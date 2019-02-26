@@ -1,0 +1,85 @@
+import { APP_LOAD_INITIAL_DATA, APP_LOADING, ADMIN_UPDATE, ADMIN_CREATE_FIXTURES, ADMIN_RESET_APP, ADMIN_GET_TEAMS, ADMIN_SAVE_TEAM, ADMIN_DELETE_TEAMS } from '../actions/types';
+
+const initialState = {
+    //Load new data for the app in the App component rather than in this reducer because error/confirmation messages can be displayed easier in the App component
+    // appData: new Data().getAppData()
+};
+
+export default function adminReducer(state = initialState, action) {
+    let newState;
+    switch (action.type) {
+
+        case APP_LOAD_INITIAL_DATA :
+        case ADMIN_CREATE_FIXTURES :
+        case ADMIN_RESET_APP :
+            // console.log('state: ', state);
+            // console.log('action.data: ', action.data);
+            debugger;
+            newState = Object.assign({}, state, action.data);
+            // console.log('newState: ', newState);
+
+            return newState;
+
+        case APP_LOADING :
+            return Object.assign({}, state, action.data);
+
+
+        case ADMIN_GET_TEAMS :
+            debugger;
+            console.log('state: ', state);
+            console.log('action.data: ', action.data);
+            
+            newState = Object.assign({}, state, action.data);
+            console.log('newState: ', newState);
+
+            return newState;
+
+        case ADMIN_SAVE_TEAM :
+            debugger;
+            console.log('state: ', state);
+            console.log('action.data: ', action.data);
+
+            newState = Object.assign({}, state, action.data);
+            console.log('newState: ', newState);
+
+            return newState;
+
+        case ADMIN_DELETE_TEAMS :
+            // console.log('state: ', state);
+            // console.log('action.data: ', action.data);
+            newState = Object.assign({}, state, action.data);
+            // console.log('newState: ', newState);
+
+            return newState;
+
+        case ADMIN_UPDATE :
+            debugger;
+            // console.log('ADMIN_UPDATE: ', action);
+            newState = Object.assign({}, state);
+
+            // newState.appData.teamsForSeason = action.data.teams;
+            newState.teamsForSeason = action.data.teams;
+
+            //Loop through the object, i.e. miscInfo
+            Object.keys(action.data.miscInfo).forEach(e => {
+
+                if (typeof(action.data.miscInfo[e]) === 'object') {
+                    
+                    //Loop through the sub-object, i.e. miscInfo.goalFactors
+                    Object.keys(action.data.miscInfo.goalFactors).forEach(e => {
+                        // newState.appData.miscInfo.goalFactors[e] = action.data.miscInfo.goalFactors[e];
+                        newState.miscInfo.goalFactors[e] = action.data.miscInfo.goalFactors[e];
+                        // console.log(`key=${e}  value=${action.data.goalFactors[e]}`)
+                    })
+                } else {
+                    // newState.appData.miscInfo[e] = action.data.miscInfo[e];
+                    newState.miscInfo[e] = action.data.miscInfo[e];
+                }
+            });
+
+            return newState;
+
+        default:
+            return state;
+    }
+}

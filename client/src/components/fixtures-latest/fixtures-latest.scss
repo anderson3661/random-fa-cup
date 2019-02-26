@@ -1,0 +1,146 @@
+@import '../../sass/_variables';
+
+.container-main-content-latest-fixtures {
+    width: 85%;
+    margin: 13vh auto 10vh auto;
+
+    &.show-goal-updates {
+        width: 90%;
+    }
+
+    .container-card.latest-fixtures-header {
+        // width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3vh;
+
+        .image-left, .image-right { flex-basis: 20%; }
+        .image-right { text-align: right; }
+        img { width: 3vw; }
+
+        .fixture-update-interval { flex-basis: 30% }
+    }
+
+    .split-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1;
+        grid-column-gap: 5vw;
+
+        // .container-card.fixtures, .container-card.in-play-updates, .container-card.league-table { width: 100%;}
+        .container-card.fixtures, .container-card.in-play-updates, .container-card.league-table { margin: unset;}
+        .container-card.league-table-repeat { display: none; }
+
+        .container-card.fixtures {
+            .fixtures.in-play {
+                font-size: 90%;
+
+                .fixtures-row.timeOrScore { flex-basis: 7vmax; }
+                .teamsGoalTimes { font-size: 90% }
+                // .minutesPlayed { font-size: 90%; flex-basis: 7vmax; }
+                .minutesPlayed { font-size: 90%; min-width: 75px; }
+                // .fixtures-row-goal-times.teamsGoalTimes.home { padding-right: 0; }
+                // .fixtures-row-goal-times.teamsGoalTimes.away { padding-left: 0; }
+            }
+        }
+    
+        &.show-goal-updates {
+            grid-template-columns: 2.5fr minmax(400px, 2fr) 2.5fr;
+            grid-column-gap: 5vw;
+
+            .fixtures.in-play-updates {
+                overflow: auto;
+                height: 68vh;
+                h3 {
+                    margin-top: 0;
+                    text-align: center;
+                }
+            
+                p {
+                    color: black; 
+                    font-family: "Courier";
+                    line-height: 1.2;
+                    font-size: 75%;
+                    // margin: 1vh 0 0 1vw;
+                    margin: 0.75vh 0 0 0;
+                    white-space: nowrap;
+                    // overflow: hidden;
+                    overflow: initial;
+                    // width: 30em;
+                    width: 100%;
+                    animation: type 4s steps(60, end);
+            
+                    span.mins {
+                        margin-right: 0.5vw;
+                        padding: 0.75vh 0.25vw;
+                        background-color: $background-color-half-time-score;
+                        font-weight: 600;
+                    }
+
+                    span { font-weight: normal; }
+                    span.team.goal { font-weight: 700; color: blue; }
+
+                  }
+                  
+                  @keyframes type { 
+                    from { width: 0; } 
+                  } 
+            }
+        }
+    }
+}
+
+.container-main-content-latest-fixtures.show-goal-updates {
+    width: 90%;
+    .split-grid {
+        grid-column-gap: 2vw;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .container-main-content-latest-fixtures {
+        .container-card.latest-fixtures-header {
+            flex-wrap: wrap;
+            h1 { flex-basis: 50%; text-align: left; };
+            .fixture-update-button { flex-basis: 50%; order: 3; }
+            .fixture-update-interval { flex-basis: 50%; order: 4; }
+            .showGoalUpdates { flex-basis: 50% }
+        }
+        .split-grid {
+            &.show-goal-updates {
+                grid-template-columns: minmax(400px, 1fr) 1fr;
+                grid-row-gap: 3vh;
+                .container-card.fixtures { order: 3; }
+                .container-card.in-play-updates{ order: 1; }
+                .container-card.league-table { order: 2; }
+                .container-card.league-table-repeat { order: 4; }
+                .container-card.league-table-repeat { display: block; margin: 0 }
+                .fixtures.in-play-updates p { font-size: 80% }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .container-main-content-latest-fixtures {
+
+        header {
+            flex-wrap: wrap;
+        }
+
+        .split-grid {
+            grid-template-columns: 1fr;
+            grid-column-gap: 0;
+            grid-row-gap: 3vh;
+            &.show-goal-updates {
+                grid-template-columns: 1fr;
+                .container-card.fixtures { order: 2; }
+                .container-card.in-play-updates{ order: 1; }
+                .container-card.league-table { order: 3; }
+                .container-card.league-table-repeat { display: none }
+                .fixtures.in-play-updates p { font-size: 80% }
+            }
+        }
+    }
+}

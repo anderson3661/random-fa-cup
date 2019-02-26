@@ -1,0 +1,27 @@
+@import '../../sass/mixins';
+@import '../../sass/_variables';
+
+
+.container-main-content-loading-error {
+    width: 50%;
+    margin: 30vh auto 0 auto;
+
+    .container-card {
+        header {
+            @include flex($justify-content: space-between);
+            img {width: 3vw;}
+        }
+
+        p {
+            text-align: center;
+            margin: 4vh 0;
+        }
+
+        .buttons {
+            width: 100%;
+            @include flex();
+            margin: 3vh 0;
+        }
+    }
+
+}

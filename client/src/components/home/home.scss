@@ -1,0 +1,25 @@
+@import '../../sass/mixins';
+@import '../../sass/_variables';
+
+
+.container-home {
+    @include flex();
+    margin: 14vh auto 10vh auto;
+
+    .container-card {
+        width: 50%;
+        padding: 1vh 2vw 2vh 2vw;
+
+        h1 { margin-bottom: 3vh; }
+
+        header {
+            @include flex($justify-content: space-between);
+            img {width: 6vw;}
+        }
+    }
+}
+
+@media screen and (orientation: landscape) and (max-width: 1024px) { .container-home .container-card { width: 75%; margin-top: 1vh;} }
+@media screen and (orientation: landscape) and (max-width: 850px) { .container-home .container-card { width: 75%; margin-top: 10vh;} }
+@media screen and (orientation: portrait) and (max-height: 1024px) { .container-home .container-card { width: 80%; margin-top: 1vh;} }
+@media screen and (orientation: portrait) and (max-height: 650px) { .container-home .container-card { width: 80%; margin-top: 10vh;} }

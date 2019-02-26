@@ -1,0 +1,71 @@
+.dialog-winners {
+
+    .confetti {
+        position: relative;
+    }
+
+    header {
+        position: absolute;
+        top: 22vh;
+        left: 0;
+        right: 0;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 5vh;
+
+        img {width: 3vw;}
+
+        .heading p {
+            margin: 0;
+        }
+
+        .filler {
+            flex-basis: 10%;
+        }
+    }
+
+    .dialog-para {
+        text-align: center;
+
+        &.main {
+            font-weight: 700;
+        }
+    }
+
+    .winners {
+        position: absolute;
+        top: 28vh;
+        left: 0;
+        right: 0;
+        width: 80%;
+        font-family: cursive;
+        font-size: 5vh;
+        margin: 5vh auto;
+        text-align: center;
+        text-transform: uppercase;
+        color: #000;
+        -webkit-animation: glow 1s ease-in-out infinite alternate;
+        -moz-animation: glow 1s ease-in-out infinite alternate;
+        animation: winners 1s ease-in-out infinite alternate;
+    }
+    
+    @-webkit-keyframes winners {
+        from {
+            text-shadow: 0 0 10px #fff, 0 0 20px #fff, 0 0 30px #e60073, 0 0 40px #e60073, 0 0 50px #e60073, 0 0 60px #e60073, 0 0 70px #e60073;
+        }
+        to {
+            text-shadow: 0 0 20px #fff, 0 0 30px #ff4da6, 0 0 40px #ff4da6, 0 0 50px #ff4da6, 0 0 60px #ff4da6, 0 0 70px #ff4da6, 0 0 80px #ff4da6;
+        }
+    }
+
+    .dialog-button {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 1vh;
+        text-align: center;
+    }
+
+}
