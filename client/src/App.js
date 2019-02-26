@@ -34,7 +34,8 @@ class App extends Component {
 
     render() {
         const { loadingError } = this.state;
-        const { loading } = this.props.user;
+        // const { loading } = this.props.user;
+        const { loading } = this.props.miscellaneous;
         return (
             <Router>
                 <div className="outer-container">

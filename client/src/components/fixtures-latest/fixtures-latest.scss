@@ -28,9 +28,9 @@
         grid-template-rows: 1;
         grid-column-gap: 5vw;
 
-        // .container-card.fixtures, .container-card.in-play-updates, .container-card.league-table { width: 100%;}
-        .container-card.fixtures, .container-card.in-play-updates, .container-card.league-table { margin: unset;}
-        .container-card.league-table-repeat { display: none; }
+        // .container-card.fixtures, .container-card.in-play-updates, .container-card.league-table-as-it-stands { width: 100%;}
+        .container-card.fixtures, .container-card.in-play-updates, .container-card.league-table-as-it-stands { margin: unset;}
+        .container-card.league-table-as-it-stands-repeat { display: none; }
 
         .container-card.fixtures {
             .fixtures.in-play {
@@ -69,7 +69,7 @@
                     overflow: initial;
                     // width: 30em;
                     width: 100%;
-                    animation: type 4s steps(60, end);
+                    animation: typing 4s steps(40, end), blink-caret .75s step-end infinite;
             
                     span.mins {
                         margin-right: 0.5vw;
@@ -83,9 +83,15 @@
 
                   }
                   
-                  @keyframes type { 
-                    from { width: 0; } 
-                  } 
+                  @keyframes typing { 
+                    from { width: 0; }
+                    to { width: 100% }
+                  }
+
+                  @keyframes blink-caret {                      /* The typewriter cursor effect */
+                    from, to { border-color: transparent }
+                    50% { border-color: orange; }
+                  }
             }
         }
     }
@@ -113,9 +119,9 @@
                 grid-row-gap: 3vh;
                 .container-card.fixtures { order: 3; }
                 .container-card.in-play-updates{ order: 1; }
-                .container-card.league-table { order: 2; }
-                .container-card.league-table-repeat { order: 4; }
-                .container-card.league-table-repeat { display: block; margin: 0 }
+                .container-card.league-table-as-it-stands { order: 2; }
+                .container-card.league-table-as-it-stands-repeat { order: 4; }
+                .container-card.league-table-as-it-stands-repeat { display: block; margin: 0 }
                 .fixtures.in-play-updates p { font-size: 80% }
             }
         }
@@ -137,8 +143,8 @@
                 grid-template-columns: 1fr;
                 .container-card.fixtures { order: 2; }
                 .container-card.in-play-updates{ order: 1; }
-                .container-card.league-table { order: 3; }
-                .container-card.league-table-repeat { display: none }
+                .container-card.league-table-as-it-stands { order: 3; }
+                .container-card.league-table-as-it-stands-repeat { display: none }
                 .fixtures.in-play-updates p { font-size: 80% }
             }
         }

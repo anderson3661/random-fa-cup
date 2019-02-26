@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 // dateOfFixture: { type: Date, default: Date.now },
 
 const FixtureSchema = new Schema({
+    // _id: mongoose.Schema.Types.ObjectId,
     userDocumentId: { type: String, required: true },
     setOfFixturesNumber: Number,
     fixtureNumber: Number,

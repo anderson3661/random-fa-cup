@@ -11,7 +11,7 @@ export const loadFromAllDbsStarted = () => async (dispatch, getState) => {
         let { dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, dataFromFixturesDb, setsOfFixtures, dataFromLeagueTableDb } = results;
         if (dataFromMiscellaneousDb.length === 0 && dataFromAdminFactorsDb.length === 0 && dataFromTeamsDb.length === 0 && dataFromFixturesDb.length === 0 && dataFromLeagueTableDb.length === 0) {
             console.log('No documents exist in any of the databases ... create documents in the database from the app defaults');
-            dispatch(createDocumentsInDbsFromAppDefaults());
+            dispatch(createDocumentsInDbsFromAppDefaults(getState().default.user._id));
             dispatch({ type: LOAD_FROM_ALL_DBS_FINISHED, data: { loading: false }});
         } else if (dataFromMiscellaneousDb.length === 1 && dataFromAdminFactorsDb.length === 1 && dataFromTeamsDb.length === TEAMS_DEFAULT.length && dataFromLeagueTableDb.length === TEAMS_DEFAULT.length &&
                   (dataFromFixturesDb.length === 0 || doesFixturesDbContainCorrectNumberOfDocuments(dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromFixturesDb, setsOfFixtures))) {

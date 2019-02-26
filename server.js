@@ -16,8 +16,8 @@ const app = express();
 app.use(bodyParser.json());
 
 //Db config
-// const db = require('./config/keys').mongoURI;
-const db = require('./config/keys').mongoURILocal;
+const db = require('./config/keys').mongoURI;
+// const db = require('./config/keys').mongoURILocal;
 
 mongoose.connect(db, { useNewUrlParser: true })
     .then(() => console.log('MongoDb connected ...'))

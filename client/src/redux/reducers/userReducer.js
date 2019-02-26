@@ -3,6 +3,9 @@ import { LOADING_APP, LOADING_BACKEND_UPDATE, LOAD_FROM_USERS_DB, USER_AUTHENTIC
 const initialState = {
     emailAddress: '',
     authenticated: false,
+    // emailAddress: 'm@m.com',
+    // authenticated: true,
+    // _id: '5c73d7380e7ad937b026c787',
 }
 
 export default function userReducer(state = initialState, action) {

@@ -33,13 +33,9 @@ export async function fetchDataFromAllDbs(documentIdInUsersDb) {
     try {
 
         // Get the data from all of the databases
-        debugger;
         res = await fetch(API_ENDPOINT_MISCELLANEOUS + "/" + documentIdInUsersDb);
-        debugger;
         if (!res.ok) throw Error(res.statusText);
-        debugger;
         dataFromMiscellaneousDb = await res.json();
-        debugger;
         console.log('dataFromMiscellaneousDb', dataFromMiscellaneousDb);
 
         res = await fetch(API_ENDPOINT_ADMIN_FACTORS + "/" + documentIdInUsersDb);

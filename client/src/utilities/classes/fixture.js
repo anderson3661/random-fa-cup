@@ -91,6 +91,7 @@ export class Fixture {
         let minutesinMatchFactor;
         let homeTeamUpdate;
         let awayTeamUpdate;
+        let isFirstHalfBeforeUpdate;
 
         // updateTable = false;
         homeTeamUpdate = false;
@@ -117,6 +118,8 @@ export class Fixture {
                 awayTeamUpdate = this.hasTeamScored(teams, goalFactors, "away", minutesinMatchFactor);
             }
 
+            isFirstHalfBeforeUpdate = this.isFirstHalf;         // Get a handle to whether it is the first half (as this is needed for the Goal 'typing' Updates), before it is updated below.
+
             //Check for half time or end of fixtures
             if (this.minutesPlayed === this.maxNumberOfMinutes) {
                 if (this.isFirstHalf) {
@@ -136,7 +139,7 @@ export class Fixture {
             // debugger;
         // }
 
-        return {homeTeamUpdate, awayTeamUpdate};
+        return {homeTeamUpdate, awayTeamUpdate, isFirstHalfBeforeUpdate};
     }
 
     hasTeamScored(teams, goalFactors, whichTeam, minutesinMatchFactor) {

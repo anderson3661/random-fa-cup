@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
 
 //User Model
 const User = require('../../models/User');
@@ -45,14 +47,35 @@ router.put('/:id', (req, res) => {
 // @desc  Create user documents
 // @access Public
 router.post('/', (req, res) => {
-    const newUser = new User({ emailAddress: req.body.emailAddress, password: req.body.password });
+    const newUser = new User({
+                    // _id: mongoose.Types.ObjectId(),
+                    emailAddress: req.body.emailAddress,
+                    password: req.body.password,
+                });
+                newUser.save()
+                .then(user => {
+                    // console.log(res.json(user));
+                    return res.json(user);
+                })
+                .catch(err => console.error(err));
 
-    newUser.save()
-    .then(user => {
-        // console.log(res.json(user));
-        return res.json(user);
-    })
-    .catch(err => console.error(err));
+    // bcrypt.hash(req.body.password, 10, (err, hash) => {
+    //     if (err) {
+    //         return res.status(500).json({ error: err });
+    //     } else {
+    //         const newUser = new User({
+    //             _id: mongoose.Types.ObjectId(),
+    //             emailAddress: req.body.emailAddress,
+    //             password: hash,
+    //         });
+    //         newUser.save()
+    //         .then(user => {
+    //             // console.log(res.json(user));
+    //             return res.json(user);
+    //         })
+    //         .catch(err => console.error(err));
+    //     }
+    // });
 });
 
 

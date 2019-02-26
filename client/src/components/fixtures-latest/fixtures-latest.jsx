@@ -3,6 +3,8 @@ import Button from "@material-ui/core/Button";
 import { connect } from 'react-redux';
 import { Prompt } from 'react-router';
 
+// import Typing from 'react-typing-animation';
+
 import { updateDbsAndStoreAfterLatestResults, updateDbsAndStoreAfterSeasonHasFinished } from '../../redux/actions/fixturesActions';
 
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -187,11 +189,11 @@ class FixturesLatest extends Component {
                 updateAfterGoal = true;
                 if (fixtureMinuteUpdate.homeTeamUpdate) {
                     // this.fixtureUpdates.push({scoreUpdate: `${this.counterMinutes} mins - ${fixture.homeTeam} ${fixture.homeTeamsScore} ${fixture.awayTeam} ${fixture.awayTeamsScore}`, scoringTeam: fixture.homeTeam});
-                    this.updateWithLatestGoal(this.counterMinutes, fixture, "Home");
+                    this.updateWithLatestGoal(this.counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Home");
                 }
                 if (fixtureMinuteUpdate.awayTeamUpdate) {
                     // this.fixtureUpdates.push({scoreUpdate: `${this.counterMinutes} mins - ${fixture.homeTeam} ${fixture.homeTeamsScore} ${fixture.awayTeam} ${fixture.awayTeamsScore}`, scoringTeam: fixture.awayTeam});
-                    this.updateWithLatestGoal(this.counterMinutes, fixture, "Away");
+                    this.updateWithLatestGoal(this.counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Away");
                 }
             }
 
@@ -237,17 +239,17 @@ class FixturesLatest extends Component {
     
     }
 
-    updateWithLatestGoal(mins, fixture, scoringTeam) {
+    updateWithLatestGoal(mins, fixture, isFirstHalfBeforeUpdate, scoringTeam) {
         this.fixtureUpdates.push(
             {
-                mins: fixture.isFirstHalf ? (mins > 45 ? `45(+${mins - 45})` : mins) : (mins + 45 > 90 ? `90(+${mins + 45 - 90})` : mins + 45),
+                mins: isFirstHalfBeforeUpdate ? (mins > 45 ? `45(+${mins - 45})` : mins) : (mins + 45 > 90 ? `90(+${mins + 45 - 90})` : mins + 45),
                 homeTeam: fixture.homeTeam,
                 homeTeamsScore: fixture.homeTeamsScore,
                 awayTeam: fixture.awayTeam,
                 awayTeamsScore: fixture.awayTeamsScore,
                 scoringTeam: scoringTeam
             }
-        )
+        );
     }
 
     authenticated() {
@@ -387,10 +389,12 @@ class FixturesLatest extends Component {
                                     {this.fixtureUpdates.map((update, i) => {
                                         return (
                                         <p key={i}>
-                                            <span className="mins">{update.mins}</span>
-                                            <span className={`team ${update.scoringTeam === "Home" ? "goal" : ""}`}>{update.homeTeam} {update.homeTeamsScore}</span>
-                                            &nbsp;&nbsp;
-                                            <span className={`team ${update.scoringTeam === "Away" ? "goal" : ""}`}>{update.awayTeam} {update.awayTeamsScore}</span>
+                                            {/* <Typing> */}
+                                                <span className="mins">{update.mins}</span>
+                                                <span className={`team ${update.scoringTeam === "Home" ? "goal" : ""}`}>{update.homeTeam} {update.homeTeamsScore}</span>
+                                                &nbsp;&nbsp;
+                                                <span className={`team ${update.scoringTeam === "Away" ? "goal" : ""}`}>{update.awayTeam} {update.awayTeamsScore}</span>
+                                            {/* </Typing> */}
                                         </p>
                                         )
                                     })}
@@ -398,7 +402,7 @@ class FixturesLatest extends Component {
                             </div>
                         }
 
-                        <div className="container-card league-table">
+                        <div className="container-card league-table-as-it-stands">
                             <LeagueTable
                                 // {...this.appData}
                                 leagueTableTypeLatestFixtures={true}
@@ -409,7 +413,7 @@ class FixturesLatest extends Component {
                         </div>
 
                         {this.state.showGoalUpdates &&
-                            <div className="container-card league-table-repeat">
+                            <div className="container-card league-table-as-it-stands-repeat">
                                 <LeagueTable
                                     // {...this.appData}
                                     leagueTableTypeLatestFixtures={true}
