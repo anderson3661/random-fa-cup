@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Football League built with the MERN stack",
   "engines": {
-      "node": "11.7.0"
+      "node": "11.x"
   },
   "main": "server.js",
   "scripts": {
