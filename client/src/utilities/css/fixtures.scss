@@ -9,6 +9,7 @@
         margin: 14vh auto 10vh auto;
 
         .container-card.fixtures-card {
+            margin-bottom: 5vh;
             padding-bottom: 3vh;
 
             .main-header {
@@ -36,6 +37,8 @@
                 }
             }
 
+            .not-at-this-stage { text-align: center; }
+
         }
         
         .fixtures {
@@ -47,17 +50,17 @@
     }
 }
 
-.fixtures-date {
-    font-family: $font-family-date-of-fixtures;
-    font-size: $font-size-date-of-fixtures;
-    // background-color: $background-color-date-of-fixtures; 
-    background-color: lightgray; 
-    text-align: left;
-    text-transform: uppercase;
-    margin-bottom: 1vh;
-    padding: 1vh 1vw;
-    border-collapse: separate;
-}
+// .fixtures-date {
+//     font-family: $font-family-date-of-fixtures;
+//     font-size: $font-size-date-of-fixtures;
+//     // background-color: $background-color-date-of-fixtures; 
+//     background-color: lightgray; 
+//     text-align: left;
+//     text-transform: uppercase;
+//     margin-bottom: 1vh;
+//     padding: 1vh 1vw;
+//     border-collapse: separate;
+// }
 
 @media screen and (min-width: 1024px) { .outer-container-fixtures { .container-main-content-fixtures { width: 65%; } } };
 @media screen and (max-width: 1024px) { .outer-container-fixtures { .container-main-content-fixtures { width: 90%; } } };

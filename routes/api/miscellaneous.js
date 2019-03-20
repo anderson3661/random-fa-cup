@@ -50,11 +50,9 @@ router.put('/:id', (req, res) => {
 router.post('/', (req, res) => {
     const newMiscellaneous = new Miscellaneous({
         userDocumentId: req.body.userDocumentId,
-        haveSeasonsFixturesBeenCreated: req.body.haveSeasonsFixturesBeenCreated,
-        hasSeasonStarted: req.body.hasSeasonStarted,
-        hasSeasonFinished: req.body.hasSeasonFinished,
-        dateOfLastSetOfFixtures: req.body.dateOfLastSetOfFixtures,
-        numberOfTeams: req.body.numberOfTeams,
+        haveRound1FixturesBeenCreated: req.body.haveRound1FixturesBeenCreated,
+        hasCompetitionStarted: req.body.hasCompetitionStarted,
+        hasCompetitionFinished: req.body.hasCompetitionFinished,
     });
 
     newMiscellaneous.save()

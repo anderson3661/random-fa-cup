@@ -1,14 +1,13 @@
 import { LOADING_APP, LOAD_FROM_MISCELLANEOUS_DB, LOAD_FROM_ALL_DBS_STARTED, LOAD_FROM_ALL_DBS_FINISHED, CREATE_DOCUMENTS_IN_DBS_FOR_FIRST_TIME, UPDATE_MISCELLANEOUS_PROPERTY, LOADING_BACKEND_UPDATE } from '../actions/types';
 
 const initialState = {
-    haveSeasonsFixturesBeenCreated: false,
-    hasSeasonStarted: false,
-    hasSeasonFinished: false,
-    dateOfLastSetOfFixtures: '',
+    hasCompetitionStarted: false,
+    hasCompetitionFinished: false,
     createDocumentsInDbsForFirstTime: false,
     loading: false,
     loadingUser: false,
     loadingAdmin: false,
+    loadingDraw: false,
     loadingLatestFixtures: false,
     loadingBackendError: false,
 }

@@ -1,46 +1,103 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
+import { connect } from 'react-redux';
 
-import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE } from '../../utilities/constants';
+import TeamsLeftByDivision from './teams-left-by-division';
+import * as helpers from '../../utilities/helper-functions/helpers';
+
+import { MAIN_BACKGROUND_IMAGE, FA_CUP_IMAGE, COMPETITION_ROUNDS, COMPETITION_ROUNDS_HEADINGS } from '../../utilities/constants';
+
 
 import './home.scss';
 
 
-const Home = () => {
+const Home = (props) => {
+
+    const { teamsForCompetition, fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished } = props;
 
     return (
 
         <div className="container-home">
             <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
 
-            <div className="container-card">
+            {/* <div className="nav-home"></div> */}
 
-                <header>
-                    <img src={FOOTBALL_IMAGE} alt="" />
-                    <h1>Premier League Football App</h1>
-                    <img src={FOOTBALL_IMAGE} alt="" />
-                </header>
-
-                <p>This app allows you to play through a season's fixtures for a football league (e.g. English Premier League).</p>
-                <p>The way it works is that for each minute of each fixture a random number is generated and if that number is within a certain tolerance then a goal is scored.</p>
-                <p>You start by entering teams and various factors on the <span>Administration</span> page.</p>
-                <p>Once teams and factors have been entered (or the defaults used) then click on the <span>Create Season's Fixtures</span> to create the fixtures for the season.</p>
-                <p>This will populate the <span>Remaining Fixtures</span> page.</p>
-                <p>Then click on the <span>Latest Fixtures</span> page to start the first set of fixtures.</p>
-                <p>Once a set of fixtures has been completed the <span>Results, Table and Table(Full)</span> pages will be updated.</p>
-                <p>&nbsp;</p>
-                <p>You can specify:</p>
-                <ul>
-                    <li>which teams make up the league</li>
-                    <li>the top teams, and whether they have a slight advantage</li>
-                    <li>whether the home teams have a slight advantage</li>
-                    <li>the periods during a match which are more likely to produce goals</li>
-                    <li>whether you want high-scoring or low-scoring matches</li>
-                    <li>the number of fixtures that each team plays (i.e. allowing you to quickly run through a whole season)</li>
-                    <li>the speed at which the fixtures are updated</li>
-                </ul>
+            <div className="fa-cup-image">
+                <img src={FA_CUP_IMAGE} alt=""></img>
             </div>
+
+            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 1)}
+            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 2)}
+            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 3)}
+            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 4)}
+            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 5)}
+            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 6)}
+            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 7)}
+
+            {!hasCompetitionFinished &&
+                <TeamsLeftByDivision
+                    teamsForCompetition={teamsForCompetition}
+                    fixturesForCompetition={fixturesForCompetition}
+                    hasCompetitionStarted={hasCompetitionStarted}
+                />
+            }
+
+            {hasCompetitionFinished &&
+                <div className="container-card display-winners">
+                    <p className="heading">2018/19 Winners</p>
+                    <p className="winners">Manchester United</p>
+                </div>
+            }
+            
         </div>
     );
 }
  
-export default Home;
+const roundDiv = (fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, roundNumberOfFootball) => {
+    const competitionRound = COMPETITION_ROUNDS[roundNumberOfFootball - 1];
+    const nextCompetitionRoundForDraw = helpers.getNextCompetitionRoundForDraw(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished);
+    const competitionRoundIndexForDraw = COMPETITION_ROUNDS.indexOf(nextCompetitionRoundForDraw.competitionRound);
+    const competitionRoundForPlay = helpers.getCompetitionRoundForPlay(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished);
+    const labelContainsReplaysIndex = competitionRoundForPlay.label.indexOf("Replays");
+    const competitionRoundPlayReplays = (labelContainsReplaysIndex !== -1);
+    const competitionRoundIndexForPlay = COMPETITION_ROUNDS_HEADINGS.indexOf(labelContainsReplaysIndex === -1 ? competitionRoundForPlay.label : competitionRoundForPlay.label.substr(0, labelContainsReplaysIndex - 1));
+    const isThisCompetitionRoundActiveForDraw = (roundNumberOfFootball === (competitionRoundIndexForDraw + 1));
+    const isThisCompetitionRoundActiveForPlay = (roundNumberOfFootball === (competitionRoundIndexForPlay + 1));
+    const canDisplayDrawLabel = (nextCompetitionRoundForDraw.okToProceedWithDraw && isThisCompetitionRoundActiveForDraw);
+    const canDisplayPlayFixturesLabel = (competitionRoundForPlay.okToProceedWithPlay && isThisCompetitionRoundActiveForPlay);
+    const canDisplayFixturesAndResultsLabel = (
+            hasCompetitionFinished ||
+            (isThisCompetitionRoundActiveForPlay && !competitionRoundForPlay.okToProceedWithPlay) ||
+            ((competitionRoundIndexForPlay === -1 && roundNumberOfFootball < (competitionRoundIndexForDraw + 1)) ||
+            (!isThisCompetitionRoundActiveForPlay && roundNumberOfFootball <= (competitionRoundIndexForPlay + (competitionRoundPlayReplays ? 2 : 1)))));
+    const isCompetitionRoundActive = (canDisplayDrawLabel || canDisplayPlayFixturesLabel || canDisplayFixturesAndResultsLabel);
+    const isCompetitionRoundFinished = helpers.haveAllFixturesAndReplaysForCompetitionRoundFinished(fixturesForCompetition, roundNumberOfFootball - 1);
+    const areReplaysForCompetitionRoundStillToBePlayed = helpers.areReplaysForCompetitionRoundStillToBePlayed(fixturesForCompetition, roundNumberOfFootball - 1);
+    const linkTo = canDisplayDrawLabel ? '/draw' : (canDisplayPlayFixturesLabel ? '/fixtures-latest' : (canDisplayFixturesAndResultsLabel ? '/fixtures-and-results' : ""));
+    if (roundNumberOfFootball === 5) {
+        debugger;
+    }
+    return (
+        <NavLink to={linkTo} className="nav-link" activeClassName="active-link">
+            <div className={`competition-round ${"_" + competitionRound} ${isCompetitionRoundActive ? "active" : "deactivated"}`}>
+                <div className="competition-round-label">{COMPETITION_ROUNDS_HEADINGS[roundNumberOfFootball - 1]}</div>
+                {canDisplayDrawLabel && <div>Draw</div>}
+                {canDisplayPlayFixturesLabel && <div>Play {competitionRoundPlayReplays ? "Replays" : "Fixtures"}</div>}
+                {canDisplayFixturesAndResultsLabel && <div className="fixtures-and-results">{isCompetitionRoundFinished ? "Results" : (areReplaysForCompetitionRoundStillToBePlayed ? "Fixtures / Results" : "Fixtures") }</div>}
+            </div>
+        </NavLink>
+    )
+}
+
+
+const mapStateToProps = (state, ownProps) => {
+    const { hasCompetitionStarted, hasCompetitionFinished } = state.default.miscellaneous;
+    return {
+        teamsForCompetition: state.default.teamsForCompetition,
+        fixturesForCompetition: state.default.fixturesForCompetition,
+        hasCompetitionStarted,
+        hasCompetitionFinished,
+    }
+}
+
+export default connect(mapStateToProps, null)(Home);

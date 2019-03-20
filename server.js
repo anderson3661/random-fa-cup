@@ -7,8 +7,8 @@ const users = require('./routes/api/users');
 const miscellaneous = require('./routes/api/miscellaneous');
 const adminFactors = require('./routes/api/admin-factors');
 const teams = require('./routes/api/teams');
+const myWatchlistTeams = require('./routes/api/my-watchlist-teams');
 const fixtures = require('./routes/api/fixtures');
-const leagueTable = require('./routes/api/league-table');
 
 const app = express();
 
@@ -16,9 +16,9 @@ const app = express();
 app.use(bodyParser.json());
 
 //Db config
-// const db = require('./config/keys').mongoURI;
-const db = process.env.MONGO_URI;
-// const db = require('./config/keys').mongoURILocal;
+// const db = process.env.MONGO_URI;                                       // CHANGE FOR PRODUCTION
+// const db = require('./config/keys').mongoURI;                           // CHANGE FOR TESTING WITH MONGO_DB ON SERVER
+const db = require('./config/keys').mongoURILocal;                         // CHANGE FOR TESTING WITH MONGO_DB ON local
 
 mongoose.connect(db, { useNewUrlParser: true })
     .then(() => console.log('MongoDb connected ...'))
@@ -29,8 +29,8 @@ app.use('/api/users', users);
 app.use('/api/miscellaneous', miscellaneous);
 app.use('/api/admin-factors', adminFactors);
 app.use('/api/teams', teams);
+app.use('/api/my-watchlist-teams', myWatchlistTeams);
 app.use('/api/fixtures', fixtures);
-app.use('/api/league-table', leagueTable);
 
 //Serve static assets if in production
 if(process.env.NODE_ENV === 'production') {

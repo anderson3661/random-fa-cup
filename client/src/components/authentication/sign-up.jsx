@@ -20,7 +20,7 @@ const USER_PASSWORD_INVALID = 'Minimum eight characters, at least one uppercase 
 const USER_CONFIRM_PASSWORD_REQUIRED = 'Minimum 8 characters required';
 const USER_CONFIRM_PASSWORD_INVALID = 'Must match password';
 
-const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
 
 
@@ -42,9 +42,10 @@ class SignUp extends Component {
             },
             submitAttempted: false,
             rememberMe: false,
+            signUpFailed: false,
+            userAlreadyExists: false,
         }
 
-        console.log(this.state);
     }
 
     handleChange = e => {
@@ -58,16 +59,17 @@ class SignUp extends Component {
                 break;
             case "userPassword":
                 formErrors.userPassword = value.length < 1 ? USER_PASSWORD_REQUIRED : "";
-                formErrors.userPassword = value.length > 0 && !PASSWORD_REGEX.test(value) ? USER_PASSWORD_INVALID : formErrors.userPassword
+                // formErrors.userPassword = value.length > 0 && !PASSWORD_REGEX.test(value) ? USER_PASSWORD_INVALID : formErrors.userPassword
                 break;
             case "userConfirmPassword":
                 formErrors.userConfirmPassword = value.length < 1 ? USER_CONFIRM_PASSWORD_REQUIRED : "";
-                formErrors.userConfirmPassword = value !== formFields.userPassword ? USER_CONFIRM_PASSWORD_INVALID : "";
+                // formErrors.userConfirmPassword = value !== formFields.userPassword ? USER_CONFIRM_PASSWORD_INVALID : "";
                 break;
             default:
                 break;
         }
 
+        this.setState({ submitAttempted: false, signUpFailed: false, userAlreadyExists: false });
         this.setState({ formFields: Object.assign(formFields, {[name]: value })});
         this.setState({ formErrors }, () => console.log(this.state));
     }
@@ -78,7 +80,7 @@ class SignUp extends Component {
 
         const {formFields, formErrors} = this.state;
 
-        this.setState({ submitAttempted: true });
+        this.setState({ submitAttempted: true, signUpFailed: false, userAlreadyExists: false  });
 
         Object.keys(formFields).forEach(key => {
             if (formFields[key].trim() === '') {
@@ -91,20 +93,12 @@ class SignUp extends Component {
             // Do something with the details
             this.props.dispatch(userSignup({ emailAddress: formFields.userEmailAddress, password: formFields.userPassword }));
 
-            // Clear the form
-            this.setState({ formFields: Object.assign(formFields, {userEmailAddress: '', userPassword: '', userConfirmPassword: '' })});         
-            this.setState({ formErrors: Object.assign(formErrors, {userEmailAddress: '', userPassword: '', userConfirmPassword: '' })});
-            this.setState({ submitAttempted: false });
-
             console.log(`
                 -- SUBMITTING --
                 Email Address: ${formFields.userEmailAddress}
-                Password: ${formFields.userPassword}
-                Confirm Password: ${formFields.userConfirmPassword}
+                // Password: ${formFields.userPassword}
+                // Confirm Password: ${formFields.userConfirmPassword}
             `);
-
-            // Now re-route to the administration page
-            this.props.history.push('\administration');
 
         } else {
             console.log("FORM INVALID");
@@ -119,96 +113,123 @@ class SignUp extends Component {
         return isValid;
     }
 
+    componentWillReceiveProps(nextProps, prevState) {
+        console.log(this.state);
+        debugger;
+        if (nextProps.user.authenticated && !this.props.user.authenticated) {
+            // Re-route to the administration page
+            this.props.history.push('/administration');
+        } else if (this.state.submitAttempted && nextProps.user.signUpUserAlreadyExists) {
+            this.setState({ userAlreadyExists: true });
+        } else if (this.state.submitAttempted && nextProps.user.signUpAttempted) {
+            this.setState({ signUpFailed: true });
+        }
+    }
+
     render() {
 
-        const {formFields: {userEmailAddress, userPassword, userConfirmPassword}, formErrors, submitAttempted} = this.state;
+        const { formFields: { userEmailAddress, userPassword, userConfirmPassword }, formErrors, submitAttempted, signUpFailed, userAlreadyExists } = this.state;
 
         return (
-            <div className="container-main-content-sign-up">
-            <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
-            <div className="container-card">
-                    <header>
-                        <img src={FOOTBALL_IMAGE} alt="" />
-                        <h1>Sign up</h1>
-                        <img src={FOOTBALL_IMAGE} alt="" />                        
-                    </header>
+            <div className="outer-container-sign-up">
+                <div className="container-main-content-sign-up">
+                    <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
+                    <div className="container-card">
+                        <header>
+                            <img src={FOOTBALL_IMAGE} alt="" />
+                            <h1>Sign up</h1>
+                            <img src={FOOTBALL_IMAGE} alt="" />                        
+                        </header>
 
-                    <div className="login">
-                        <div className="main-form">
-                            <form className="login-form">
+                        <div className="login">
+                            <div className="main-form">
+                                <form className="login-form">
 
-                                <div className="login-form-full-width">
-                                    <TextField
-                                        type="text"
-                                        id="userEmailAddress"
-                                        name="userEmailAddress"
-                                        label="Your Email address"
-                                        className="form-control"
-                                        required={true}
-                                        fullWidth={true}
-                                        value={userEmailAddress}
-                                        onChange={this.handleChange}
-                                    />
+                                    <div className="login-form-full-width">
+                                        <TextField
+                                            type="text"
+                                            id="userEmailAddress"
+                                            name="userEmailAddress"
+                                            label="Your Email address"
+                                            className="form-control"
+                                            required={true}
+                                            fullWidth={true}
+                                            value={userEmailAddress}
+                                            onChange={this.handleChange}
+                                        />
+                                    </div>
+                                    {submitAttempted && formErrors.userEmailAddress.length > 0 ? <div className="errorMessage">{formErrors.userEmailAddress}</div> : <div>&nbsp;</div>}
+
+                                    <div className="login-form-full-width">
+                                        <TextField
+                                            type="password"
+                                            id="userPassword"
+                                            name="userPassword"
+                                            label="Your password"
+                                            className="form-control"
+                                            required={true}
+                                            fullWidth={true}
+                                            value={userPassword}
+                                            onChange={this.handleChange}
+                                        />        
+                                    </div>
+                                    {submitAttempted && formErrors.userPassword.length > 0 ? <div className="errorMessage">{formErrors.userPassword}</div> : <div>&nbsp;</div>}
+
+                                    <div className="login-form-full-width">
+                                        <TextField
+                                            type="password"
+                                            id="userConfirmPassword"
+                                            name="userConfirmPassword"
+                                            label="Confirm password"
+                                            className="form-control"
+                                            required={true}
+                                            fullWidth={true}
+                                            value={userConfirmPassword}
+                                            onChange={this.handleChange}
+                                        />        
+                                    </div>
+                                    {submitAttempted && formErrors.userConfirmPassword.length > 0 ? <div className="errorMessage">{formErrors.userConfirmPassword}</div> : <div>&nbsp;</div>}
+
+                                    <div className="remember-me">
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    className="rememberMe"
+                                                    checked={this.state.rememberMe}
+                                                    onChange={(e) => this.setState({rememberMe: e.target.checked})}
+                                                    value={this.state.rememberMe.toString()}
+                                                />
+                                            }
+                                            label="Remember me"
+                                        />                        
+                                    </div>
+
+                                </form>
+
+                                <div className="submit-button">
+                                    <Button variant="contained" color="primary" id="submit" onClick={this.handleSubmit}>Sign up</Button>
                                 </div>
-                                {submitAttempted && formErrors.userEmailAddress.length > 0 ? <div className="errorMessage">{formErrors.userEmailAddress}</div> : <div>&nbsp;</div>}
 
-                                <div className="login-form-full-width">
-                                    <TextField
-                                        type="password"
-                                        id="userPassword"
-                                        name="userPassword"
-                                        label="Your password"
-                                        className="form-control"
-                                        required={true}
-                                        fullWidth={true}
-                                        value={userPassword}
-                                        onChange={this.handleChange}
-                                    />        
-                                </div>
-                                {submitAttempted && formErrors.userPassword.length > 0 ? <div className="errorMessage">{formErrors.userPassword}</div> : <div>&nbsp;</div>}
 
-                                <div className="login-form-full-width">
-                                    <TextField
-                                        type="password"
-                                        id="userConfirmPassword"
-                                        name="userConfirmPassword"
-                                        label="Confirm password"
-                                        className="form-control"
-                                        required={true}
-                                        fullWidth={true}
-                                        value={userConfirmPassword}
-                                        onChange={this.handleChange}
-                                    />        
-                                </div>
-                                {submitAttempted && formErrors.userConfirmPassword.length > 0 ? <div className="errorMessage">{formErrors.userConfirmPassword}</div> : <div>&nbsp;</div>}
+                                { submitAttempted && !this.formValid() &&
+                                    <div className="invalid-form-message">
+                                        <p>Invalid ... please check the details highlighted in red above</p>
+                                    </div>
+                                }
 
-                                <div className="remember-me">
-                                    <FormControlLabel
-                                        control={
-                                            <Checkbox
-                                                className="rememberMe"
-                                                checked={this.state.rememberMe}
-                                                onChange={(e) => this.setState({rememberMe: e.target.checked})}
-                                                value={this.state.rememberMe.toString()}
-                                            />
-                                        }
-                                        label="Remember me"
-                                    />                        
-                                </div>
+                                { signUpFailed &&
+                                    <div className="invalid-form-message">
+                                        <p>Invalid details entered ... please retry</p>
+                                    </div>
+                                }
 
-                            </form>
-
-                            <div className="submit-button">
-                                <Button variant="contained" color="primary" id="submit" onClick={this.handleSubmit}>Sign up</Button>
+                                { userAlreadyExists &&
+                                    <div className="invalid-form-message">
+                                        <p>User already exists ... please retry</p>
+                                    </div>
+                                }
+                                
                             </div>
-
-
-                            { submitAttempted && !this.formValid() &&
-                                <div className="invalid-form-message">
-                                    <p>Invalid ... please check the details highlighted in red above</p>
-                                </div>
-                            }
-                            
                         </div>
                     </div>
                 </div>
@@ -218,4 +239,10 @@ class SignUp extends Component {
 };
 
 
-export default connect(null, null)(SignUp);
+const mapStateToProps = (state, ownProps) => {
+    return { 
+        user: state.default.user,
+    }
+}
+
+export default connect(mapStateToProps, null)(SignUp);

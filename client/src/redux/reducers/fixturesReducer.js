@@ -1,42 +1,36 @@
-import { LOAD_FROM_FIXTURES_DB, MERGE_DOCUMENT_IDS_FROM_FIXTURES_DB, UPDATE_FIXTURES_IN_STORE_AFTER_RESULTS } from '../actions/types';
-import * as helpers from '../../utilities/helper-functions/helpers';
+import { LOAD_FROM_FIXTURES_DB, UPDATE_FIXTURES_IN_STORE } from '../actions/types';
+import { FIXTURES_DEFAULT, COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES } from '../../utilities/constants';
 
-const initialState = {}
+const initialState = FIXTURES_DEFAULT;
+
 
 export default function fixturesReducer(state = initialState, action) {
     let newState;
+    let isReplays;
+    let arrayToUpdate;
+    let indexFixtures;
     switch (action.type) {
 
         case LOAD_FROM_FIXTURES_DB :
-        case MERGE_DOCUMENT_IDS_FROM_FIXTURES_DB :
-            return [...action.data];
+            if (action.data.length > 0) {
+                return [...action.data];
+            }
+            return state;
 
-        case UPDATE_FIXTURES_IN_STORE_AFTER_RESULTS :
-            const indexSetOfFixtures = helpers.getPositionInArrayOfObjects(state, "dateOfSetOfFixtures", action.data.dateOfLastSetOfFixtures);
+        case UPDATE_FIXTURES_IN_STORE :
+            debugger;
+            isReplays = action.data.fixtures[0].isReplay;
+            arrayToUpdate = isReplays ? 'Replays' : 'Fixtures';
+            indexFixtures = COMPETITION_ROUNDS.indexOf(action.data.fixtures[0].competitionRound);
 
-            newState = (indexSetOfFixtures === 0) ?
-            [{fixtures: action.data.latestFixtures, dateOfSetOfFixtures: action.data.dateOfLastSetOfFixtures}, ...state.slice(1)] :
-            [...state.slice(0, indexSetOfFixtures), {fixtures: action.data.latestFixtures, dateOfSetOfFixtures: action.data.dateOfLastSetOfFixtures}, ...state.slice(indexSetOfFixtures + 1)];
+            newState = (indexFixtures === 0) ?
+            [Object.assign({}, ...state.slice(0, 1), {[COMPETITION_ROUNDS_FIXTURES[indexFixtures] + arrayToUpdate]: action.data.fixtures})].concat([...state.slice(1)]) :
+            [...state.slice(0, indexFixtures), Object.assign({}, ...state.slice(indexFixtures, indexFixtures + 1), {[COMPETITION_ROUNDS_FIXTURES[indexFixtures] + arrayToUpdate]: action.data.fixtures}), ...state.slice(indexFixtures + 1)];
 
             return [...newState];
 
         default:
             return state;
-
-        // case LATEST_FIXTURES_SEASON_HAS_FINISHED :
-        //     // console.log('state: ', state);
-        //     // console.log('action.data: ', action.data);
-        //     newState = Object.assign({}, state, {
-        //         appData: {
-        //             miscInfo: Object.assign({}, state.appData.miscInfo, { hasSeasonFinished: action.data.hasSeasonFinished }),
-        //             setsOfFixtures: [...state.appData.setsOfFixtures],
-        //             latestTable: [...state.appData.latestTable],
-        //             teamsForSeason: [...state.appData.teamsForSeason]
-        //         }
-        //     });
-        //     // console.log('newState: ', newState);
-
-        //     return newState;
 
     }
 }

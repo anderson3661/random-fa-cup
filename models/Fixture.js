@@ -7,11 +7,11 @@ const Schema = mongoose.Schema;
 const FixtureSchema = new Schema({
     // _id: mongoose.Schema.Types.ObjectId,
     userDocumentId: { type: String, required: true },
-    setOfFixturesNumber: Number,
-    fixtureNumber: Number,
-    dateOfFixture: { type: String, required: true },
+    competitionRound: { type: String, required: true },
     homeTeam: { type: String, required: true },
     awayTeam: { type: String, required: true },
+    homeTeamDivision: { type: String, required: true },
+    awayTeamDivision: { type: String, required: true },
     homeTeamsScore: Number,
     awayTeamsScore: Number,
     homeTeamsGoals: String,
@@ -20,6 +20,9 @@ const FixtureSchema = new Schema({
     injuryTimeSecondHalf: Number,
     minutesPlayed: Number,
     hasFixtureFinished: Boolean,
+    isReplay: Boolean,
+    dateOfFixture: String,
+    timeOfFixture: String,
 });
 
 module.exports = Fixture = mongoose.model('fixture', FixtureSchema);

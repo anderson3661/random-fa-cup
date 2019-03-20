@@ -3,23 +3,102 @@
 
 
 .container-home {
+    min-height: 70vh;
     @include flex();
     margin: 14vh auto 10vh auto;
 
-    .container-card {
-        width: 50%;
-        padding: 1vh 2vw 2vh 2vw;
+    .fa-cup-image {
+        position: absolute;
+        top: 35vh;
+        width: 23vw;
+        height: 50vh;
+        margin: 0 auto;
+        background-color: rgba(248, 248, 248, 0.3);
+        border-radius: 50%;
+        box-shadow: 0px 0px 10vw 10vw rgba(248, 248, 248, 0.3);
 
-        h1 { margin-bottom: 3vh; }
+        img { height: 100%; }
+    }
 
-        header {
-            @include flex($justify-content: space-between);
-            img {width: 6vw;}
+    .competition-round {
+        position: absolute;
+        height: 15vh;
+        width: 15vh;
+        background-image: url('../../assets/images/white-football.png');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        @include flex();
+        flex-direction: column;
+
+        &._final { top: 10vh; left: 0; right: 0; margin: 0 auto; }
+        &._semi-finals { top: 25vh; right: 15vw; }
+        &._quarter-finals { top: 25vh; left: 15vw; }
+        &._4th-round { top: 45vh; right: 10vw; }
+        &._3rd-round { top: 45vh; left: 10vw; }
+        &._2nd-round { top: 65vh; right: 15vw; }
+        &._1st-round { top: 65vh; left: 15vw; }
+
+        .competition-round-label { width: 14vh; text-align: center; }
+        .fixtures-and-results { width: 12vh; text-align: center; }
+    }
+
+    .teams-left-by-division {
+        position: absolute;
+        top: 78vh;
+        left: 0.5vw;
+        color: white;
+        background-color: rgba(255, 255, 255, 0.4);
+        padding: 0.5vh 0.5vw;
+        width: 10vw;
+
+        header { margin-bottom: 0.5vh; text-align: center; font-weight: 700; }
+
+        table { width: 100% }
+        tr { width: 50% }
+        td.teamName { padding-left: 2vw; }
+        td.numberOfTeams { padding-right: 2vw; text-align: right; }
+    }
+
+    .container-card.display-winners {
+        position: absolute;
+        top: 26vh;
+        color: darkred;
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 0.5vh 0.5vw;
+        margin: 0 auto;
+        width: 25vw;
+        text-align: center;
+        font-weight: 700;
+        box-shadow: 0px 0px 10vw 10vw rgba(245, 216, 216, 0.3);
+
+        p.heading {
+            margin: 0.5vh 0;
+            font-size: 120%;
+        }
+
+        p.winners {
+            margin: 2vh 0 1vh 0;
+            font-size: 150%;
         }
     }
-}
 
-@media screen and (orientation: landscape) and (max-width: 1024px) { .container-home .container-card { width: 75%; margin-top: 1vh;} }
-@media screen and (orientation: landscape) and (max-width: 850px) { .container-home .container-card { width: 75%; margin-top: 10vh;} }
-@media screen and (orientation: portrait) and (max-height: 1024px) { .container-home .container-card { width: 80%; margin-top: 1vh;} }
-@media screen and (orientation: portrait) and (max-height: 650px) { .container-home .container-card { width: 80%; margin-top: 10vh;} }
+    a.nav-link {
+        > div {
+            font-size: 125%;
+            font-weight: 700;
+            margin: 0 0 1vh 0;
+        }
+
+        .active {
+            > div { color: blue; }
+            &:hover { transform: scale(1.1) };
+        }
+
+        .deactivated {
+            > div { color: gray; }
+            &:hover { cursor: default; }
+        }
+    }
+
+}

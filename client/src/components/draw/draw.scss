@@ -1,0 +1,219 @@
+@import '../../sass/mixins';
+@import '../../sass/_variables';
+
+
+.outer-container-draw {
+    min-height: 94vh;
+
+    .container-main-content-draw {
+        // min-height: 70vh;
+        width: 90%;
+        margin: 14vh 0 5vh 0;
+
+        &.competition-finished { width: 100%; }
+
+        .draw {
+            width: 45vw;
+            margin-left: 2.5vw;
+        }
+
+        .secondary-information {
+            position: fixed;
+            left: 52.5vw;
+            width: 40vw;
+        }
+
+        &.drawInProgress {
+
+            .secondary-information {
+                top: 10vh;
+
+                .my-watchlist, .premier-league-teams, .teams-to-be-drawn { padding-bottom: 1vh; overflow: auto; }
+                .my-watchlist, .premier-league-teams { margin-bottom: 2vh; }
+                .my-watchlist { height: 10vh; }
+                .premier-league-teams { height: 27vh; }
+                .teams-to-be-drawn { height: 40vh; }
+
+                .main-header { padding-bottom: 1vh; }
+            }
+        }
+
+        &.drawComplete {
+
+            .secondary-information {
+                top: 14vh;
+
+                .my-watchlist, .premier-league-teams { 
+                    padding-bottom: 2vh;
+
+                    .main-header { padding-bottom: 2vh; }
+                }
+
+                .my-watchlist { margin-bottom: 3vh; }                
+            }
+        }
+
+        .draw {
+
+            padding-bottom: 3vh;
+
+            .main-header {
+                @include flex($justify-content: space-between);
+                padding-bottom: 2vh;
+
+                .image-left, .image-right { flex-basis: 20%; }
+                .image-right { text-align: right; }
+                img { width: 3vw; }
+            }
+
+            .not-at-this-stage {
+                text-align: center;
+            }
+
+            .draw-control-section {
+                display: flex;
+                align-items: center;
+                margin-bottom: 3vh;
+
+                .draw-update-button {
+                    margin-right: 2vw;
+                }
+
+                .draw-update-interval {
+                    flex-basis: 50%;
+                }
+            }
+
+            .draw-row {
+                &.versus {
+                    font-size: 80%;
+                    padding-top: 0.25vh;
+                    padding-bottom: 0.25vh;
+                }
+
+                .homeTeamsName, .awayTeamsName {
+                    .teamNumberBlank {
+                        position: relative;
+                        display: inline-block;
+                        height: 2.25vh;
+                        width: 2.25vh;
+                        background-color: darkred;
+                        border-radius: 50%;
+                        margin-right: 0.5vw;
+                        @include flex();
+                    }
+
+                    .teamNumberInDraw {
+                        position: absolute;
+                        color: white;
+                        font-size: 70%;
+                        font-weight: normal;
+                        @include flex();
+                    }
+                }
+            }
+
+            &.competition-finished {
+                width: 50%;
+                margin: 0 auto;
+            }
+        }
+
+        .secondary-information {
+            margin-left: 3vw;
+
+            .teams-to-be-drawn, .premier-league-teams, .my-watchlist  {
+                background-color: rgba(250, 250, 240, 0.9);
+
+                .main-header {
+                    @include flex($justify-content: space-between);
+                    // padding-bottom: 1vh;
+    
+                    h1, h2 { width: 100%; text-align: center; font-size: 120%; margin: 0.5vh 0 0 0; }
+                }
+
+                .draw-row.versus {
+                    font-size: 80%;
+                    padding-top: 0.25vh;
+                    padding-bottom: 0.25vh;
+                }
+
+                span {
+                    font-size: 85%;
+                    &.division { color: gray; font-size: 80%;}
+                }
+
+                p span {
+                    font-weight: normal;
+                    
+                    &.division { color: gray; font-size: 80%;}
+                    &.premierLeague { color: blue; }
+                }
+
+                .teams {
+                    display: flex;
+                    flex-wrap: wrap;
+
+                    .team {
+                        flex-basis: 50%;
+                        margin-bottom: 0.5vh;
+                        @include flex($justify-content: null);
+
+                        .teamNumberBlank {
+                            position: relative;
+                            display: inline-block;
+                            height: 2.25vh;
+                            width: 2.25vh;
+                            background-color: darkred;
+                            border-radius: 50%;
+                            margin-right: 0.5vw;
+                            @include flex();
+                        }
+
+                        .teamNumberInDraw {
+                            position: absolute;
+                            color: white;
+                            font-size: 70%;
+                            font-weight: normal;
+                            @include flex();
+                        }
+
+                        .teamAndDivision {
+                            span {
+                                font-size: 85%;
+                                font-weight: normal;
+                            
+                                &.division { color: gray; font-size: 70%;}
+                                &.premierLeague { color: blue; }
+                            }
+                        }                        
+
+                    }
+
+                }
+            }
+        }
+
+        .fixtures {
+            width: 100%;
+            margin-bottom: 2.5vh;
+            font-size: 85%;
+        }
+
+    }
+}
+
+// .fixtures-date {
+//     font-family: $font-family-date-of-fixtures;
+//     font-size: $font-size-date-of-fixtures;
+//     // background-color: $background-color-date-of-fixtures; 
+//     background-color: lightgray; 
+//     text-align: left;
+//     text-transform: uppercase;
+//     margin-bottom: 1vh;
+//     padding: 1vh 1vw;
+//     border-collapse: separate;
+// }
+
+@media screen and (min-width: 1024px) { .outer-container-draw { .container-main-content-draw { width: 90%; } } };
+@media screen and (max-width: 1024px) { .outer-container-draw { .container-main-content-draw { width: 90%; } } };

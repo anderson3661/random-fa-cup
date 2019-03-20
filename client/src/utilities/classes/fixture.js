@@ -1,5 +1,7 @@
 import * as helpers from '../helper-functions/helpers';
 
+import { DEFAULT_VALUE_COMPETITION_START_DATE, DEFAULT_VALUE_COMPETITION_START_TIME, DIVISIONS } from '../constants';
+
 const EXTRA_MINUTES_FIRST_HALF = 5;
 const EXTRA_MINUTES_SECOND_HALF = 9;
 
@@ -10,10 +12,13 @@ const FULL_TIME = "Full-Time";
 export class Fixture {
 
     _id;
+    competitionRound;
     dateOfFixture;
     timeOfFixture;
     homeTeam;
     awayTeam;
+    homeTeamDivision;
+    awayTeamDivision;
     homeTeamsScore;
     awayTeamsScore;
     homeTeamsGoals = "";
@@ -26,6 +31,7 @@ export class Fixture {
     minutesPlayed;
     minutesInfo;
     hasFixtureFinished;
+    isReplay;
 
     goalFactors;
     props;
@@ -33,19 +39,26 @@ export class Fixture {
 
     constructor(fixture) {
         this._id = fixture._id;
-        this.dateOfFixture = fixture.dateOfFixture;
-        this.timeOfFixture = fixture.timeOfFixture;
+        this.dateOfFixture = DEFAULT_VALUE_COMPETITION_START_DATE;
+        this.timeOfFixture = DEFAULT_VALUE_COMPETITION_START_TIME;
         this.homeTeam = fixture.homeTeam;
         this.awayTeam = fixture.awayTeam;
+        this.homeTeamDivision = fixture.homeTeamDivision;
+        this.awayTeamDivision = fixture.awayTeamDivision;
+        this.competitionRound = fixture.competitionRound;
+        this.isReplay = fixture.isReplay;
     }
 
     getFixtureObject() {
         return {
             _id: this._id,
+            competitionRound: this.competitionRound,
             dateOfFixture: this.dateOfFixture,
             timeOfFixture: this.timeOfFixture,
             homeTeam: this.homeTeam,
             awayTeam: this.awayTeam,
+            homeTeamDivision: this.homeTeamDivision,
+            awayTeamDivision: this.awayTeamDivision,
             homeTeamsScore: this.homeTeamsScore,
             awayTeamsScore: this.awayTeamsScore,
             homeTeamsGoals: this.homeTeamsGoals,
@@ -54,7 +67,8 @@ export class Fixture {
             injuryTimeSecondHalf: this.injuryTimeSecondHalf,
             minutesPlayed: this.minutesPlayed,
             minutesInfo: this.minutesInfo,
-            hasFixtureFinished: this.hasFixtureFinished
+            hasFixtureFinished: this.hasFixtureFinished,
+            isReplay: this.isReplay,
         }
     }
 
@@ -144,20 +158,41 @@ export class Fixture {
 
     hasTeamScored(teams, goalFactors, whichTeam, minutesinMatchFactor) {
         let thisTeam;
+        let oppositionTeam;
         let awayTeamFactor;
         let isNotATopTeamFactor;
+        let isThisTeamATopTeam;
+        let isOppositionTeamATopTeam;
+        let divisionFactor;
+        let thisTeamsDivision;
+        let oppositionTeamsDivision;
         let isItAGoalFactor;
 
-        awayTeamFactor = (whichTeam === "home") ? 1 : goalFactors.isAwayTeam;
-
-        thisTeam = this[whichTeam + "Team"];
         
-        isNotATopTeamFactor = (teams[helpers.getPositionInArrayOfObjects(teams, "teamName", thisTeam)].isATopTeam) ? 1 : goalFactors.isNotATopTeam;
+        awayTeamFactor = (whichTeam === "home") ? 1 : goalFactors.isAwayTeam;
+        
+        thisTeam = this[whichTeam + "Team"];
+        oppositionTeam = this[(whichTeam === "home" ? "away" : "home") + "Team"];
 
+        // If both teams are or are not 'top teams', then don't apply the 'Is Top Team' factor
+        isThisTeamATopTeam = teams[helpers.getPositionInArrayOfObjects(teams, "teamName", thisTeam)].isATopTeam;
+        isOppositionTeamATopTeam = teams[helpers.getPositionInArrayOfObjects(teams, "teamName", oppositionTeam)].isATopTeam;
+        isNotATopTeamFactor = (isThisTeamATopTeam || (isThisTeamATopTeam === isOppositionTeamATopTeam)) ? 1 : goalFactors.isNotATopTeam;
+        
+        // Apply the 'Division' factor - if teams are in the same division then don't apply, otherwise the factor applies for each difference in division
+        divisionFactor = 1;
+        thisTeamsDivision = DIVISIONS.indexOf(helpers.getDivisionTheTeamPlaysIn(teams, thisTeam));
+        oppositionTeamsDivision = DIVISIONS.indexOf(helpers.getDivisionTheTeamPlaysIn(teams, oppositionTeam));
+        if (thisTeamsDivision > oppositionTeamsDivision) {
+            for (let i = 0; i < (thisTeamsDivision - oppositionTeamsDivision); i++) {
+                divisionFactor *= goalFactors.divisionFactor;
+            }
+        }
+        
         isItAGoalFactor = goalFactors.isItAGoal;
 
         // Has a goal been scored
-        if (Math.floor(Math.random() * goalFactors.baseForRandomMultiplier * minutesinMatchFactor * awayTeamFactor * isNotATopTeamFactor) < isItAGoalFactor) {
+        if (Math.floor(Math.random() * goalFactors.baseForRandomMultiplier * minutesinMatchFactor * awayTeamFactor * isNotATopTeamFactor * divisionFactor) < isItAGoalFactor) {
 
             this[whichTeam + "TeamsScore"] += 1;
 
@@ -167,7 +202,7 @@ export class Fixture {
                 this[whichTeam + "TeamsGoals"] += this.minutesPlayed + "  ";
             }
 
-            return true       // Return true to update table and re-display
+            return true       // Return true to re-display
         }
         return false;
     }

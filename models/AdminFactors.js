@@ -6,11 +6,11 @@ const AdminFactorsSchema = new Schema({
     // _id: mongoose.Schema.Types.ObjectId,
     userDocumentId: { type: String, required: true },
     season: { type: String, required: true },
-    seasonStartDate: String,
-    numberOfFixturesForSeason: Number,
+    competitionStartDate: String,
     goalFactors: {
         isAwayTeam: Number,
         isNotATopTeam: Number,
+        divisionFactor: Number,
         baseForRandomMultiplier: Number,
         likelihoodOfAGoalDuringASetPeriod: [{
             minutes: Number,

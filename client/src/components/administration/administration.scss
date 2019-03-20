@@ -5,38 +5,52 @@
 .outer-container-administration {
 
     .container-main-content-administration {
-        width: 85%;
+        width: 80%;
         margin: 14vh auto 8vh auto;
 
         .container-card {
             padding: 0.5vh 1.5vw 1.5vh 1.5vw;
+
+            &.display-validation-errors-message {
+                background-color: darkred;
+                color: white;
+                margin-bottom: 3vh;
+                padding: 0.5vh 0.5vw;
+            }
         
             .grid-season-info {
                 display: grid;
-                grid-template-columns: 1fr 1fr;
-                grid-column-gap: 3vw;
+                // grid-row-gap: 3vh;
+                
+                &.competition-information {
+                    grid-template-columns: 1fr;                    
+                }
+                
+                &.match-score-factors {
+                    grid-template-columns: 1fr;
+                    // grid-column-gap: 3vw;
+                }
             }
 
             &.header {
-                width: 50%;
+                width: 60%;
                 padding: 0.5vh 1vw;
                 margin-bottom: 3vh;
-                background: rgba(255, 255, 255, 0.5);
+                background: rgba(255, 255, 255, 0.7);
 
                 header {
                     display: flex;
-
+                    
                     img {width: 3vw;}
-        
-                    h1 {
+                    
+                    .heading-and-buttons {
                         flex-basis: 75%;
-                        text-align: center;
-                        // margin-bottom: 3vh;
-                        margin: 0.5vh 0;
-                        padding: 0.5vh 0;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+
+                        span.heading { font-size: 150% }
                     }
-        
-                    span { flex-basis: 25%; font-size: 80%; color: slategray;}
                 }
             }
 
@@ -46,10 +60,20 @@
 
                 p { margin: 0 0 1vh 0; }
 
-                #saveChanges:disabled, #createFixtures:disabled, #resetApp:disabled {
+                #saveChanges:disabled, #resetApp:disabled {
                     background-color: lightgray;
                 }
             }
+
+            .validation-error {
+                color: red;
+                padding-top: 1vh;
+            }
+
+            .team-row .validation-error {
+                padding-top: 0.25vh;
+            }
+
         }
 
         mat-radio-button {
@@ -73,8 +97,30 @@
         }
         
         .container-admin {
-            display: flex;
-            > div { width: 50%; }
+
+            .container-admin-factors {
+                display: flex;
+                margin: 0 0 0 0;
+                
+                > div { flex-basis: 70%; margin-bottom: 3vh; margin-left: 5vw; }
+                > div:first-child { flex-basis: 30%; margin-left: 0; }
+                .buttons { text-align: center; }
+                .fullWidth {grid-column: 1 / span 2; margin-top: 3vh;}
+                .fullWidth:first-child {margin-top: 0;}
+
+                // Set the widths of the fields to 50% (otherwise the long labels wrap and it looks bad).  However set the Goals Per Minute Factor to 100%
+                .grid-season-info.match-score-factors .fullWidth > div { width: 50%; }
+                .grid-season-info.match-score-factors .fullWidth .likelihoodOfAGoalDuringASetPeriod-input-field { width: 100%; }
+            }
+
+            .container-admin-teams, .container-admin-my-watchlist-teams {
+                display: flex;
+                flex-wrap: wrap;
+                > div { width: 40%; margin-bottom: 3vh; }
+            }
+
+            .container-admin-my-watchlist-teams button { margin: 0.5vh 0; }
+            .container-admin-my-watchlist-teams button.button-add-team { margin-bottom: 1vh; }
 
             table.admin-teams {
                 width: 100%;
@@ -92,7 +138,7 @@
             
                 td {
                     border-bottom: 1px solid lightgray;
-                    padding: 0.5vh 0.5vw;
+                    // padding: 0.5vh 0.5vw;
 
                     &.admin-team-number { font-size: 80%; }
                 }
@@ -100,15 +146,13 @@
                 input { color: #495057; }
                 
                 tbody tr:odd { background-color: gray; }
+
+                // .teamName-input-field { border-bottom: 1px solid lightgray; }
+
+                input#teamName { text-align: left; font-weight: 700; font-size: 100%; }
+                td.admin-team-isATopTeam { text-align: center; }
             }
         
-            .container-admin-factors {
-                margin: 0 0 0 5vw;
-                
-                > div { margin-bottom: 3vh; }
-                .buttons { text-align: center; }
-                .fullWidth {grid-column: 1 / span 2; }
-            }
         }
         
         .form-control {

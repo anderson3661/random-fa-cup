@@ -1,29 +1,30 @@
-import { LOAD_FROM_MISCELLANEOUS_DB, LOAD_FROM_ADMIN_FACTORS_DB, LOAD_FROM_TEAMS_DB, LOAD_FROM_FIXTURES_DB, LOAD_FROM_LEAGUE_TABLE_DB, LOAD_FROM_ALL_DBS_FINISHED, MERGE_DOCUMENT_IDS_FROM_TEAMS_DB, MERGE_DOCUMENT_IDS_FROM_LEAGUE_TABLE_DB, LOADING_BACKEND_UPDATE } from './types';
+import { LOAD_FROM_MISCELLANEOUS_DB, LOAD_FROM_ADMIN_FACTORS_DB, LOAD_FROM_TEAMS_DB, LOAD_FROM_MY_WATCHLIST_TEAMS_DB, LOAD_FROM_FIXTURES_DB, LOAD_FROM_ALL_DBS_FINISHED, MERGE_DOCUMENT_IDS_FROM_TEAMS_DB, LOADING_BACKEND_UPDATE } from './types';
 import { getAdminFactors } from '../../utilities/data';
-import { fetchDataFromAllDbs, errorWithNumbersOfDocumentsInDatabases, doesFixturesDbContainCorrectNumberOfDocuments, createDocumentInASingleDocumentDb, createTeamsDocumentsInDb, createLeagueTableDocumentsInDb, mergeDocumentsIdsFromDatabaseToObjectsInArray } from '../../utilities/data-backend';
-import { TEAMS_DEFAULT, API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_ADMIN_FACTORS } from '../../utilities/constants';
+import { fetchDataFromAllDbs, errorWithNumbersOfDocumentsInDatabases, doesFixturesDbContainCorrectNumberOfDocuments, createDocumentInASingleDocumentDb, createTeamsDocumentsInDb, mergeDocumentsIdsFromDatabaseToObjectsInArray } from '../../utilities/data-backend';
+import { API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_ADMIN_FACTORS, NUMBER_OF_TEAMS } from '../../utilities/constants';
 
 // ACTION CREATORS
 
 export const loadFromAllDbsStarted = () => async (dispatch, getState) => {
     try {
         let results = await fetchDataFromAllDbs(getState().default.user._id);
-        let { dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, dataFromFixturesDb, setsOfFixtures, dataFromLeagueTableDb } = results;
-        if (dataFromMiscellaneousDb.length === 0 && dataFromAdminFactorsDb.length === 0 && dataFromTeamsDb.length === 0 && dataFromFixturesDb.length === 0 && dataFromLeagueTableDb.length === 0) {
+        let { dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures } = results;
+        if (dataFromMiscellaneousDb.length === 0 && dataFromAdminFactorsDb.length === 0 && dataFromTeamsDb.length === 0 && dataFromFixturesDb.length === 0) {
             console.log('No documents exist in any of the databases ... create documents in the database from the app defaults');
             dispatch(createDocumentsInDbsFromAppDefaults(getState().default.user._id));
             dispatch({ type: LOAD_FROM_ALL_DBS_FINISHED, data: { loading: false }});
-        } else if (dataFromMiscellaneousDb.length === 1 && dataFromAdminFactorsDb.length === 1 && dataFromTeamsDb.length === TEAMS_DEFAULT.length && dataFromLeagueTableDb.length === TEAMS_DEFAULT.length &&
+        } else if (dataFromMiscellaneousDb.length === 1 && dataFromAdminFactorsDb.length === 1 && dataFromTeamsDb.length === NUMBER_OF_TEAMS &&
                   (dataFromFixturesDb.length === 0 || doesFixturesDbContainCorrectNumberOfDocuments(dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromFixturesDb, setsOfFixtures))) {
-            console.log(`Data has been loaded from the databases ... the user has not yet created fixtures`);
+            // console.log(`Data has been loaded from the databases ... the user has not yet created fixtures`);
+            console.log(`Data has been loaded from the databases`);
             dispatch({ type: LOAD_FROM_MISCELLANEOUS_DB, data: dataFromMiscellaneousDb[0] });        // As the api call result returns an array just need to send the [0] element
             dispatch({ type: LOAD_FROM_ADMIN_FACTORS_DB, data: dataFromAdminFactorsDb[0] });         // As the api call result returns an array just need to send the [0] element
-            dispatch({ type: LOAD_FROM_TEAMS_DB, data: dataFromTeamsDb });
+            dispatch({ type: LOAD_FROM_TEAMS_DB, data: teamsByDivision });
+            dispatch({ type: LOAD_FROM_MY_WATCHLIST_TEAMS_DB, data: dataFromMyWatchlistTeamsDb });
             dispatch({ type: LOAD_FROM_FIXTURES_DB, data: (dataFromFixturesDb === 0 ? dataFromFixturesDb : setsOfFixtures) });
-            dispatch({ type: LOAD_FROM_LEAGUE_TABLE_DB, data: dataFromLeagueTableDb });
             dispatch({ type: LOAD_FROM_ALL_DBS_FINISHED, data: { loading: false }});
         } else {
-            errorWithNumbersOfDocumentsInDatabases(dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, dataFromFixturesDb, setsOfFixtures, dataFromLeagueTableDb);
+            errorWithNumbersOfDocumentsInDatabases(dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures);
         }
     } catch(error) {
         console.log('Error from loadFromAllDbsStarted', error);
@@ -38,8 +39,6 @@ export const createDocumentsInDbsFromAppDefaults = (documentIdInUsersDb) => asyn
     let results;
     let updatedData;
 
-    debugger;
-
     try {
         results = await createDocumentInASingleDocumentDb(getState().default.miscellaneous, API_ENDPOINT_MISCELLANEOUS, 'Miscellaneous', documentIdInUsersDb);
         dispatch({ type: LOAD_FROM_MISCELLANEOUS_DB, data: results });            // The API call returns an object so update the store
@@ -49,12 +48,8 @@ export const createDocumentsInDbsFromAppDefaults = (documentIdInUsersDb) => asyn
         dispatch({ type: LOAD_FROM_ADMIN_FACTORS_DB, data: results });            // The API call returns an object so update the store
         
         results = await createTeamsDocumentsInDb(documentIdInUsersDb);
-        updatedData = await mergeDocumentsIdsFromDatabaseToObjectsInArray(getState().default.teamsForSeason, results);
+        updatedData = await mergeDocumentsIdsFromDatabaseToObjectsInArray(getState().default.teamsForCompetition, results);
         dispatch({ type: MERGE_DOCUMENT_IDS_FROM_TEAMS_DB, data: updatedData });
-        
-        results = await createLeagueTableDocumentsInDb(documentIdInUsersDb);
-        updatedData = await mergeDocumentsIdsFromDatabaseToObjectsInArray(getState().default.leagueTable, results);
-        dispatch({ type: MERGE_DOCUMENT_IDS_FROM_LEAGUE_TABLE_DB, data: updatedData });
 
     } catch(error) {
         throw new Error(error);

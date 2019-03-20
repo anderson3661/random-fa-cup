@@ -11,7 +11,7 @@ const USER_DEFAULT_REQUIRED = 'Minimum 1 character required';
 const USER_EMAIL_ADDRESS_REQUIRED = 'Minimum 1 character required';
 const USER_EMAIL_ADDRESS_INVALID = 'Invalid Email address';
 
-const EMAIL_REGEX = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 class PasswordReset extends Component {
 
@@ -93,47 +93,49 @@ class PasswordReset extends Component {
         const {formFields: {userEmailAddress}, formErrors, submitAttempted} = this.state;
 
         return (
-            <div className="container-main-content-password-reset">
-            <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
-            <div className="container-card">
-                    <header>
-                        <img src={FOOTBALL_IMAGE} alt="" />
-                        <h1>Password Reset</h1>
-                        <img src={FOOTBALL_IMAGE} alt="" />                        
-                    </header>
+            <div className="outer-container-password-reset">
+                <div className="container-main-content-password-reset">
+                    <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
+                    <div className="container-card">
+                        <header>
+                            <img src={FOOTBALL_IMAGE} alt="" />
+                            <h1>Password Reset</h1>
+                            <img src={FOOTBALL_IMAGE} alt="" />                        
+                        </header>
 
-                    <div className="login">
-                        <div className="main-form">
-                            <form className="login-form">
+                        <div className="login">
+                            <div className="main-form">
+                                <form className="login-form">
 
-                                <div className="login-form-full-width">
-                                    <TextField
-                                        type="text"
-                                        id="userEmailAddress"
-                                        name="userEmailAddress"
-                                        label="Your Email address"
-                                        className="form-control"
-                                        required={true}
-                                        fullWidth={true}
-                                        value={userEmailAddress}
-                                        onChange={this.handleChange}
-                                    />
+                                    <div className="login-form-full-width">
+                                        <TextField
+                                            type="text"
+                                            id="userEmailAddress"
+                                            name="userEmailAddress"
+                                            label="Your Email address"
+                                            className="form-control"
+                                            required={true}
+                                            fullWidth={true}
+                                            value={userEmailAddress}
+                                            onChange={this.handleChange}
+                                        />
+                                    </div>
+                                    {submitAttempted && formErrors.userEmailAddress.length > 0 ? <div className="errorMessage">{formErrors.userEmailAddress}</div> : <div>&nbsp;</div>}
+
+                                </form>
+
+                                <div className="submit-button">
+                                    <Button variant="contained" color="primary" id="submit" onClick={this.handleSubmit}>Reset</Button>
                                 </div>
-                                {submitAttempted && formErrors.userEmailAddress.length > 0 ? <div className="errorMessage">{formErrors.userEmailAddress}</div> : <div>&nbsp;</div>}
 
-                            </form>
 
-                            <div className="submit-button">
-                                <Button variant="contained" color="primary" id="submit" onClick={this.handleSubmit}>Reset</Button>
+                                { submitAttempted && !this.formValid() &&
+                                    <div className="invalid-form-message">
+                                        <p>Invalid ... please check the details highlighted in red above</p>
+                                    </div>
+                                }
+                                
                             </div>
-
-
-                            { submitAttempted && !this.formValid() &&
-                                <div className="invalid-form-message">
-                                    <p>Invalid ... please check the details highlighted in red above</p>
-                                </div>
-                            }
-                            
                         </div>
                     </div>
                 </div>

@@ -7,8 +7,6 @@ import Checkbox from '@material-ui/core/Checkbox';
 import TeamStatsChart from './team-stats-chart';
 import FixtureRow from "../fixture-row/fixture-row";
 
-import * as helpers from './helpers';
-
 import "../../utilities/css/fixtures.scss";
 import "./team-stats.scss";
 
@@ -16,10 +14,10 @@ class TeamStats extends Component {
 
     fixturesForSeason;
     fixturesToOutput;
-    leagueTable;
     teamName;
 
     constructor(props) {
+        debugger;
         super(props);
 
         this.state = {
@@ -39,7 +37,6 @@ class TeamStats extends Component {
         let awayTeamsGoals;
         let dateOfFixture;
         let winDrawLoss;
-        let positionInLeagueTable;
 
         this.teamName = this.props.match.params.teamName;
 
@@ -79,9 +76,7 @@ class TeamStats extends Component {
                 };
             };
             
-            positionInLeagueTable = (winDrawLoss === "") ? 0 : helpers.getPositionInLeagueTable(teamsForSeason, setOfFixtures, this.leagueTable, this.teamName);
-
-            this.fixturesToOutput.push({ dateOfFixture, homeTeam, awayTeam, homeTeamsScore, awayTeamsScore, homeTeamsGoals, awayTeamsGoals, winDrawLoss, positionInTable: positionInLeagueTable, hasFixtureFinished: winDrawLoss !== "" });
+            this.fixturesToOutput.push({ dateOfFixture, homeTeam, awayTeam, homeTeamsScore, awayTeamsScore, homeTeamsGoals, awayTeamsGoals, winDrawLoss, hasFixtureFinished: winDrawLoss !== "" });
         });
 
     }

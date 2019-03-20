@@ -1,6 +1,4 @@
-import { TEAMS_DEFAULT, NUMBER_OF_FIXTURES_FOR_SEASON, API_ENDPOINT_USERS, API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_ADMIN_FACTORS, API_ENDPOINT_TEAMS, API_ENDPOINT_FIXTURES, API_ENDPOINT_LEAGUE_TABLE, API_ENDPOINTS_TO_LOAD_ALL_DATA, HAVE_SEASONS_FIXTURES_BEEN_CREATED } from './constants';
-import { getZerosiedTeamInLeagueTable } from './data';
-import * as helpers from './helper-functions/helpers';
+import { TEAMS_DEFAULT, FIXTURES_DEFAULT, COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES, API_ENDPOINT_USERS, API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_ADMIN_FACTORS, API_ENDPOINT_TEAMS, API_ENDPOINT_MY_WATCHLIST_TEAMS, API_ENDPOINT_FIXTURES, API_ENDPOINTS_TO_DELETE_ALL_DATA, HAVE_SEASONS_FIXTURES_BEEN_CREATED, DIVISIONS, NUMBER_OF_TEAMS } from './constants';
 
 // const APP_DATA_LOCAL_STORAGE = "football_AppInfo";
 
@@ -10,7 +8,7 @@ export async function isUserAuthenticated(userDetails) {
         const res = await fetch(API_ENDPOINT_USERS + '/' + userDetails.emailAddress);
         if (!res.ok) throw Error(res.statusText);
         const dataFromUsersDb = await res.json();
-        if (userDetails.emailAddress === dataFromUsersDb.emailAddress && userDetails.password === dataFromUsersDb.password) {
+        if (dataFromUsersDb && userDetails.emailAddress === dataFromUsersDb.emailAddress && userDetails.password === dataFromUsersDb.password) {
             return { ...dataFromUsersDb, authenticated: true }
         } else {
             return { authenticated: false }
@@ -21,14 +19,26 @@ export async function isUserAuthenticated(userDetails) {
     }
 }
 
+export async function userSignUpDoesUserAlreadyExist(userDetails) {
+    try {
+        const res = await fetch(API_ENDPOINT_USERS + '/' + userDetails.emailAddress);
+        if (!res.ok) throw Error(res.statusText);
+        const dataFromUsersDb = await res.json();
+        return dataFromUsersDb && userDetails.emailAddress === dataFromUsersDb.emailAddress;
+    } catch(err) {
+        console.log(err);
+        throw new Error('Error from userSignUpDoesUserAlreadyExist');
+    }
+}
+
 export async function fetchDataFromAllDbs(documentIdInUsersDb) {
     // This is called by the starting function getAppDataFromDb, to load the data from the databases into arrays (and update the Redux store)
     let res;
     let dataFromMiscellaneousDb;
     let dataFromAdminFactorsDb;
     let dataFromTeamsDb;
+    let dataFromMyWatchlistTeamsDb;
     let dataFromFixturesDb;
-    let dataFromLeagueTableDb;
 
     try {
 
@@ -47,21 +57,20 @@ export async function fetchDataFromAllDbs(documentIdInUsersDb) {
         if (!res.ok) throw Error(res.statusText);
         dataFromTeamsDb = await res.json();
         console.log('dataFromTeamsDb', dataFromTeamsDb);
+        let teamsByDivision = await formatTeams(dataFromTeamsDb);
+
+        res = await fetch(API_ENDPOINT_MY_WATCHLIST_TEAMS + "/" + documentIdInUsersDb);
+        if (!res.ok) throw Error(res.statusText);
+        dataFromMyWatchlistTeamsDb = await res.json();
+        console.log('dataFromMyWatchlistTeamsDb', dataFromMyWatchlistTeamsDb);
 
         res = await fetch(API_ENDPOINT_FIXTURES + "/" + documentIdInUsersDb);
         if (!res.ok) throw Error(res.statusText);
         dataFromFixturesDb = await res.json();
         // Now format the individual fixtures into sets of fixtures
-        let setsOfFixtures = await formatFixtures(dataFromAdminFactorsDb, dataFromFixturesDb);
+        let setsOfFixtures = await formatFixtures(dataFromFixturesDb);
 
-        res = await fetch(API_ENDPOINT_LEAGUE_TABLE + "/" + documentIdInUsersDb);
-        if (!res.ok) throw Error(res.statusText);
-        dataFromLeagueTableDb = await res.json();
-        console.log('dataFromLeagueTableDb', dataFromLeagueTableDb);
-        // Now need to sort the league table
-        helpers.sortLatestLeagueTable(dataFromLeagueTableDb);
-
-        return { dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, dataFromFixturesDb, setsOfFixtures, dataFromLeagueTableDb };
+        return { dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures };
 
     } catch(err) {
         console.log(err);
@@ -69,56 +78,71 @@ export async function fetchDataFromAllDbs(documentIdInUsersDb) {
     }
 }
 
-export const errorWithNumbersOfDocumentsInDatabases = (dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, dataFromFixturesDb, setsOfFixtures, dataFromLeagueTableDb) => {
+export const errorWithNumbersOfDocumentsInDatabases = (dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures) => {
     // Data has been loaded from the databases, but there is one or more inconsistencies with the number of documents
-    const numberOfTeams = TEAMS_DEFAULT.length;
-    const numberOfFixturesForSeason = dataFromMiscellaneousDb[0][NUMBER_OF_FIXTURES_FOR_SEASON];
+    // const numberOffixturesForCompetition = dataFromMiscellaneousDb[0][NUMBER_OF_FIXTURES_FOR_SEASON];
     const haveSeasonsFixturesBeenCreated = dataFromMiscellaneousDb[0][HAVE_SEASONS_FIXTURES_BEEN_CREATED];
     console.log('An unknown error has occured with the databases');
     console.log('Documents in Miscellaneous database:', dataFromMiscellaneousDb.length);
     console.log('Documents in Admin Factors database:', dataFromAdminFactorsDb.length);
     console.log('Documents in Teams database:', dataFromTeamsDb.length);
+    console.log('Documents in My Watchlist Teams database:', dataFromMyWatchlistTeamsDb.length);
     console.log('Documents in Fixtures database:', dataFromFixturesDb.length);
     console.log('haveSeasonsFixturesBeenCreated in state:', haveSeasonsFixturesBeenCreated);
-    console.log('Documents in League Table database:', dataFromLeagueTableDb.length);
     if (dataFromMiscellaneousDb.length !== 1) throw new Error(`There should only be 1 miscellaneous document on the DB, but there are ${dataFromMiscellaneousDb.length}`);
     if (dataFromAdminFactorsDb.length !== 1) throw new Error(`There should only be 1 admin-factors document on the DB, but there are ${dataFromAdminFactorsDb.length}`);
-    if (dataFromTeamsDb.length !== numberOfTeams) throw new Error(`There should be ${numberOfTeams} teams documents on the DB, but there are ${dataFromTeamsDb.length}`);
-    if (dataFromLeagueTableDb.length !== numberOfTeams) throw new Error(`There should be ${numberOfTeams} league table documents on the DB, but there are ${dataFromLeagueTableDb.length}`);
+    if (dataFromTeamsDb.length !== NUMBER_OF_TEAMS) throw new Error(`There should be ${NUMBER_OF_TEAMS} teams documents on the DB, but there are ${dataFromTeamsDb.length}`);
     if (haveSeasonsFixturesBeenCreated && dataFromFixturesDb.length === 0) throw new Error(`There are 0 fixtures documents on the DB, but haveSeasonsFixturesBeenCreated is true`);
-    if (haveSeasonsFixturesBeenCreated && dataFromFixturesDb.length !== numberOfFixturesForSeason * numberOfTeams / 2) throw new Error(`There are ${dataFromFixturesDb.length} fixtures documents on the DB, but there should be ${numberOfFixturesForSeason * numberOfTeams}`);
+    // if (haveSeasonsFixturesBeenCreated && dataFromFixturesDb.length !== numberOffixturesForCompetition * numberOfTeams / 2) throw new Error(`There are ${dataFromFixturesDb.length} fixtures documents on the DB, but there should be ${numberOffixturesForCompetition * numberOfTeams}`);
     if (!haveSeasonsFixturesBeenCreated && dataFromFixturesDb.length !== 0) throw new Error(`There are ${dataFromFixturesDb.length} fixtures documents on the DB, but haveSeasonsFixturesBeenCreated is false`);
     if (setsOfFixtures.length !== 0 && dataFromFixturesDb.length === 0) throw new Error(`There are ${setsOfFixtures.length} sets of fixtures, but there are 0 documents on the fixtures db`);
-    if (setsOfFixtures.length !== dataFromFixturesDb.length / numberOfFixturesForSeason) throw new Error(`There are ${setsOfFixtures.length} sets of fixtures, but there but there should be ${dataFromFixturesDb.length / numberOfFixturesForSeason}`);
+    // if (setsOfFixtures.length !== dataFromFixturesDb.length / numberOffixturesForCompetition) throw new Error(`There are ${setsOfFixtures.length} sets of fixtures, but there but there should be ${dataFromFixturesDb.length / numberOffixturesForCompetition}`);
 }
 
 export const doesFixturesDbContainCorrectNumberOfDocuments = (dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromFixturesDb, setsOfFixtures) => {
-    debugger;
     const numberOfTeams = TEAMS_DEFAULT.length;
-    const numberOfFixturesForSeason = dataFromAdminFactorsDb[0][NUMBER_OF_FIXTURES_FOR_SEASON];
+    // const numberOffixturesForCompetition = dataFromAdminFactorsDb[0][NUMBER_OF_FIXTURES_FOR_SEASON];
+    const numberOffixturesForCompetition = 0;
     const haveSeasonsFixturesBeenCreated = dataFromMiscellaneousDb[0][HAVE_SEASONS_FIXTURES_BEEN_CREATED];
-    return (dataFromFixturesDb.length === 0 && !haveSeasonsFixturesBeenCreated) ||
-           (dataFromFixturesDb.length === numberOfTeams * numberOfFixturesForSeason / 2 && setsOfFixtures.length === numberOfFixturesForSeason && haveSeasonsFixturesBeenCreated);
+    return true;
+    // return (dataFromFixturesDb.length === 0 && !haveSeasonsFixturesBeenCreated) ||
+    //        (dataFromFixturesDb.length === numberOfTeams * numberOffixturesForCompetition / 2 && setsOfFixtures.length === numberOffixturesForCompetition && haveSeasonsFixturesBeenCreated);
 }
 
-const formatFixtures = (resultsAdminFactors, resultsFixtures) => {
-    // This is called when fixtures are loaded from the database.  Each fixtures is stored in an individual document on the db, and this function groups them into sets of fixtures
-    let numberOfFixturesForSeason;
-    let setsOfFixtures;
-    let filteredFixtures;
-    let singleSetOfFixtures;
+const formatTeams = (resultsTeams) => {
+    // This is called when teams are loaded from the database.  Each team is stored in an individual document on the db, and this function groups them into sets of divisions
+    let teamsByDivision;
+    let filteredTeams;
     let i;
 
-    setsOfFixtures = [];
+    teamsByDivision = [];
+
+    if (resultsTeams.length > 0) {
+        for (i = 0; i < DIVISIONS.length; i++) {
+            filteredTeams = resultsTeams.filter(team => team.division === DIVISIONS[i]);
+            teamsByDivision.push({ [DIVISIONS[i]]: filteredTeams });
+        }
+    }
+
+    return teamsByDivision;
+}
+
+const formatFixtures = (resultsFixtures) => {
+    // This is called when fixtures are loaded from the database.  Each fixtures is stored in an individual document on the db, and this function groups them into sets of fixtures
+    let setsOfFixtures;
+    let filteredFixtures;
+
+    setsOfFixtures = [...FIXTURES_DEFAULT];
 
     if (resultsFixtures.length > 0) {
-        numberOfFixturesForSeason = resultsAdminFactors[0].numberOfFixturesForSeason;
-
-        for (i = 1; i <= numberOfFixturesForSeason; i++) {
-            filteredFixtures = resultsFixtures.filter(fixture => fixture.setOfFixturesNumber === i);
-            singleSetOfFixtures = { fixtures: [...filteredFixtures], dateOfSetOfFixtures: filteredFixtures[0].dateOfFixture}
-            setsOfFixtures.push(singleSetOfFixtures);
-        }
+        COMPETITION_ROUNDS.forEach((competitionRound, i) => {
+            filteredFixtures = resultsFixtures.filter(fixture => fixture.competitionRound === competitionRound && !fixture.isReplay);
+            setsOfFixtures[i][COMPETITION_ROUNDS_FIXTURES[i] + 'Fixtures'] = filteredFixtures;
+            if (setsOfFixtures[i].replaysAllowed) {
+                filteredFixtures = resultsFixtures.filter(fixture => fixture.competitionRound === competitionRound && fixture.isReplay);
+                setsOfFixtures[i][COMPETITION_ROUNDS_FIXTURES[i] + 'Replays'] = filteredFixtures;
+            }
+        });
     }
 
     return setsOfFixtures;
@@ -129,7 +153,7 @@ export const deleteAllDocumentsInDbs = (documentIdInUsersDb) => {
     try {
 
         // Maps each URL into a fetch() Promise
-        const requests = API_ENDPOINTS_TO_LOAD_ALL_DATA.map(url => {
+        const requests = API_ENDPOINTS_TO_DELETE_ALL_DATA.map(url => {
             return fetch(url + "/" + documentIdInUsersDb, { method: 'DELETE' })
                    .then(response => response.json())
         });
@@ -163,16 +187,21 @@ export const createDocumentInASingleDocumentDb = (obj, apiEndpoint, dbDescriptio
 export const createTeamsDocumentsInDb = (documentIdInUsersDb) => {
     // This function is called when the app is reset, or the app is loaded for the first time after the user has registered.
     // The Team documents in the database just store a document for each team with the team's name and whether the team is 'a top team'.
-    let numberOfTeams = TEAMS_DEFAULT.length;
+    const numberOfDivisions = TEAMS_DEFAULT.length;
+    let division;
     let bulkData = [];
     let i;
+    let j;
 
-    for (i = 0; i < numberOfTeams; i++) {
-        bulkData.push({
-            insertOne: {
-                document: { ...TEAMS_DEFAULT[i], userDocumentId: documentIdInUsersDb }
-            }
-        });
+    for (i = 0; i < numberOfDivisions; i++) {
+        division = Object.keys(TEAMS_DEFAULT[i])[0];
+        for (j = 0; j < TEAMS_DEFAULT[i][division].length; j++) {
+            bulkData.push({
+                insertOne: {
+                    document: { ...TEAMS_DEFAULT[i][division][j], division, userDocumentId: documentIdInUsersDb }
+                }
+            });
+        }
     }
 
     try {
@@ -182,48 +211,45 @@ export const createTeamsDocumentsInDb = (documentIdInUsersDb) => {
     }
 }
 
-export const createLeagueTableDocumentsInDb = (documentIdInUsersDb) => {
+export const createMyWatchlistTeamsDocumentsInDb = (myWatchlistTeams, documentIdInUsersDb) => {
     // This function is called when the app is reset, or the app is loaded for the first time after the user has registered.
-    // The LeagueTable documents in the database just store a document for each team with details of games played, points, wins, goals etc.
-    let numberOfTeams = TEAMS_DEFAULT.length;
+    // The My Watchlist Team documents in the database just store a document for each team with the team's name.
     let bulkData = [];
     let i;
+    let j;
 
-    for (i = 0; i < numberOfTeams; i++) {
+    debugger;
+    for (i = 0; i < myWatchlistTeams.length; i++) {
         bulkData.push({
             insertOne: {
-                document: { ...getZerosiedTeamInLeagueTable(TEAMS_DEFAULT[i].teamName), userDocumentId: documentIdInUsersDb }
+                document: {
+                    ...myWatchlistTeams[i],
+                    userDocumentId: documentIdInUsersDb,
+                }
             }
         });
     }
 
     try {
-        return sendDataToAPIEndpoint(API_ENDPOINT_LEAGUE_TABLE, 'League Table', 'POST', bulkData);
+        return sendDataToAPIEndpoint(API_ENDPOINT_MY_WATCHLIST_TEAMS, 'MyWatchlistTeam', 'POST', bulkData);
     } catch(error) {
-        throw new Error('Error creating LeagueTable documents in db', error);
+        throw new Error('Error creating MyWatchlistTeam documents in db', error);
     }
 }
 
-export const createFixturesDocumentsInDb = (fixturesForSeason, documentIdInUsersDb) => {
-    // This function is called when "Create Season's Fixtures" is used on the Administration screen
+export const createFixturesDocumentsInDb = (fixtures, documentIdInUsersDb) => {
     let bulkData = [];
     let i;
-    let j;
 
-    for (i = 0; i < fixturesForSeason.length; i++) {
-        for (j = 0; j < fixturesForSeason[i].fixtures.length; j++) {
-            bulkData.push({
-                insertOne: {
-                    document: {
-                        ...fixturesForSeason[i].fixtures[j],
-                        dateOfFixture: fixturesForSeason[i].dateOfSetOfFixtures,
-                        setOfFixturesNumber: i + 1,
-                        fixtureNumber: j + 1,
-                        userDocumentId: documentIdInUsersDb,
-                    }
+    for (i = 0; i < fixtures.length; i++) {
+        bulkData.push({
+            insertOne: {
+                document: {
+                    ...fixtures[i],
+                    userDocumentId: documentIdInUsersDb,
                 }
-            });
-        }
+            }
+        });
     }
 
     try {
@@ -238,16 +264,13 @@ export const mergeDocumentsIdsFromDatabaseToObjectsInArray = (originalArray, res
     return originalArray.map((objectInArray, i) => Object.assign({}, objectInArray, resultsFromAPICall.insertedIds[i]));
 }
 
-export const mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray = (originalArray, resultsFromAPICall) => {
+export const mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray = (originalValues, resultsFromAPICall) => {
     // Add the newly created ids from the documents in the database to the array in memory
-    let updatedValues = [];
-    let arrayElement;
+   
+    let updatedValues = [...originalValues];
 
-    // Sets of Fixtures are in an array with sub-arrays, each of 10 fixtures, so need to add the id of each document in a slightly different way
     resultsFromAPICall.insertedIds.forEach((objectInArray, i) => {
-        arrayElement = parseInt(i / 10);
-        originalArray[arrayElement].fixtures[i - arrayElement * 10] = Object.assign({}, originalArray[arrayElement].fixtures[i - arrayElement * 10], resultsFromAPICall.insertedIds[i]);
-        if (i%10 === 9) updatedValues.push(originalArray[arrayElement]);
+        updatedValues[i] = Object.assign({}, updatedValues[i], objectInArray);
     });
 
     return updatedValues;
@@ -267,6 +290,37 @@ export const updateTeamsDocumentsInDb = (updatedValues) => {
         });
 
         sendDataToAPIEndpoint(API_ENDPOINT_TEAMS, 'Team', 'PUT', bulkData);
+}
+
+export const updateMyWatchlistTeamsDocumentsInDb = (updatedValues) => {
+    // This function is called when changes to the My Watchlist Teams on the Administration screen are then saved
+    let bulkData = [];
+
+        updatedValues.forEach(updatedValue => {
+            bulkData.push({
+                updateOne: {
+                    filter: { _id: updatedValue._id },
+                    update: updatedValue
+                }
+            });        
+        });
+
+        sendDataToAPIEndpoint(API_ENDPOINT_MY_WATCHLIST_TEAMS, 'MyWatchlistTeam', 'PUT', bulkData);
+}
+
+export const deleteMyWatchlistTeamsDocumentsInDb = (deletedValues) => {
+    // This function is called when changes to the My Watchlist Teams on the Administration screen are then saved
+    let bulkData = [];
+
+    deletedValues.forEach(updatedValue => {
+        bulkData.push({
+            deleteOne: {
+                filter: { userDocumentId: deletedValues[0].userDocumentId, _id: updatedValue._id },
+            }
+        });        
+    });
+
+    sendDataToAPIEndpoint(API_ENDPOINT_MY_WATCHLIST_TEAMS, 'MyWatchlistTeam', 'DELETE', bulkData);
 }
 
 export async function updateDocumentsInDbAfterLatestResults(sourceArray, apiEndpoint, dbDescription) {

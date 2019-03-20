@@ -2,20 +2,21 @@ import React, { Component, Fragment } from "react";
 import { connect } from 'react-redux';
 import { Prompt } from 'react-router';
 
-import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, INCLUDE_FIREBASE_OPTION, SEASON, SEASON_START_DATE, NUMBER_OF_FIXTURES_FOR_SEASON, FIXTURE_UPDATE_INTERVAL, BASE_FOR_RANDOM_MULTIPLIER, AWAY_TEAM_FACTOR, IS_NOT_A_TOP_TEAM_FACTOR, GOALS_PER_MINUTE_FACTOR, IS_IT_A_GOAL_FACTOR } from '../../utilities/constants';
+import { MAIN_BACKGROUND_IMAGE, GOALS_PER_MINUTE_FACTOR, DIVISIONS } from '../../utilities/constants';
 import { getAdminFactors } from '../../utilities/data';
 import * as helpers from '../../utilities/helper-functions/helpers';
-import { validateAdmin, areThereAnyChangesToTeamValues, areThereAnyChangesToAdminFactorsValues, getUpdatesToTeamsToSendToDb, getUpdatesToAdminFactorsToSendToDb, getUpdatesToGoalFactorsToSendToDb } from './administration-helpers';
+import SettingsHeader from './settings-header';
+import SettingsFactors from './settings-factors';
+import SettingsTeams from './settings-teams';
+import SettingsMyWatchlistTeams from './settings-my-watchlist-teams';
 
-import { adminSaveChanges, adminResetApp, adminCreateSeasonsFixtures } from '../../redux/actions/administrationActions';
+import { areThereAdminFactorsValidationErrors, areThereTeamsValidationErrors, areThereAnyChangesToTeamValues, areThereAnyChangesToMyWatchlistTeamValues,
+         areThereAnyChangesToAdminFactorsValues, getUpdatesToTeamsToSendToDb, getNewMyWatchlistTeamsToSendToDb,
+         getUpdatesToMyWatchlistTeamsToSendToDb, getDeletedMyWatchlistTeamsToSendToDb, getUpdatesToAdminFactorsToSendToDb, getUpdatesToGoalFactorsToSendToDb,
+         getNewTeamsArray, getNewMyWatchlistTeamsArray, deleteTeamFromMyWatchlistTeamsArray, validateAdminFactors, validateTeams,
+         getTeamsValidationError, blankTeamsValidationError } from './administration-helpers';
 
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormControl from '@material-ui/core/FormControl';
-// import FormLabel from '@material-ui/core/FormLabel';
+import { adminSaveChanges, adminResetApp } from '../../redux/actions/administrationActions';
 
 import ConfirmationDialog from '../dialogs/confirmationDialog';
 import ConfirmationYesNo from '../dialogs/confirmYesNo';
@@ -28,10 +29,6 @@ const LOCAL_STATE = {
     dataStorage: 'browser',
     dialogSaveChangesIsActive: false,
     dialogSaveChangesIsOpen: false,
-    dialogCreateFixturesIsActive: false,
-    dialogCreateFixturesYesNoIsOpen: false,
-    dialogCreateFixturesYesSelected: false,
-    dialogCreateFixturesConfirmIsOpen: false,
     dialogResetAppIsActive: false,
     dialogResetAppYesNoIsOpen: false,
     dialogResetAppYesSelected: false,
@@ -44,19 +41,48 @@ class Administration extends Component {
 
     input;
     data;
+    teamsForCompetitionFlattened;
 
     constructor(props) {
         super(props);
 
-        this.state = Object.assign({}, LOCAL_STATE, { teams: props.teamsForSeason }, getAdminFactors(props.adminFactors, true, false, 'string'));
+        this.state = Object.assign({},
+                        LOCAL_STATE,
+                        getAdminFactors(props.adminFactors, true, false, 'string'),
+                        { teams: props.teamsForCompetition },
+                        { adminFactorsValidationErrors: this.createAdminFactorsValidationErrorsArray(props)},
+                        { teamsValidationErrors: this.createTeamValidationErrorsArray(props)},
+                        { myWatchlistTeams: props.myWatchlistTeams },
+                    );
 
         this.updateOriginalValues('props', props.adminFactors);
+
+        this.teamsForCompetitionFlattened = helpers.getTeamsForCompetitionFlattened(props.teamsForCompetition);
+    }
+
+    createAdminFactorsValidationErrorsArray = (props) => {
+        let adminFactorsValidationErrors = {};
+        const adminFactorsObject = getAdminFactors(props.adminFactors, true, false, 'string');
+        Object.entries(adminFactorsObject).forEach(([key, val]) => {
+            adminFactorsValidationErrors = Object.assign({}, adminFactorsValidationErrors, { [key]: '' });
+        });
+        return adminFactorsValidationErrors;
+    }
+
+    createTeamValidationErrorsArray = (props) => {
+        return props.teamsForCompetition.map((division, i) => {
+            return { [Object.keys(division)[0]]: division[DIVISIONS[i]].map(team => {
+                return {teamName: team.teamName, errors: ''}
+            })};
+        });
     }
 
     updateOriginalValues = (sourceType, sourceArray) => {
         // These are used to see whether any values have changed so that a warning can be issued if the user trys to navigate away from the page
         this.originalValuesAdminFactors = Object.assign({}, getAdminFactors(sourceArray, sourceType === 'props', false, 'string'));
-        this.originalValuesTeams = this.state.teams.map(a => ({...a}));         // Deep clone of object
+        // this.originalValuesTeams = this.state.teams.map(a => ({...a}));         // Deep clone of object
+        this.originalValuesTeams = helpers.deepClone(this.state.teams);
+        this.originalValuesMyWatchlistTeams = helpers.deepClone(this.state.myWatchlistTeams);
     }
 
     componentWillReceiveProps(nextProps, prevState) {
@@ -64,25 +90,26 @@ class Administration extends Component {
         // console.log('nextProps loadAdmin', nextProps.miscellaneous.loadingAdmin);
         // console.log('nextProps error loadAdmin', nextProps.miscellaneous.loadingBackendError);
         // console.log('this.props loadAdmin', this.props.miscellaneous.loadingAdmin);
-        // debugger;
+
         if (!nextProps.miscellaneous.loadingAdmin && this.props.miscellaneous.loadingAdmin) {
             this.checkForBackEndChanges(nextProps, 'dialogSaveChangesIsActive', 'dialogSaveChangesIsOpen');
-            this.checkForBackEndChanges(nextProps, 'dialogCreateFixturesIsActive', 'dialogCreateFixturesConfirmIsOpen');
             this.checkForBackEndChanges(nextProps, 'dialogResetAppIsActive', 'dialogResetAppConfirmIsOpen');
         }
-                
+        
         let nextPropsAdminFactors = getAdminFactors(nextProps.adminFactors, true, true, 'string');      // Flatten the array to make it easier to compare
         let thisPropsAdminFactors = getAdminFactors(this.props.adminFactors, true, true, 'string');      // Flatten the array to make it easier to compare
+
         this.setStateOnChangeAdminFactors(nextPropsAdminFactors, thisPropsAdminFactors);
 
         this.setStateOnChangeTeams(nextProps);
+
+        this.setStateOnChangeMyWatchlistTeams(nextProps);
     }
 
     checkForBackEndChanges = (nextProps, localStateActionIsActive, localStateFieldToUpdate) => {
-        // If the new value of loadingAdmin is false and the old value is true then the appropriate update (i.e. to Save Changes, Reset App, or Create Fixtures) has completed.
+        // If the new value of loadingAdmin is false and the old value is true then the appropriate update (i.e. to Save Changes or Reset App) has completed.
         // If that has returned an error then display the error dialog, otherwise display the appropriate dialog to say that the process has completed.
         let saveChangesIsActive = (localStateActionIsActive === 'dialogSaveChangesIsActive');
-        let createFixturesIsActive = (localStateActionIsActive === 'dialogCreateFixturesIsActive');
         let resetAppIsActive = (localStateActionIsActive === 'dialogResetAppIsActive');
 
         if (nextProps.miscellaneous.loadingBackendError) {
@@ -90,7 +117,6 @@ class Administration extends Component {
         } else {
             if (this.state[localStateActionIsActive]) {
                 if (resetAppIsActive) this.setState({ dialogResetAppYesNoIsOpen: false });                  // Reset App has finished so set the flag which will close the Yes/No dialog
-                if (createFixturesIsActive) this.setState({ dialogCreateFixturesYesNoIsOpen: false });      // Create Fixtures has finished so set the flag which will close the Yes/No dialog
                 this.setState({ [localStateFieldToUpdate]: true });
                 if (saveChangesIsActive || resetAppIsActive) {
                     this.setState({ haveChangesBeenMade: false });          // Set the flag which tracks whether any changes has been made back to false
@@ -109,7 +135,6 @@ class Administration extends Component {
             } else {
                 let valPrevious = (nestedObject !== '' ? objPrevious[nestedObject][key] : objPrevious[key]);
                 if (val !== valPrevious) {
-                    debugger;
                     this.setState({[key]: val});
                     haveChangesBeenMade = true;
                 }
@@ -120,27 +145,55 @@ class Administration extends Component {
 
     setStateOnChangeTeams = (nextProps) => {
         // If data has been loaded from the Teams database (i.e. _id is present) then update state, or if any of the values have changed then update state
-        if ((nextProps.teamsForSeason[0]._id && !this.state.teams[0]._id) || areThereAnyChangesToTeamValues(nextProps.teamsForSeason, this.state.teams)) {
-            this.setState({ teams: nextProps.teamsForSeason });
+        if ((nextProps.teamsForCompetition[0]._id && !this.state.teams[0]._id) || areThereAnyChangesToTeamValues(nextProps.teamsForCompetition, this.state.teams)) {
+            this.setState({ teams: nextProps.teamsForCompetition });
         }
     }
 
-    handleChangeAdminFactorsFields = (field) => (e) => {
-        this.setState({[field]: e.target.value})
-        this.updateHaveChangesBeenMadeAfterUserEdit();
+    setStateOnChangeMyWatchlistTeams = (nextProps) => {
+        // If data has been loaded from the MyWatchlistTeams database (i.e. _id is present) then update state, or if any of the values have changed then update state
+        if ((nextProps.myWatchlistTeams.length > 0 && nextProps.myWatchlistTeams[0]._id && (this.state.myWatchlistTeams.length > 0 && !this.state.myWatchlistTeams[0]._id)) ||
+            areThereAnyChangesToMyWatchlistTeamValues(nextProps.myWatchlistTeams, this.state.myWatchlistTeams)) {
+            this.setState({ myWatchlistTeams: nextProps.myWatchlistTeams });
+        }
     }
 
-    handleTeamsInputChange = (i, key) => (e) => {
-        const newTeams = [...this.state.teams];
-        newTeams[i][key] = (key === 'teamName' ? e.target.value : e.target.checked);
-        this.setState({ teams: newTeams });
-        this.updateHaveChangesBeenMadeAfterUserEdit();
+    handleChangeAdminFactorsFields = (objectKey) => (updatedValue) => {
+        // handleChangeAdminFactorsFields = (field) => (e) => {
+        this.setState({ [objectKey]: updatedValue.trim() }, this.updateHaveChangesBeenMadeAfterUserEdit);
+        const validationErrors = helpers.deepClone(this.state.adminFactorsValidationErrors);
+        if (validationErrors[objectKey] !== '') this.setState({ adminFactorsValidationErrors: Object.assign({}, validationErrors, { [objectKey]: '' }) });        
+    }
+
+    handleTeamsInputChange = (divisionIndex, teamIndex, updatedValue) => {
+        this.setState(prevState => ({ teams: getNewTeamsArray(prevState.teams, divisionIndex, teamIndex, "teamName", updatedValue.trim()) }), this.updateHaveChangesBeenMadeAfterUserEdit);
+        const validationErrors = helpers.deepClone(this.state.teamsValidationErrors);
+        if (getTeamsValidationError(validationErrors, divisionIndex, teamIndex) !== '') this.setState({ teamsValidationErrors: blankTeamsValidationError(validationErrors, divisionIndex, teamIndex) });        
+    }
+    
+    handleTopTeamsInputChange = (divisionIndex, teamIndex, updatedValue) => {
+        // updatedValue returns the event as it has bubbled up from the Material UI checkbox
+        // const isChecked = updatedValue.target.checked;            // Can't put updatedValue.target.checked directly into the setState statement otherwise it errors
+        this.setState(prevState => ({ teams: getNewTeamsArray(prevState.teams, divisionIndex, teamIndex, "isATopTeam", updatedValue) }), this.updateHaveChangesBeenMadeAfterUserEdit);
+    }
+    
+    handleMyWatchlistTeamsAddTeam = () => {
+        this.setState(prevState => ({ myWatchlistTeams: prevState.myWatchlistTeams.concat({ teamName: '' }) }), this.updateHaveChangesBeenMadeAfterUserEdit);
+    }
+
+    handleMyWatchlistTeamsChangeTeam = (teamIndex, updatedValue) => {
+        this.setState(prevState => ({ myWatchlistTeams: getNewMyWatchlistTeamsArray(prevState.myWatchlistTeams, teamIndex, updatedValue) }), this.updateHaveChangesBeenMadeAfterUserEdit);
+    }
+
+    handleMyWatchlistTeamsDeleteTeam = (teamIndex) => {
+        this.setState(prevState => ({ myWatchlistTeams: deleteTeamFromMyWatchlistTeamsArray(prevState.myWatchlistTeams, teamIndex) }), this.updateHaveChangesBeenMadeAfterUserEdit);
     }
 
     updateHaveChangesBeenMadeAfterUserEdit = () => {
         // This is called whenever the user makes a change to the teams or any of the admin factors
-        if (areThereAnyChangesToTeamValues(this.state.teams, this.originalValuesTeams) ||
-            areThereAnyChangesToAdminFactorsValues(getAdminFactors(this.state, false, false, 'string'), this.originalValuesAdminFactors)) {
+        if (areThereAnyChangesToTeamValues( this.originalValuesTeams, this.state.teams) ||
+            areThereAnyChangesToMyWatchlistTeamValues(this.originalValuesMyWatchlistTeams, this.state.myWatchlistTeams) ||
+            areThereAnyChangesToAdminFactorsValues(this.originalValuesAdminFactors, getAdminFactors(this.state, false, false, 'string'))) {
                 this.setState({ haveChangesBeenMade: true });
         }
     }
@@ -148,18 +201,37 @@ class Administration extends Component {
     handleSaveChanges = (e) => {
         let adminFactors;
         let updatedTeams;
+        let newMyWatchlistTeams;
+        let updatedMyWatchlistTeams;
+        let deletedMyWatchlistTeams;
         let updatedAdminFactors;
         let updatedGoalFactors;
 
         e.preventDefault();
-        
-        if (validateAdmin(this.state)) return;
 
-        updatedTeams = getUpdatesToTeamsToSendToDb(this.state.teams, this.originalValuesTeams);
+        debugger;
+        
+        const adminFactorsValidationErrors = validateAdminFactors(this.state);
+        if (areThereAdminFactorsValidationErrors(adminFactorsValidationErrors)) {
+            this.setState({ adminFactorsValidationErrors });
+            return;
+        }
+        
+        const teamsValidationErrors = validateTeams(this.state);
+        if (areThereTeamsValidationErrors(teamsValidationErrors)) {
+            this.setState({ teamsValidationErrors });
+            return;
+        }
+        
+        updatedTeams = getUpdatesToTeamsToSendToDb(this.originalValuesTeams, this.state.teams);
+
+        newMyWatchlistTeams = getNewMyWatchlistTeamsToSendToDb(this.originalValuesMyWatchlistTeams, this.state.myWatchlistTeams);
+        updatedMyWatchlistTeams = getUpdatesToMyWatchlistTeamsToSendToDb(this.originalValuesMyWatchlistTeams, this.state.myWatchlistTeams);
+        deletedMyWatchlistTeams = getDeletedMyWatchlistTeamsToSendToDb(this.originalValuesMyWatchlistTeams, this.state.myWatchlistTeams);
 
         adminFactors = getAdminFactors(this.state, false, true, 'string');
-        updatedAdminFactors = getUpdatesToAdminFactorsToSendToDb(adminFactors, this.originalValuesAdminFactors);
-        updatedGoalFactors = getUpdatesToGoalFactorsToSendToDb(adminFactors, this.originalValuesAdminFactors);
+        updatedAdminFactors = getUpdatesToAdminFactorsToSendToDb(this.originalValuesAdminFactors, adminFactors);
+        updatedGoalFactors = getUpdatesToGoalFactorsToSendToDb(this.originalValuesAdminFactors, adminFactors);
         
         // Update the GOALS_PER_MINUTE_FACTOR (i.e. likelihoodOfAGoal) property, which is stored as a string so need to convert it to an array so that it gets saved in the database as an array
         adminFactors.goalFactors[GOALS_PER_MINUTE_FACTOR] = helpers.getGoalsPerMinuteFactors(adminFactors.goalFactors[GOALS_PER_MINUTE_FACTOR], 'array');
@@ -167,26 +239,17 @@ class Administration extends Component {
         // If any of the nested goalFactors object values have changes then send the whole nested goalFactors object, otherwise the database doesn't get updated correctly
         if (helpers.doesObjectHaveAnyProperties(updatedGoalFactors)) updatedAdminFactors.goalFactors = adminFactors.goalFactors;
         
-        debugger;
-        if (updatedTeams.length === 0 && !helpers.doesObjectHaveAnyProperties(updatedAdminFactors)) return;         // If no changes have been made then exit
-        debugger;
+        // if (updatedTeams.length === 0 && newMyWatchlistTeams.length === 0 && updatedMyWatchlistTeams.length === 0 && deletedMyWatchlistTeams.length === 0 &&
+        //     !helpers.doesObjectHaveAnyProperties(updatedAdminFactors)) return;         // If no changes have been made then exit
 
         this.setState({ dialogSaveChangesIsActive: true });
 
-        this.props.dispatch(adminSaveChanges(updatedTeams, updatedAdminFactors, { teams: this.state.teams, adminFactors }));
+        this.props.dispatch(adminSaveChanges(updatedTeams, newMyWatchlistTeams, updatedMyWatchlistTeams, deletedMyWatchlistTeams, updatedAdminFactors,
+            { teams: this.state.teams, myWatchlistTeams: this.state.myWatchlistTeams, adminFactors }
+        ));
     }
 
-    handleDialogYesNoCloseCreateFixtures = (value) => {
-        // this.setState({ dialogCreateFixturesYesSelected: value, dialogCreateFixturesYesNoIsOpen: false }, () => {
-        this.setState({ dialogCreateFixturesYesSelected: value }, () => {
-            if (this.state.dialogCreateFixturesYesSelected) {
-                this.setState({ dialogCreateFixturesIsActive: true });
-                this.props.dispatch(adminCreateSeasonsFixtures());
-            } else {
-                this.setState({ dialogCreateFixturesYesNoIsOpen: false });
-            }
-        });
-    }
+    handleResetApp = () => this.setState({ dialogResetAppYesNoIsOpen: true });
 
     handleDialogYesNoCloseResetApp = (value) => {
         // this.setState({ dialogResetAppYesSelected: value, dialogResetAppYesNoIsOpen: false }, () => {
@@ -206,205 +269,94 @@ class Administration extends Component {
 
 
     render() {
-        const { haveChangesBeenMade, teams } = this.state;
+        const { haveChangesBeenMade, teams, myWatchlistTeams, adminFactorsValidationErrors, teamsValidationErrors } = this.state;
         const { authenticated } = this.props.user;
-        const { fixturesForSeason } = this.props;
-        const { loadingAdmin } = this.props.miscellaneous;
+        const { loadingAdmin, hasCompetitionStarted, hasCompetitionFinished } = this.props.miscellaneous;
+        debugger;
 
         return (
             <Fragment>
                 <div className="outer-container-administration">
                     <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
                     { loadingAdmin ? <Loading /> : null }
+                    <Prompt when={haveChangesBeenMade} message={`Are you sure you want to abandon these unsaved changes'} ?`} />
                     <div className="container-main-content-administration">
-                        <div className="container-card header">
-                            <header>
-                                <img src={FOOTBALL_IMAGE} alt="" />
-                                <h1>Administration</h1>
-                                <span>For help, click on the Help link at the bottom of the screen</span>
 
-                                <Prompt when={haveChangesBeenMade} message={`Are you sure you want to abandon these unsaved changes'} ?`} />
+                        <SettingsHeader
+                            authenticated={authenticated}
+                            haveChangesBeenMade={haveChangesBeenMade}
+                            onSaveChanges={this.handleSaveChanges}
+                            onResetApp={this.handleResetApp}
+                        />
 
-                                {INCLUDE_FIREBASE_OPTION &&
-                                    <div className="dataStorage">
-                                        {/* <FormControl component="fieldset" className={classes.formControl}> */}
-                                        <span className="dataStorageLabel">Where is data saved?</span>
-                                        <FormControl component="fieldset">
-                                            {/* <FormLabel component="legend">Where is data saved?</FormLabel> */}
-                                            <RadioGroup
-                                                aria-label="Where is data saved?"
-                                                name="dataStorage"
-                                                className="dataStorageButtons"
-                                                value={this.state.dataStorage}
-                                                onChange={this.handleChange}
-                                            >
-                                                <FormControlLabel value="browser" control={<Radio />} label="Browser" labelplacement="start" />
-                                                <FormControlLabel value="firebase" control={<Radio />} label="Firebase" labelplacement="start" />
-                                            </RadioGroup>
-                                        </FormControl>
-                                            {/* <span>Where is data saved?</span>
-                                            <mat-radio-group name="dataStorage">
-                                                <mat-radio-button value="Browser">Browser</mat-radio-button>
-                                                <mat-radio-button value="Firebase">Firebase</mat-radio-button>
-                                            </mat-radio-group> */}
-                                    </div>
-                                }
-                            </header>
+                        {(areThereAdminFactorsValidationErrors(adminFactorsValidationErrors) || areThereTeamsValidationErrors(teamsValidationErrors)) &&
+                            <div className="container-card display-validation-errors-message">
+                                <h2>Unable to save ... please correct the errors highlighted in red</h2>
+                            </div>
+                        }
+
+                        <div className="container-admin">
+
+                            <div className="container-admin-factors">
+                                <SettingsFactors
+                                    hasCompetitionStarted={hasCompetitionStarted}
+                                    hasCompetitionFinished={hasCompetitionFinished}
+                                    settingsFactors={getAdminFactors(this.state, false, false, 'string')}
+                                    settingsFactorsValidationErrors={adminFactorsValidationErrors}
+                                    onChangeSettingsFactorsFields={this.handleChangeAdminFactorsFields}
+                                />
+                            </div>
+
+                            <div className="container-admin-teams">
+                                {teams.map((division, divisionIndex) => {
+                                    const divisionObjectKey = helpers.getObjectKey(division);
+                                    return (
+                                        <SettingsTeams
+                                            key={divisionIndex}
+                                            hasCompetitionStarted={hasCompetitionStarted}
+                                            divisionIndex={divisionIndex}
+                                            teams={division[divisionObjectKey]}
+                                            teamsValidationErrors={teamsValidationErrors[divisionIndex][divisionObjectKey]}
+                                            onTeamsInputChange={this.handleTeamsInputChange.bind(this)}
+                                            onTopTeamsInputChange={this.handleTopTeamsInputChange.bind(this)}
+                                        />
+                                    );
+                                })};
+                            </div>
+
+                            <div className="container-admin-my-watchlist-teams">
+                                <SettingsMyWatchlistTeams
+                                    hasCompetitionFinished={hasCompetitionFinished}
+                                    teamsForCompetitionFlattened={this.teamsForCompetitionFlattened}
+                                    authenticated={authenticated}
+                                    myWatchlistTeams={myWatchlistTeams}
+                                    onMyWatchlistTeamsAddTeam={this.handleMyWatchlistTeamsAddTeam.bind(this)}
+                                    onMyWatchlistTeamsChangeTeam={this.handleMyWatchlistTeamsChangeTeam.bind(this)}
+                                    onMyWatchlistTeamsDeleteTeam={this.handleMyWatchlistTeamsDeleteTeam.bind(this)}
+                                />
+                            </div>
+
                         </div>
 
-                        <form>
-                            <div className="container-admin">
-                                <div className="container-admin-teams">
-                                    <div className="container-card">
-                                        <h2>Teams for the Season</h2>
-
-                                        <table className="admin-teams">
-                                            <thead>
-                                                <tr className="teams-header">
-                                                <th className="admin-team-number">No.</th>
-                                                <th className="admin-team-team">Team</th>
-                                                <th className="admin-team-top-team">Top Team?</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-                                                {teams.map((team, i) => {
-                                                    return (
-                                                        <tr key={i} className="team-row">
-                                                            <td className="admin-team-number">{i + 1}</td>
-                                                            <td><input type="text" onChange={this.handleTeamsInputChange(i, 'teamName')} value={team.teamName} /></td>
-                                                            <td><input type="checkbox" onChange={this.handleTeamsInputChange(i, 'isATopTeam')} defaultChecked={team.isATopTeam} value={team.isATopTeam} /></td>
-                                                        </tr>
-                                                    );
-                                                })}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div className="container-admin-factors">
-
-                                    <div className="container-card">
-                                        <h2>Information for the Season</h2>
-
-                                        <div className="grid-season-info">
-
-                                            <TextField
-                                                id={SEASON}
-                                                label="Season"
-                                                placeholder="e.g. 2017/18"
-                                                className="form-control"
-                                                value={this.state[SEASON]}
-                                                onChange={this.handleChangeAdminFactorsFields(SEASON)}
-                                            />
-
-                                            <TextField
-                                                id={SEASON_START_DATE}
-                                                label="Season Start Date"
-                                                placeholder="e.g. 05 Aug 2017"
-                                                className="form-control"
-                                                value={this.state[SEASON_START_DATE]}
-                                                onChange={this.handleChangeAdminFactorsFields(SEASON_START_DATE)}
-                                            />
-
-                                            <TextField
-                                                id={NUMBER_OF_FIXTURES_FOR_SEASON}
-                                                label="Number of Fixtures for Season"
-                                                placeholder="e.g. 38"
-                                                className="form-control"
-                                                value={this.state[NUMBER_OF_FIXTURES_FOR_SEASON]}
-                                                onChange={this.handleChangeAdminFactorsFields(NUMBER_OF_FIXTURES_FOR_SEASON)}
-                                            />
-
-                                        </div>
-
-                                    </div>
-
-                                    <div className="container-card">
-                                        <h2>Match Score Factors</h2>
-
-                                        <div className="grid-season-info">
-
-                                            <TextField
-                                                id={FIXTURE_UPDATE_INTERVAL}
-                                                label="Fixture Update Interval (seconds)"
-                                                placeholder="e.g. 0.5"
-                                                className="form-control"
-                                                value={this.state[FIXTURE_UPDATE_INTERVAL]}
-                                                onChange={this.handleChangeAdminFactorsFields(FIXTURE_UPDATE_INTERVAL)}
-                                            />
-
-                                            <TextField
-                                                id={BASE_FOR_RANDOM_MULTIPLIER}
-                                                label="Base For Random Multiplier"
-                                                placeholder="e.g. 90"
-                                                className="form-control"
-                                                value={this.state[BASE_FOR_RANDOM_MULTIPLIER]}
-                                                onChange={this.handleChangeAdminFactorsFields(BASE_FOR_RANDOM_MULTIPLIER)}
-                                            />
-
-                                            <TextField
-                                                id={AWAY_TEAM_FACTOR}
-                                                label="Away Team Factor"
-                                                placeholder="e.g. 1.1"
-                                                className="form-control"
-                                                value={this.state[AWAY_TEAM_FACTOR]}
-                                                onChange={this.handleChangeAdminFactorsFields(AWAY_TEAM_FACTOR)}
-                                            />
-
-                                            <TextField
-                                                id={IS_NOT_A_TOP_TEAM_FACTOR}
-                                                label="Is Not A Top Team Factor"
-                                                placeholder="e.g. 1.1"
-                                                className="form-control"
-                                                value={this.state[IS_NOT_A_TOP_TEAM_FACTOR]}
-                                                onChange={this.handleChangeAdminFactorsFields(IS_NOT_A_TOP_TEAM_FACTOR)}
-                                            />
-
-                                            <div className="fullWidth">
-                                                <TextField
-                                                    id={GOALS_PER_MINUTE_FACTOR}
-                                                    label="Goals Per Minute Factor"
-                                                    placeholder="e.g. [{'minutes': 30, 'factor': 1.8}, {'minutes': 80, 'factor': 1.2}, {'minutes': 120, 'factor': 1}]"
-                                                    className="form-control"
-                                                    fullWidth
-                                                    value={this.state[GOALS_PER_MINUTE_FACTOR]}
-                                                    onChange={this.handleChangeAdminFactorsFields(GOALS_PER_MINUTE_FACTOR)}
-                                                />
-                                            </div>
-
-                                            <TextField
-                                                id={IS_IT_A_GOAL_FACTOR}
-                                                label="Is It A Goal Factor"
-                                                placeholder="e.g. 2"
-                                                className="form-control"
-                                                value={this.state[IS_IT_A_GOAL_FACTOR]}
-                                                onChange={this.handleChangeAdminFactorsFields(IS_IT_A_GOAL_FACTOR)}
-                                            />
-
-                                        </div>
-                                    </div>
-
-                                    <div className="container-card buttons-card">
-                                        <div className="buttons">
-                                            {!authenticated && <p>Please log in or sign up in order to use the app</p>}
-                                            <Button variant="contained" color="primary" id="saveChanges" disabled={!authenticated} onClick={this.handleSaveChanges}>Save Changes</Button>
-                                            &nbsp; &nbsp;
-                                            <Button variant="contained" color="secondary" id="createFixtures" disabled={!authenticated || fixturesForSeason.length > 0} onClick={() => this.state.haveChangesBeenMade ? alert('Changes have been made ... please save these first and re-try') : this.setState({dialogCreateFixturesYesNoIsOpen: true})}>Create Season's Fixtures</Button>
-                                            &nbsp; &nbsp;
-                                            <Button variant="contained" color="secondary" id="resetApp" disabled={!authenticated} onClick={() => this.setState({dialogResetAppYesNoIsOpen: true})}>Reset App</Button>
-
-                                            <ConfirmationDialog message="Changes saved" open={this.state.dialogSaveChangesIsOpen} onClose={() => this.setState({ dialogSaveChangesIsActive: false, dialogSaveChangesIsOpen: false })} />
-                                            <ConfirmationYesNo message="Are you sure you want to create fixtures for the season ?" dialogYesNoSelectedIsYes={this.state.dialogCreateFixturesYesSelected} open={this.state.dialogCreateFixturesYesNoIsOpen} onClose={this.handleDialogYesNoCloseCreateFixtures} />
-                                            <ConfirmationDialog message="Season's fixtures created" open={this.state.dialogCreateFixturesConfirmIsOpen} onClose={() => this.setState({ dialogCreateFixturesIsActive: false, dialogCreateFixturesConfirmIsOpen: false })} />
-                                            <ConfirmationYesNo message="Are you sure you want to reset the app ?" dialogYesNoSelectedIsYes={this.state.dialogResetAppYesSelected} open={this.state.dialogResetAppYesNoIsOpen} onClose={this.handleDialogYesNoCloseResetApp} />
-                                            <ConfirmationDialog message="App has been reset" open={this.state.dialogResetAppConfirmIsOpen} onClose={() => this.setState({ dialogResetAppIsActive: false, dialogResetAppConfirmIsOpen: false })} />
-                                            <ConfirmationDialog message="An error has been encountered connecting to the backend ... please retry" open={this.state.dialogLoadingBackendErrorConfirmIsOpen} onClose={() => this.setState({ dialogLoadingBackendErrorConfirmIsOpen: false })} />
-                                        </div>
-                                    </div>
-                                </div>
+                        {(areThereAdminFactorsValidationErrors(adminFactorsValidationErrors) || areThereTeamsValidationErrors(teamsValidationErrors)) &&
+                            <div className="container-card display-validation-errors-message">
+                                <h2>Unable to save ... please correct the errors highlighted in red</h2>
                             </div>
-                        </form>
+                        }
+                        
+                        <SettingsHeader
+                            authenticated={authenticated}
+                            haveChangesBeenMade={haveChangesBeenMade}
+                            onSaveChanges={this.handleSaveChanges}
+                            onResetApp={this.handleResetApp}
+                        />
+
+                        <ConfirmationDialog message="Changes saved" open={this.state.dialogSaveChangesIsOpen} onClose={() => this.setState({ dialogSaveChangesIsActive: false, dialogSaveChangesIsOpen: false })} />
+                        <ConfirmationYesNo message="Are you sure you want to reset the app ?" dialogYesNoSelectedIsYes={this.state.dialogResetAppYesSelected} open={this.state.dialogResetAppYesNoIsOpen} onClose={this.handleDialogYesNoCloseResetApp} />
+                        <ConfirmationDialog message="App has been reset" open={this.state.dialogResetAppConfirmIsOpen} onClose={() => this.setState({ dialogResetAppIsActive: false, dialogResetAppConfirmIsOpen: false })} />
+                        <ConfirmationDialog message="An error has been encountered connecting to the backend ... please retry" open={this.state.dialogLoadingBackendErrorConfirmIsOpen} onClose={() => this.setState({ dialogLoadingBackendErrorConfirmIsOpen: false })} />
+                        <ConfirmationDialog message="Changes saved" open={this.state.dialogSaveChangesIsOpen} onClose={() => this.setState({ dialogSaveChangesIsActive: false, dialogSaveChangesIsOpen: false })} />
+
                     </div>
                 </div>
             </Fragment>
@@ -413,16 +365,15 @@ class Administration extends Component {
 }
 
 const mapStateToProps = (state, ownProps) => {
+    debugger;
     return {
         user: state.default.user,
-        fixturesForSeason: state.default.fixturesForSeason,
-        teamsForSeason: state.default.teamsForSeason,
+        teamsForCompetition: state.default.teamsForCompetition,
+        myWatchlistTeams: state.default.myWatchlistTeams,
         adminFactors: state.default.adminFactors,
         miscellaneous: state.default.miscellaneous,
     }
 }
 
 
-Administration = connect(mapStateToProps, null)(Administration)
-
-export default Administration;
+export default connect(mapStateToProps, null)(Administration);

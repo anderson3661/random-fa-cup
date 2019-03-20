@@ -1,9 +1,9 @@
 {
-  "name": "football_league",
+  "name": "fa_cup",
   "version": "1.0.0",
-  "description": "Football League built with the MERN stack",
+  "description": "FA Cup built with the MERN stack",
   "engines": {
-      "node": "11.x"
+    "node": "11.x"
   },
   "main": "server.js",
   "scripts": {

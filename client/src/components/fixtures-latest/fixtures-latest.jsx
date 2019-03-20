@@ -5,17 +5,17 @@ import { Prompt } from 'react-router';
 
 // import Typing from 'react-typing-animation';
 
-import { updateDbsAndStoreAfterLatestResults, updateDbsAndStoreAfterSeasonHasFinished } from '../../redux/actions/fixturesActions';
+import { updateDbsAndStoreAfterCompetitionHasFinished } from '../../redux/actions/fixturesActions';
 
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import TextField from "@material-ui/core/TextField";
 import FixtureRow from '../fixture-row/fixture-row';
-import LeagueTable from '../league-table/league-table';
-import * as helperFixtureUpdates from './fixtures-updates';
+import RouteToThisStage from '../route-to-this-stage/route-to-this-stage';
+import * as helperFixtureUpdates from './fixtures-latest-helpers';
 import * as helpers from '../../utilities/helper-functions/helpers';
 import {Fixture} from '../../utilities/classes/fixture';
-import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE } from '../../utilities/constants';
+import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, DIVISIONS, IS_FIXTURES, QUARTER_FINALS, SEMI_FINALS, FINAL } from '../../utilities/constants';
 
 import ConfirmationDialog from '../dialogs/confirmationDialog';
 import ConfirmationDialogWinners from '../dialogs/confirmationDialogWinners';
@@ -35,22 +35,21 @@ const FIXTURE_UPDATE_INTERVAL = 'fixtureUpdateInterval';
 
 class FixturesLatest extends Component {
 
-    haveSeasonsFixturesBeenCreated;
-    hasSeasonFinished
-    dateOfThisSetOfFixtures = "";
+    canTheLatestFixturesForThisCompetitionRoundProceed;
+    hasCompetitionStarted;
+    hasCompetitionFinished;
     frequencyOfUpdates;
     maxMinutesForPeriod;
     displayHeader;
     latestFixtures;
-    leagueTableBeforeFixtures;
-    leagueTableInPlay;
-    formattedDateOfFixtures;
-    top3TeamsBeforeFixtures = ["", "", ""];
     authenticated = true;
     updateInterval;
     counterMinutes = 0;
-    areFixturesInPlayForRouter = false;
+    areFixturesInPlay = false;
     fixtureUpdates= [];
+    flattenedTeams;
+    competitionRound;
+    // top3TeamsBeforeFixtures = ["", "", ""];
   
 
     constructor(props) {
@@ -60,58 +59,59 @@ class FixturesLatest extends Component {
         let nextSetOfFixtures;
         let fixtures = [];
 
-        debugger;
-        const { fixturesForSeason, teamsForSeason, leagueTable, goalFactors, haveSeasonsFixturesBeenCreated, hasSeasonStarted, hasSeasonFinished, dateOfLastSetOfFixtures } = this.props;
-        
+        const { fixturesForCompetition, teamsForCompetition, goalFactors, hasCompetitionStarted, hasCompetitionFinished } = this.props;
+
+        this.canTheLatestFixturesForThisCompetitionRoundProceed = false;
+
         //The following are set at the start of the component and their values WON'T change (i.e. they are just used for easier reference)
-        this.haveSeasonsFixturesBeenCreated = haveSeasonsFixturesBeenCreated;
-        if (this.haveSeasonsFixturesBeenCreated) {
-            this.hasSeasonFinished = hasSeasonFinished;
-            this.displayHeader = this.hasSeasonFinished ? "Season finished" : "Latest Fixtures";
-            
-            nextSetOfFixtures = helperFixtureUpdates.getNextSetOfFixtures(hasSeasonStarted, dateOfLastSetOfFixtures, fixturesForSeason);
-
-            if (nextSetOfFixtures !== undefined) {
-                this.dateOfThisSetOfFixtures = nextSetOfFixtures.dateOfSetOfFixtures;
-            }
-            
-            this.latestFixtures = helperFixtureUpdates.getEmptySetOfFixtures();
-
-            for (i = 0; i < nextSetOfFixtures.fixtures.length; i++) {
-                this.latestFixtures.fixtures.push(new Fixture(nextSetOfFixtures.fixtures[i], teamsForSeason));
-                this.latestFixtures.dateOfSetOfFixtures = nextSetOfFixtures.dateOfSetOfFixtures;
-                this.latestFixtures.fixtures[i].setUpFixture(goalFactors);
-                fixtures.push(this.latestFixtures.fixtures[i].getFixtureObject());
-            }
-            
-            this.formattedDateOfFixtures = helpers.formatDate(this.latestFixtures.dateOfSetOfFixtures);
-            
-            this.leagueTableBeforeFixtures = leagueTable;
-
-            if (this.leagueTableBeforeFixtures[0].played > 0) {
-                this.top3TeamsBeforeFixtures = [ this.leagueTableBeforeFixtures[0].teamName, this.leagueTableBeforeFixtures[1].teamName, this.leagueTableBeforeFixtures[2].teamName ];
-            }
-            
-        } else {
-            this.displayHeader = "New game ... please create fixtures for the season via Administration";
-        }
+        this.hasCompetitionStarted = hasCompetitionStarted;
+        this.hasCompetitionFinished = hasCompetitionFinished;
         
-        this.leagueTableInPlay = helperFixtureUpdates.setupInPlayLeagueTable(leagueTable);
+        if (this.hasCompetitionFinished) {
+            this.displayHeader = "Competition Finished";
+        } else {
+            if (this.hasCompetitionStarted) {
+                
+                if (helpers.canLatestFixturesProceed(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished)) {
+                    this.canTheLatestFixturesForThisCompetitionRoundProceed = true;
+                }
+
+                if (this.canTheLatestFixturesForThisCompetitionRoundProceed) {
+                    this.flattenedTeams = helpers.getTeamsRemainingInCompetitionFlattened(teamsForCompetition, null);
+                    
+                    nextSetOfFixtures = helperFixtureUpdates.getNextSetOfFixtures(fixturesForCompetition);
+                    this.competitionRound = nextSetOfFixtures.competitionRound;
+                                
+                    this.latestFixtures = helperFixtureUpdates.getEmptySetOfFixtures();
+                    
+                    for (i = 0; i < nextSetOfFixtures.fixtures.length; i++) {
+                        this.latestFixtures.fixtures.push(new Fixture(nextSetOfFixtures.fixtures[i], teamsForCompetition));
+                        this.latestFixtures.fixtures[i].setUpFixture(goalFactors);
+                        fixtures.push(this.latestFixtures.fixtures[i].getFixtureObject());
+                    }
+                    this.displayHeader = helpers.getCompetitionRoundHeader(this.competitionRound) + (fixtures.length > 0 && fixtures[0].isReplay ? ' Replays' : ' Fixtures');
+                } else {
+                    this.displayHeader = "New game ... please draw fixtures for Round 1";
+                }
+                
+            } else {
+                this.displayHeader = "New game ... please draw fixtures for Round 1";
+            }
+        }
         
         this.state = {
             haveLatestFixturesStarted: false,
-            areFixturesInPlayForRouter: false,
+            areFixturesInPlay: false,
             haveFixturesBeenPaused: false,
             haveAllFixturesInThisSetFinished: false,
             startFixturesButtonEnabled: true,
             startFixturesButtonText: START_FIXTURES,
             fixtures: fixtures,
-            leagueTableInPlay: this.leagueTableInPlay,
             [FIXTURE_UPDATE_INTERVAL]: goalFactors[FIXTURE_UPDATE_INTERVAL],
             showGoalUpdates: false,
             dialogLatestFixturesFinishedIsOpen: false,
             dialogWinnersIsOpen: false,
-            displayWinnersAtEndOfSeason: false,
+            displayWinnersAtEndOfCompetition: false,
         }        
         
         this.startSetOfFixtures = this.startSetOfFixtures.bind(this);
@@ -142,7 +142,7 @@ class FixturesLatest extends Component {
 
             if (!this.state.haveLatestFixturesStarted) {
                 this.setState({ haveLatestFixturesStarted: true });
-                this.setState({ areFixturesInPlayForRouter: true });
+                this.setState({ areFixturesInPlay: true });
             }
             
             if (this.state.haveFixturesBeenPaused) {
@@ -157,13 +157,11 @@ class FixturesLatest extends Component {
                 this.latestFixtures.fixtures.forEach(fixture => {
                     if (!fixture.hasFixtureFinished) {
                         fixture.startFixture();
-                        this.leagueTableInPlay = helperFixtureUpdates.updateInPlayLeagueTable(fixture, this.leagueTableBeforeFixtures, this.leagueTableInPlay);      // Set up in play table before fixtures start (so all teams in the current fixture are drawing)
                         
                         this.maxMinutesForPeriod = helperFixtureUpdates.getMaximumMinutes(fixture, this.maxMinutesForPeriod);      // Get the maximum number of minutes for this period of all fixtures in play
                     }
                 });               
                 
-                this.setState({leagueTableInPlay: this.leagueTableInPlay});
             }
 
             this.setState({ startFixturesButtonText: PAUSE_FIXTURES, });
@@ -178,62 +176,37 @@ class FixturesLatest extends Component {
         let updateAfterGoal;
         let fixturesNew;
 
-        const { teamsForSeason, goalFactors } = this.props;
+        const { fixtures } = this.state;
+        const { dispatch, fixturesForCompetition, goalFactors } = this.props;
 
         this.counterMinutes++;
 
-        this.latestFixtures.fixtures.forEach((fixture, i) => {
-            fixtureMinuteUpdate = fixture.updateFixture(teamsForSeason, goalFactors);
+        fixturesNew = [...this.latestFixtures.fixtures];
+        fixturesNew.forEach((fixture, i) => {
+            fixtureMinuteUpdate = fixture.updateFixture(this.flattenedTeams, goalFactors);
             updateAfterGoal = false;
             if (fixtureMinuteUpdate.homeTeamUpdate || fixtureMinuteUpdate.awayTeamUpdate) {
                 updateAfterGoal = true;
-                if (fixtureMinuteUpdate.homeTeamUpdate) {
-                    // this.fixtureUpdates.push({scoreUpdate: `${this.counterMinutes} mins - ${fixture.homeTeam} ${fixture.homeTeamsScore} ${fixture.awayTeam} ${fixture.awayTeamsScore}`, scoringTeam: fixture.homeTeam});
-                    this.updateWithLatestGoal(this.counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Home");
-                }
-                if (fixtureMinuteUpdate.awayTeamUpdate) {
-                    // this.fixtureUpdates.push({scoreUpdate: `${this.counterMinutes} mins - ${fixture.homeTeam} ${fixture.homeTeamsScore} ${fixture.awayTeam} ${fixture.awayTeamsScore}`, scoringTeam: fixture.awayTeam});
-                    this.updateWithLatestGoal(this.counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Away");
-                }
+                if (fixtureMinuteUpdate.homeTeamUpdate) this.updateWithLatestGoal(this.counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Home");
+                if (fixtureMinuteUpdate.awayTeamUpdate) this.updateWithLatestGoal(this.counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Away");
             }
-
-            if (i === 0) {
-                fixturesNew = [ fixture.getFixtureObject(), ...this.state.fixtures.slice(i+1) ]
-            } else {
-                fixturesNew = [...this.state.fixtures.slice(0, i), fixture.getFixtureObject(), ...this.state.fixtures.slice(i+1) ];
-            }
-
-            this.setState({ fixtures: fixturesNew });
-
-            if (updateAfterGoal) {
-                this.leagueTableInPlay = helperFixtureUpdates.updateInPlayLeagueTable(fixture, this.leagueTableBeforeFixtures, this.leagueTableInPlay);
-
-                this.setState({ leagueTableInPlay: this.leagueTableInPlay });
-            }
+            fixturesNew[i] = fixture.getFixtureObject();
         });
+
+        this.setState({ fixtures: fixturesNew });
 
         if (this.maxMinutesForPeriod === this.counterMinutes) {
 
             clearInterval(this.updateInterval);
-    
+
             this.haveAllFixturesInThisSetFinished = (this.latestFixtures.fixtures.filter(fixture => fixture.hasFixtureFinished).length === this.latestFixtures.fixtures.length);
     
             if (this.haveAllFixturesInThisSetFinished) {
-    
-                this.setState({
-                    startFixturesButtonText: FIXTURES_FINISHED,
-                    startFixturesButtonEnabled: false                //Enable/Disable the Start Fixtures button
-                });                
-                
-                this.props.dispatch(updateDbsAndStoreAfterLatestResults(this.state.fixtures, this.state.leagueTableInPlay, this.dateOfThisSetOfFixtures));
-
-                this.setState({ areFixturesInPlayForRouter: false });
-
+                this.setState({ startFixturesButtonText: FIXTURES_FINISHED, startFixturesButtonEnabled: false });
+                helperFixtureUpdates.createUpdatesAfterFixturesHaveFinished(dispatch, fixturesForCompetition, fixtures, this.competitionRound);
+                this.setState({ areFixturesInPlay: false });
             } else {
-                this.setState({
-                    startFixturesButtonText: START_SECOND_HALF,
-                    startFixturesButtonEnabled: true                //Enable/Disable the Start Fixtures button
-                });
+                this.setState({ startFixturesButtonText: START_SECOND_HALF, startFixturesButtonEnabled: true });
             }
         }
     
@@ -259,17 +232,17 @@ class FixturesLatest extends Component {
 
     componentWillReceiveProps(nextProps, prevState) {
         // The following is required in order to display the correct dialog message (i.e. it has either worked, or there has been a backend error)
-        const { fixturesForSeason, hasSeasonStarted } = this.props;
+        const { dispatch, fixturesForCompetition } = this.props;
 
-        debugger;
         if (!nextProps.miscellaneous.loadingLatestFixtures && this.props.miscellaneous.loadingLatestFixtures) {
             if (nextProps.miscellaneous.loadingBackendError) {
                 this.setState({ dialogLoadingBackendErrorConfirmIsOpen: true });     // If an error was encountered on the backend, then open the backend error dialog
             } else {
                 // If the season has finished display the congratulations to winners dialog, otherwise display the latest fixtures have finished dialog
-                if (helperFixtureUpdates.getNextSetOfFixtures(hasSeasonStarted, this.dateOfThisSetOfFixtures, fixturesForSeason).fixtures.length === 0) {
-                    this.setState({ displayWinnersAtEndOfSeason: true });
+                if (helpers.isThisCompetitionRoundTheFinal(this.competitionRound) && helpers.haveAllFixturesInSetFinished(helpers.getFixturesArray(fixturesForCompetition, helpers.getCompetitionRoundIndex(this.competitionRound), IS_FIXTURES))) {
+                    this.setState({ displayWinnersAtEndOfCompetition: true });
                     this.setState({ dialogWinnersIsOpen: true });
+                    dispatch(updateDbsAndStoreAfterCompetitionHasFinished());
                 } else {
                     this.setState({ dialogLatestFixturesFinishedIsOpen: true });
                 }                
@@ -288,143 +261,255 @@ class FixturesLatest extends Component {
     }
 
     componentWillUnmount() {
-        const { fixturesForSeason, haveSeasonsFixturesBeenCreated, hasSeasonStarted, dateOfLastSetOfFixtures } = this.props;
         clearInterval(this.updateInterval);
-        if (haveSeasonsFixturesBeenCreated && helperFixtureUpdates.getNextSetOfFixtures(hasSeasonStarted, dateOfLastSetOfFixtures, fixturesForSeason).fixtures.length === 0) {
-            this.props.dispatch(updateDbsAndStoreAfterSeasonHasFinished());
-        }
     }
 
     render() {
 
-        const { latestFixturesHaveStarted } = this.props;
+        const { fixturesForCompetition, hasCompetitionFinished, myWatchlistTeams, latestFixturesHaveStarted } = this.props;
+        const { season } = this.props.adminFactors;
 
         return (            
             <div className={`container-main-content-latest-fixtures ${this.state.showGoalUpdates ? "show-goal-updates" : ""}`}>
                 <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
                 { latestFixturesHaveStarted ? <Loading /> : null }
 
-                <Prompt when={this.state.areFixturesInPlayForRouter} message="Are you sure you want to abandon these fixtures ?"/>
+                <Prompt when={this.state.areFixturesInPlay} message="Are you sure you want to abandon these fixtures ?"/>
 
-                <div className="container-card latest-fixtures-header">
-
-                    <ConfirmationDialog message="All fixtures have finished" open={this.state.dialogLatestFixturesFinishedIsOpen} onClose={() => this.setState({ dialogLatestFixturesFinishedIsOpen: false })} />
-                    <ConfirmationDialogWinners winners={this.state.leagueTableInPlay[0].teamName} open={this.state.dialogWinnersIsOpen} onClose={() => this.setState({ dialogWinnersIsOpen: false })} />
-
-                    {(this.hasSeasonFinished || !this.haveSeasonsFixturesBeenCreated) && <div className="image-left"><img src={FOOTBALL_IMAGE} alt="" /></div>}
-                    <h1>{ this.displayHeader }</h1>
-                    {(this.hasSeasonFinished || !this.haveSeasonsFixturesBeenCreated) && <div className="image-right"><img src={FOOTBALL_IMAGE} alt="" /></div>}
-
-                    {this.haveSeasonsFixturesBeenCreated && !this.hasSeasonFinished &&
-                        <Fragment>
-                            <div className="fixture-update-button">
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    id="startSetOfFixtures"
-                                    onClick={this.startSetOfFixtures}
-                                    value={this.state.startFixturesButtonText}
-                                    disabled={!this.authenticated || !this.state.startFixturesButtonEnabled}
-                                    >{this.state.startFixturesButtonText}
-                                </Button>
-                            </div>
-
-                            <div className="fixture-update-interval">
-                                <TextField
-                                    id={FIXTURE_UPDATE_INTERVAL}
-                                    label="Fixture Update Interval (seconds)"
-                                    placeholder="e.g. 0.5"
-                                    className="form-control"
-                                    fullWidth
-                                    disabled={this.state.areFixturesInPlayForRouter && !this.state.haveFixturesBeenPaused}
-                                    value={this.state[FIXTURE_UPDATE_INTERVAL]}
-                                    onChange={this.handleChangeFixtureUpdateInterval(FIXTURE_UPDATE_INTERVAL)}
-                                />
-                            </div>
-
-                            <div className="showGoalUpdates">
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            className="showGoalsText"
-                                            checked={this.state.showGoalUpdates}
-                                            onChange={this.handleChangeShowGoalUpdates.bind(this)}
-                                            value={this.state.showGoalUpdates.toString()}
-                                        />
-                                    }
-                                    label="Show Goal Updates"
-                                />                        
-                            </div>
-                        </Fragment>
-                    }
-                </div>
-
-                {this.haveSeasonsFixturesBeenCreated && !this.hasSeasonFinished && (
-                    <div className={`split-grid ${this.state.showGoalUpdates ? "show-goal-updates" : ""}`}>
-
-                        <div className="container-card fixtures">
-                            <div className="fixtures-date">{this.formattedDateOfFixtures}</div>
-
-                            <div className="fixtures in-play">
-                                {this.state.fixtures.map((fixture, i) => {
-                                    return (
-                                        <FixtureRow
-                                            key={i}                                        
-                                            fixture={fixture}
-                                            showForLatestFixtures={true}
-                                            haveLatestFixturesStarted={this.state.haveLatestFixturesStarted}
-                                            showGoals={false}
-                                            top3TeamsBeforeFixtures={this.top3TeamsBeforeFixtures}
-                                        />
-                                    )
-                                })}
-                            </div>
+                {!this.canTheLatestFixturesForThisCompetitionRoundProceed ?
+                    <div className={`container-card latest-fixtures-header ${hasCompetitionFinished ? 'competition-finished' : ''}`}>
+                        <div className="main-header">
+                            <div className="image-left"><img src={FOOTBALL_IMAGE} alt="" /></div>
+                            <h1>{ this.displayHeader }</h1>
+                            <div className="image-right"><img src={FOOTBALL_IMAGE} alt="" /></div>
                         </div>
-
-                        {this.state.showGoalUpdates &&
-                            <div className="container-card in-play-updates">
-                                <div className="fixtures in-play-updates" id="in-play-updates">
-                                    <h3>Goal Updates</h3>
-                                    {/* {this.fixtureUpdates.map((update, i) => <p key={i}>{update.scoreUpdate}</p>)} */}
-                                    {this.fixtureUpdates.map((update, i) => {
-                                        return (
-                                        <p key={i}>
-                                            {/* <Typing> */}
-                                                <span className="mins">{update.mins}</span>
-                                                <span className={`team ${update.scoringTeam === "Home" ? "goal" : ""}`}>{update.homeTeam} {update.homeTeamsScore}</span>
-                                                &nbsp;&nbsp;
-                                                <span className={`team ${update.scoringTeam === "Away" ? "goal" : ""}`}>{update.awayTeam} {update.awayTeamsScore}</span>
-                                            {/* </Typing> */}
-                                        </p>
-                                        )
-                                    })}
-                                </div>
-                            </div>
-                        }
-
-                        <div className="container-card league-table-as-it-stands">
-                            <LeagueTable
-                                // {...this.appData}
-                                leagueTableTypeLatestFixtures={true}
-                                leagueTableDuringLatestFixtures={this.state.leagueTableInPlay}
-                                leagueTableBeforeLatestFixtures={this.leagueTableBeforeFixtures}
-                                showGoalUpdates={this.state.showGoalUpdates}
-                            />
-                        </div>
-
-                        {this.state.showGoalUpdates &&
-                            <div className="container-card league-table-as-it-stands-repeat">
-                                <LeagueTable
-                                    // {...this.appData}
-                                    leagueTableTypeLatestFixtures={true}
-                                    leagueTableDuringLatestFixtures={this.state.leagueTableInPlay}
-                                    leagueTableBeforeLatestFixtures={this.leagueTableBeforeFixtures}
-                                    showGoalUpdates={this.state.showGoalUpdates}
-                                />
-                            </div>
-                        }
+                        <div className="not-at-this-stage">{hasCompetitionFinished ? 'In order to play again, please reset the app via Settings' : 'The fixtures for this round cannot take place at this stage of the competition'}</div>
                     </div>
-                )}
+                    :
+                    <Fragment>
+                        <div className="container-card latest-fixtures-header">
+
+                            <ConfirmationDialog message="All fixtures have finished" open={this.state.dialogLatestFixturesFinishedIsOpen} onClose={() => this.setState({ dialogLatestFixturesFinishedIsOpen: false })} />
+                            <ConfirmationDialogWinners season={season} winners={helpers.getWinningTeamInFinal(this.state.fixtures)} open={this.state.dialogWinnersIsOpen} onClose={() => this.setState({ dialogWinnersIsOpen: false })} />
+
+                            <div className="main-header">
+                                {(this.hasCompetitionFinished || !this.hasCompetitionStarted) && <div className="image-left"><img src={FOOTBALL_IMAGE} alt="" /></div>}
+                                <h1>{ this.displayHeader }</h1>
+                                {(this.hasCompetitionFinished || !this.hasCompetitionStarted) && <div className="image-right"><img src={FOOTBALL_IMAGE} alt="" /></div>}
+                            </div>
+
+                            {this.hasCompetitionStarted && !this.hasCompetitionFinished &&
+                                <Fragment>
+                                    <div className="fixture-update-button">
+                                        <Button
+                                            variant="contained"
+                                            color="primary"
+                                            id="startSetOfFixtures"
+                                            onClick={this.startSetOfFixtures}
+                                            value={this.state.startFixturesButtonText}
+                                            disabled={!this.authenticated || !this.state.startFixturesButtonEnabled}
+                                            >{this.state.startFixturesButtonText}
+                                        </Button>
+                                    </div>
+
+                                    <div className="fixture-update-interval">
+                                        <TextField
+                                            id={FIXTURE_UPDATE_INTERVAL}
+                                            label="Fixture Update Interval (seconds)"
+                                            placeholder="e.g. 0.5"
+                                            className="form-control"
+                                            fullWidth
+                                            disabled={this.state.areFixturesInPlay && !this.state.haveFixturesBeenPaused}
+                                            value={this.state[FIXTURE_UPDATE_INTERVAL]}
+                                            onChange={this.handleChangeFixtureUpdateInterval(FIXTURE_UPDATE_INTERVAL)}
+                                        />
+                                    </div>
+
+                                    <div className="showGoalUpdates">
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    className="showGoalsText"
+                                                    checked={this.state.showGoalUpdates}
+                                                    onChange={this.handleChangeShowGoalUpdates.bind(this)}
+                                                    value={this.state.showGoalUpdates.toString()}
+                                                />
+                                            }
+                                            label="Show Goal Updates"
+                                        />                        
+                                    </div>
+                                </Fragment>
+                            }
+                        </div>
+
+                        {this.hasCompetitionStarted && !this.hasCompetitionFinished && (
+                            <div className={`split-grid ${this.state.showGoalUpdates ? "show-goal-updates" : ""}`}>
+
+                                <div className="container-card fixtures">
+                                    {/* <div className="fixtures-date">{this.formattedDateOfFixtures}</div> */}
+
+                                    <div className="fixtures in-play">
+                                        {this.state.fixtures.map((fixture, i) => {
+                                            return (
+                                                <FixtureRow
+                                                    key={i}                                        
+                                                    fixture={fixture}
+                                                    showForLatestFixtures={true}
+                                                    haveLatestFixturesStarted={this.state.haveLatestFixturesStarted}
+                                                    showGoals={false}
+                                                    // top3TeamsBeforeFixtures={this.top3TeamsBeforeFixtures}
+                                                />
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+
+                                {this.state.showGoalUpdates &&
+                                    <div className="container-card in-play-updates">
+                                        <div className="fixtures in-play-updates" id="in-play-updates">
+                                            <h3>Goal Updates</h3>
+                                            {this.fixtureUpdates.map((update, i) => {
+                                                return (
+                                                <p key={i}>
+                                                    {/* <Typing> */}
+                                                        <span className="mins">{update.mins}</span>
+                                                        <span className={`team ${update.scoringTeam === "Home" ? "goal" : ""}`}>{update.homeTeam} {update.homeTeamsScore}</span>
+                                                        &nbsp;&nbsp;
+                                                        <span className={`team ${update.scoringTeam === "Away" ? "goal" : ""}`}>{update.awayTeam} {update.awayTeamsScore}</span>
+                                                    {/* </Typing> */}
+                                                </p>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                }
+
+                                <div className="watchlists">
+
+                                    { this.competitionRound !== QUARTER_FINALS && this.competitionRound !== SEMI_FINALS && this.competitionRound !== FINAL &&
+                                        helpers.areAnyMyWatchlistTeamsPlaying(this.state.fixtures, myWatchlistTeams) &&
+                                        <div className="container-card my-watchlist">
+                                            <h2>My Watchlist</h2>
+
+                                            <div className="fixtures my-watchlist">
+                                                {this.state.fixtures.map((fixture, i) => {
+                                                    // Convert fixture (an object) to an array as the areAnyMyWatchlistTeamsPlaying function requires this
+                                                    if (helpers.areAnyMyWatchlistTeamsPlaying([fixture], myWatchlistTeams)) {
+                                                        return (
+                                                            <FixtureRow
+                                                                key={i}                                        
+                                                                fixture={fixture}
+                                                                showForLatestFixtures={true}
+                                                                haveLatestFixturesStarted={this.state.haveLatestFixturesStarted}
+                                                                showGoals={false}
+                                                                showVersus={true}
+                                                            />
+                                                        )
+                                                    }
+                                                })}
+                                            </div>
+                                        </div>
+                                    }
+
+                                    { this.competitionRound !== QUARTER_FINALS && this.competitionRound !== SEMI_FINALS && this.competitionRound !== FINAL && 
+                                        <div className="container-card cup-upsets">
+                                            <h2>Cup Upsets</h2>
+
+                                            <div className="fixtures cup-upsets">
+                                                {this.state.fixtures.map((fixture, i) => {
+                                                    if (helpers.isACupUpset(this.props.teamsForCompetition, fixture)) {
+                                                        return (
+                                                            <FixtureRow
+                                                                key={i}                                        
+                                                                fixture={fixture}
+                                                                showForLatestFixtures={true}
+                                                                haveLatestFixturesStarted={this.state.haveLatestFixturesStarted}
+                                                                showGoals={false}
+                                                                showVersus={true}
+                                                                // top3TeamsBeforeFixtures={this.top3TeamsBeforeFixtures}
+                                                            />
+                                                        )
+                                                    }
+                                                })}
+                                            </div>
+                                        </div>
+                                    }
+
+                                    { this.competitionRound !== QUARTER_FINALS && this.competitionRound !== SEMI_FINALS && this.competitionRound !== FINAL &&
+                                        helpers.areAnyPremierLeagueTeamsPlaying(this.state.fixtures) &&
+                                        <div className="container-card premier-league-teams">
+                                            <h2>Premier League Teams</h2>
+
+                                            <div className="fixtures premier-league-teams">
+                                                {this.state.fixtures.map((fixture, i) => {
+                                                    if (fixture.homeTeamDivision === DIVISIONS[0] || fixture.awayTeamDivision === DIVISIONS[0]) {
+                                                        return (
+                                                            <FixtureRow
+                                                                key={i}                                        
+                                                                fixture={fixture}
+                                                                showForLatestFixtures={true}
+                                                                haveLatestFixturesStarted={this.state.haveLatestFixturesStarted}
+                                                                showGoals={false}
+                                                                showVersus={true}
+                                                                // top3TeamsBeforeFixtures={this.top3TeamsBeforeFixtures}
+                                                            />
+                                                        )
+                                                    }
+                                                })}
+                                            </div>
+                                        </div>
+                                    }
+
+                                    { this.competitionRound === FINAL &&
+                                        <div className="container-card route-to-this-stage">
+                                            <h2>Route to the final</h2>
+
+                                            <div className="fixtures route-to-this-stage">
+                                                { helpers.getFixturesPlayedForTeam(fixturesForCompetition, this.state.fixtures[0].homeTeam, this.competitionRound).map((fixture, i) => {
+                                                    return (
+                                                        <FixtureRow
+                                                            key={i}                                        
+                                                            fixture={fixture}
+                                                            showForLatestFixtures={false}
+                                                            haveLatestFixturesStarted={false}
+                                                            showGoals={true}
+                                                            showVersus={false}
+                                                        />
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    }
+                                    
+                                    { this.competitionRound === FINAL &&
+                                        <div className="container-card route-to-this-stage">
+                                            <h2>Route to the final</h2>
+
+                                            <div className="fixtures route-to-this-stage">
+                                                { helpers.getFixturesPlayedForTeam(fixturesForCompetition, this.state.fixtures[0].awayTeam, this.competitionRound).map((fixture, i) => {
+                                                    return (
+                                                        <FixtureRow
+                                                            key={i}                                        
+                                                            fixture={fixture}
+                                                            showForLatestFixtures={false}
+                                                            haveLatestFixturesStarted={false}
+                                                            showGoals={true}
+                                                            showVersus={false}
+                                                        />
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    }
+
+                                    {/* <RouteToThisStage fixturesForCompetition={fixturesForCompetition} teamName="Manchester United" />                                         */}
+
+                                </div>
+
+                            </div>
+                        )}
+                    </Fragment>
+                }
             </div>
         );
     };
@@ -432,14 +517,16 @@ class FixturesLatest extends Component {
 
 const mapStateToProps = (state, ownProps) => {
     debugger;
-    const { haveSeasonsFixturesBeenCreated, hasSeasonStarted, hasSeasonFinished, dateOfLastSetOfFixtures } = state.default.miscellaneous;
+    const { hasCompetitionStarted, hasCompetitionFinished } = state.default.miscellaneous;
     return {
         miscellaneous: state.default.miscellaneous,
-        fixturesForSeason: state.default.fixturesForSeason,
-        teamsForSeason: state.default.teamsForSeason,
-        leagueTable: state.default.leagueTable,
+        fixturesForCompetition: state.default.fixturesForCompetition,
+        teamsForCompetition: state.default.teamsForCompetition,
+        myWatchlistTeams: state.default.myWatchlistTeams,
+        adminFactors: state.default.adminFactors,
         goalFactors: state.default.adminFactors.goalFactors,
-        haveSeasonsFixturesBeenCreated, hasSeasonStarted, hasSeasonFinished, dateOfLastSetOfFixtures,
+        hasCompetitionStarted,
+        hasCompetitionFinished,
     }
 }
 

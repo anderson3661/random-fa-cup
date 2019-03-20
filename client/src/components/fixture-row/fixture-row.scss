@@ -21,7 +21,20 @@
     %teamScore { flex-basis: $width-fixture-row-team-score; }
     .homeTeamsScore { @extend %teamScore; padding-right: 0; }
     .awayTeamsScore { @extend %teamScore; padding-left: 0; }
+
+    // .homeTeamsName span.divisionAbbreviation, .awayTeamsName span.divisionAbbreviation { color: lightgray; font-size: 80%; }
+
+    // .homeTeamsName span.teamName.premierLeague, .awayTeamsName span.teamName.premierLeague { color: blue; }
     
+    .homeTeamsName, .awayTeamsName {
+        span {
+            font-weight: 700;
+        
+            &.division { color: gray; font-size: 80%;}
+            &.premierLeague { color: blue; }
+        }
+    }
+
     .timeOrScore {
         @include flex($align-items: null);
         // flex-basis: $width-fixture-time-or-score;

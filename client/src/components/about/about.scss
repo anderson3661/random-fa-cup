@@ -2,35 +2,44 @@
 @import '../../sass/_variables';
 
 
-.container-main-content-about {
-    width: 90%;
-    margin: 15vh auto 0 auto;
+.outer-container-about {
+    min-height: 94vh;
 
-    header.container-card.header {
-        width: 50%;
-        background: rgba(255, 255, 255, 0.5);
-        @include flex($justify-content: space-between);
-        img {width: 3vw;}
-    }
-    
-    .container {
-        display: flex;
-        > div { width: 45%; }
-        margin: 2vh 0;
-    
-        .container-inner {
-            margin-bottom: 2.5vh;
+    .container-main-content-about {
+        width: 80%;
+        margin: 15vh auto 9vh auto;
 
-            .container-card {
-                ul li a {
-                    color: blue;
+        .container-card.about {
+            padding: 1vh 2vw 1vh 2vw;
+            margin-bottom: 3vh;
 
-                    &:hover { text-decoration: underline }
+            header {
+                @include flex($justify-content: space-between);
+                img {width: 3vw;}
+            }
+        }
+
+        .container-technical {
+            display: flex;
+            > div { width: 50%; }
+            margin: 2vh 0;
+        
+            .container-inner {
+                margin-left: 5vw;
+                margin-bottom: 2.5vh;
+
+                .container-card {
+                    ul li a {
+                        color: blue;
+
+                        &:hover { text-decoration: underline }
+                    }
                 }
             }
         }
     }
 }
+
 
 @media screen and (max-width: 600px) {
     .container-main-content-about {

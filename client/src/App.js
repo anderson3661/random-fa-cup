@@ -39,7 +39,7 @@ class App extends Component {
         return (
             <Router>
                 <div className="outer-container">
-                    <Header authenticated={ this.props.user.authenticated } dispatch={ this.props.dispatch } />
+                    {/* <Header authenticated={ this.props.user.authenticated } dispatch={ this.props.dispatch } /> */}
                     { loadingError ? <LoadingError /> : (loading ? <Loading /> : <Routes />) }
                     <Footer />
                 </div>                   

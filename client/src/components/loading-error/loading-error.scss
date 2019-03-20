@@ -2,26 +2,29 @@
 @import '../../sass/_variables';
 
 
-.container-main-content-loading-error {
-    width: 50%;
-    margin: 30vh auto 0 auto;
+.outer-container-loading-error {
+    min-height: 94vh;
 
-    .container-card {
-        header {
-            @include flex($justify-content: space-between);
-            img {width: 3vw;}
-        }
+    .container-main-content-loading-error {
+        width: 50%;
+        margin: 30vh auto 10vh auto;
 
-        p {
-            text-align: center;
-            margin: 4vh 0;
-        }
+        .container-card {
+            header {
+                @include flex($justify-content: space-between);
+                img {width: 3vw;}
+            }
 
-        .buttons {
-            width: 100%;
-            @include flex();
-            margin: 3vh 0;
+            p {
+                text-align: center;
+                margin: 4vh 0;
+            }
+
+            .buttons {
+                width: 100%;
+                @include flex();
+                margin: 3vh 0;
+            }
         }
     }
-
 }

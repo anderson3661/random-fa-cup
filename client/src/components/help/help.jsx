@@ -99,30 +99,32 @@ const Help = () => {
 
     return (
 
-        <div className="container-main-content-help">
-            <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
+        <div className="outer-container-help">
+            <div className="container-main-content-help">
+                <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
 
-            <div className="container-card">
+                <div className="container-card">
 
-                <header>
-                    <img src={FOOTBALL_IMAGE} alt="" />
-                    <h1>Help</h1>
-                    <img src={FOOTBALL_IMAGE} alt="" />
-                </header>
+                    <header>
+                        <img src={FOOTBALL_IMAGE} alt="" />
+                        <h1>Help</h1>
+                        <img src={FOOTBALL_IMAGE} alt="" />
+                    </header>
 
-                {dataHelp.map((data, i) => {
-                    return (
-                        <div key={i} className="accordion">
-                            <div className="accordion__item">
-                                <a href={`#tab${i+1}`} className="accordion__trigger accordion__title">{data.heading}</a>
-                                <div id={`tab${i+1}`} className="accordion__content">
-                                    {data.details.map((para, j) => <p key={j}>{ReactHtmlParser(para)}</p>)}
+                    {dataHelp.map((data, i) => {
+                        return (
+                            <div key={i} className="accordion">
+                                <div className="accordion__item">
+                                    <a href={`#tab${i+1}`} className="accordion__trigger accordion__title">{data.heading}</a>
+                                    <div id={`tab${i+1}`} className="accordion__content">
+                                        {data.details.map((para, j) => <p key={j}>{ReactHtmlParser(para)}</p>)}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    )
-                })}
+                        )
+                    })}
 
+                </div>
             </div>
         </div>
     );

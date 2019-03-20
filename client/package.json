@@ -1,5 +1,5 @@
 {
-  "name": "football-league-mern-client",
+  "name": "fa-cup-mern-client",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -9,6 +9,7 @@
     "@material-ui/core": "^3.6.2",
     "axios": "^0.18.0",
     "chart.js": "^2.7.3",
+    "lodash": "^4.17.11",
     "node-sass": "^4.11.0",
     "react": "^16.6.3",
     "react-chartjs-2": "^2.7.4",

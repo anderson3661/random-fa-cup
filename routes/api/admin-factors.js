@@ -76,8 +76,7 @@ router.post('/', (req, res) => {
     const newAdminFactors = new AdminFactors({
         userDocumentId: req.body.userDocumentId,
         season: req.body.season,
-        seasonStartDate: req.body.seasonStartDate,
-        numberOfFixturesForSeason: req.body.numberOfFixturesForSeason,
+        competitionStartDate: req.body.competitionStartDate,
         goalFactors: req.body.goalFactors
     });
 

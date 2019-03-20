@@ -1,107 +1,58 @@
-import Team from '../classes/team';
-import SetOfFixtures from '../classes/set-of-fixtures';
 import * as helpers from './helpers';
+import { DIVISIONS, COMPETITION_ROUNDS } from '../constants';
 
-const CONSOLE_LOG_FIXTURES = false;
-const NUMBER_OF_ATTEMPTS_TO_GET_SET_OF_TEAMS = 100000;
+export function createFixtures(teamsForCompetition, competitionStartDate) {
+    let allTeams = [];
 
-export function createFixtures(teamsForSeason, seasonStartDate, numberOfFixturesForSeason) {
+    if (teamsForCompetition.length === 5) {        
+        teamsForCompetition.forEach((teamsByDivision, i) => {
+            allTeams.push(...teamsByDivision[DIVISIONS[i]]);
+        });
+    }
+
+    return {
+        fixtures: createSetOfFixtures(allTeams),
+        dateOfSetOfFixtures: competitionStartDate,
+        competitionRound: COMPETITION_ROUNDS[0],
+        isReplays: false,
+    };
+}
+
+const createSetOfFixtures = (teamsRemainingInCompetition) => {
     let i;
+    let homeTeam;
+    let awayTeam;
+    let homeTeamDivision;
+    let awayTeamDivision;
     let setOfFixtures;
-    let setOfFixturesCounter;
-    let retryCounter;
-    let teams = [];
-    let datesOfFixturesForSeason = [];
-    let fixturesForSeason = [];
-    let dateOfSetOfFixtures = seasonStartDate;
+    let teamsStillToBeDrawn;
+    let numberOfFixtures;
 
-    // Populate the datesOfFixturesForSeason array, an element for every set of fixtures in the season
-    for (i = 0; i < numberOfFixturesForSeason; i++) {
-        datesOfFixturesForSeason.push({ 'date': dateOfSetOfFixtures = getFixturesDate(dateOfSetOfFixtures), 'numberOfFixtures': numberOfFixturesForSeason.toString() });
+    setOfFixtures = [];
+    teamsStillToBeDrawn = [];
+    numberOfFixtures = teamsRemainingInCompetition.length / 2;
+
+    teamsRemainingInCompetition.forEach(teamRemaining => teamsStillToBeDrawn.push(teamRemaining.teamName));       //Put the team names into an array
+
+    for (i = 0; i < numberOfFixtures; i++) {
+
+        homeTeam = teamsStillToBeDrawn[helpers.getRandomNumber(teamsStillToBeDrawn.length)];
+        homeTeamDivision = helpers.getDivisionTheTeamPlaysIn(teamsRemainingInCompetition, homeTeam);
+        teamsStillToBeDrawn.splice(teamsStillToBeDrawn.indexOf(homeTeam), 1);    //Remove the randomly selected team from the remaining array
+
+        awayTeam = teamsStillToBeDrawn[helpers.getRandomNumber(teamsStillToBeDrawn.length)];
+        awayTeamDivision = helpers.getDivisionTheTeamPlaysIn(teamsRemainingInCompetition, awayTeam);
+        teamsStillToBeDrawn.splice(teamsStillToBeDrawn.indexOf(awayTeam), 1);    //Remove the randomly selected team from the remaining array
+
+        setOfFixtures.push({ homeTeam: homeTeam, awayTeam: awayTeam, homeTeamDivision: homeTeamDivision, awayTeamDivision: awayTeamDivision, hasFixtureFinished: false })
+
+        // if (i === numberOfFixtures / 2 - 1) teamsDrawn.sort();      //Sort the first half of the teams
     }
 
-    // Populate the teams array, an element for each team, containing properties and numerous methods
-    for (i = 0; i < teamsForSeason.length; i++) {
-        teams.push(new Team(teamsForSeason[i].teamName, teamsForSeason[i].isATopTeam, teamsForSeason.length));
-    }
-
-    for (setOfFixturesCounter = 0; setOfFixturesCounter < numberOfFixturesForSeason; setOfFixturesCounter++) {
-
-        if (CONSOLE_LOG_FIXTURES) {
-            console.log('');
-            console.log('Starting fixture set ' + (setOfFixturesCounter + 1));
-        }
-
-        if (setOfFixturesCounter === 32) {
-            if (CONSOLE_LOG_FIXTURES) console.log('');
-        }
-
-        retryCounter = 0;
-
-        setOfFixtures = undefined;
-
-        while (setOfFixtures === undefined || setOfFixtures.fixtures === undefined) {
-
-            setOfFixtures = {
-                fixtures: (new SetOfFixtures(teamsForSeason, teams)).createSetOfFixtures(),
-                dateOfSetOfFixtures: datesOfFixturesForSeason[setOfFixturesCounter].date
-            };
-
-            retryCounter++;
-            if (retryCounter > NUMBER_OF_ATTEMPTS_TO_GET_SET_OF_TEAMS) {
-                console.log('Cannot get teams for set of fixtures');
-                alert('Cannot create fixtures for season ... ' + fixturesForSeason.length + ' sets of fixtures created');
-                return;
-            }
-        }
-
-        updateCheckArrays(setOfFixtures, teams);
-
-        fixturesForSeason.push(setOfFixtures);        //Update the array - this is used to output the matches to the web page
-    }
-
-    //Update the All Fixtures array in the data service and save
-    // appData.miscInfo.haveSeasonsFixturesBeenCreated = true;
-    // appData.setsOfFixtures = fixturesForSeason;
-    // this.dataService.saveAppData();
-
-    if (CONSOLE_LOG_FIXTURES) console.log('Fixtures created');
-
-    return fixturesForSeason;
-
-    // return appData;
-
-    // this.dataService.confirmationMessage("Fixtures created for season");
+    return setOfFixtures;
 }
 
-function updateCheckArrays(setOfFixtures, teams) {
-    //We now have the 20 teams and therefore 10 matches.
-    //Now update the arrays used to check numbers of home/away games and also the dates of these games
-    let homeTeam = "";
-    let awayTeam = "";
-    let homeTeamIndex;
-    let awayTeamIndex;
-
-    homeTeamIndex = 0;
-    awayTeamIndex = 0;
-
-    setOfFixtures.fixtures.forEach(fixture => {
-        homeTeam = fixture.homeTeam;
-        awayTeam = fixture.awayTeam;
-
-        homeTeamIndex = helpers.getPositionInArrayOfObjects(teams, "teamName", homeTeam);
-        awayTeamIndex = helpers.getPositionInArrayOfObjects(teams, "teamName", awayTeam);
-
-        teams[homeTeamIndex].updateCheckArraysForTeam(teams[awayTeamIndex].teamName, setOfFixtures.dateOfSetOfFixtures, "H");
-        teams[awayTeamIndex].updateCheckArraysForTeam(teams[homeTeamIndex].teamName, setOfFixtures.dateOfSetOfFixtures, "A");
-        teams[homeTeamIndex].updateCheckArraysForHomeTeam(teams[awayTeamIndex].teamName, setOfFixtures.dateOfSetOfFixtures);
-        teams[awayTeamIndex].updateCheckArraysForAwayTeam(teams[homeTeamIndex].teamName, setOfFixtures.dateOfSetOfFixtures);
-
-        if (CONSOLE_LOG_FIXTURES) console.log(homeTeam + ' v ' + awayTeam);
-    });
-}
-
-function getFixturesDate(date) {
+const getFixturesDate = (date) => {
     let fixturesDate;
     let fixturesDateNew;
 

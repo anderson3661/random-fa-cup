@@ -121,90 +121,93 @@ class Contact extends Component {
         const {formFields: {userName, userComments}, formErrors, submitAttempted} = this.state;
 
         return (
-            <div className="container-main-content-contact">
-            <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
-            <div className="container-card">
-                    <header>
-                        <img src={FOOTBALL_IMAGE} alt="" />
-                        <h1>Contact</h1>
-                        <img src={FOOTBALL_IMAGE} alt="" />                        
-                    </header>
+            <div className="outer-container-contact">
+                <div className="container-main-content-contact">
+                    <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
+                    
+                    <div className="container-card">
+                        <header>
+                            <img src={FOOTBALL_IMAGE} alt="" />
+                            <h1>Contact</h1>
+                            <img src={FOOTBALL_IMAGE} alt="" />                        
+                        </header>
 
-                    <div className="help-text">
-                        <p>If you have any comments about this application, please complete the details below:</p>
-                        <p>(This will create a new email in your default email application)</p>
-                    </div>
+                        <div className="help-text">
+                            <p>If you have any comments about this application, please complete the details below:</p>
+                            <p>(This will create a new email in your default email application)</p>
+                        </div>
 
-                    <div className="contact">
-                        <div className="main-form">
-                            <form className="contact-form">
+                        <div className="contact">
+                            <div className="main-form">
+                                <form className="contact-form">
 
-                                <div className="contact-form-full-width">
-                                    <TextField
-                                        type="text"
-                                        id="userName"
-                                        name="userName"
-                                        label="Your Name"
-                                        className="form-control"
-                                        required={true}
-                                        fullWidth={true}
-                                        value={userName}
-                                        onChange={this.handleChange}
-                                    />
+                                    <div className="contact-form-full-width">
+                                        <TextField
+                                            type="text"
+                                            id="userName"
+                                            name="userName"
+                                            label="Your Name"
+                                            className="form-control"
+                                            required={true}
+                                            fullWidth={true}
+                                            value={userName}
+                                            onChange={this.handleChange}
+                                        />
+                                    </div>
+                                    {submitAttempted && formErrors.userName.length > 0 ? <div className="errorMessage">{formErrors.userName}</div> : <div>&nbsp;</div>}
+
+                                    {/* <div className="contact-form-full-width">
+                                        <TextField
+                                            type="text"
+                                            id="userEmailAddress"
+                                            name="userEmailAddress"
+                                            label="Your email address"
+                                            className="form-control"
+                                            required={true}
+                                            fullWidth={true}
+                                            value={userEmailAddress}                                            
+                                            onChange={this.handleChange}
+                                        />
+                                    </div>
+                                    {submitAttempted && formErrors.userEmailAddress.length > 0 ? <div className="errorMessage">{formErrors.userEmailAddress}</div> : <div>&nbsp;</div>} */}
+
+                                    <div className="contact-form-full-width">
+                                        <TextField
+                                            type="text"
+                                            id="userComments"
+                                            name="userComments"
+                                            label="Your comments"
+                                            className="form-control"
+                                            required={true}
+                                            multiline={true}
+                                            rows="7"
+                                            fullWidth={true}
+                                            value={userComments}
+                                            onChange={this.handleChange}
+                                        />        
+                                    </div>
+                                    {submitAttempted && formErrors.userComments.length > 0 ? <div className="errorMessage">{formErrors.userComments}</div> : <div>&nbsp;</div>}
+
+                                </form>
+
+                                <div className="submit-button">
+                                    <Button variant="contained" color="primary" id="submit" onClick={this.handleSubmit}>Submit</Button>
                                 </div>
-                                {submitAttempted && formErrors.userName.length > 0 ? <div className="errorMessage">{formErrors.userName}</div> : <div>&nbsp;</div>}
 
-                                {/* <div className="contact-form-full-width">
-                                    <TextField
-                                        type="text"
-                                        id="userEmailAddress"
-                                        name="userEmailAddress"
-                                        label="Your email address"
-                                        className="form-control"
-                                        required={true}
-                                        fullWidth={true}
-                                        value={userEmailAddress}                                            
-                                        onChange={this.handleChange}
-                                    />
-                                </div>
-                                {submitAttempted && formErrors.userEmailAddress.length > 0 ? <div className="errorMessage">{formErrors.userEmailAddress}</div> : <div>&nbsp;</div>} */}
+                                { submitAttempted && !this.formValid() &&
+                                    <div className="invalid-form-message">
+                                        <p>Invalid ... please check the details highlighted in red above</p>
+                                    </div>
+                                }
 
-                                <div className="contact-form-full-width">
-                                    <TextField
-                                        type="text"
-                                        id="userComments"
-                                        name="userComments"
-                                        label="Your comments"
-                                        className="form-control"
-                                        required={true}
-                                        multiline={true}
-                                        rows="7"
-                                        fullWidth={true}
-                                        value={userComments}
-                                        onChange={this.handleChange}
-                                    />        
-                                </div>
-                                {submitAttempted && formErrors.userComments.length > 0 ? <div className="errorMessage">{formErrors.userComments}</div> : <div>&nbsp;</div>}
-
-                            </form>
-
-                            <div className="submit-button">
-                                <Button variant="contained" color="primary" id="submit" onClick={this.handleSubmit}>Submit</Button>
+                                {/* <div>
+                                    <p>Form Value: {{ contactForm.value | json }}</p>
+                                    <p>Form Status: {{ contactForm.status | json }}</p>
+                                    <p>Errors: {{ contactForm.controls.name?.errors | json }}</p>
+                                    <p>Errors: {{ contactForm.controls.emailAddress?.errors | json }}</p>
+                                    <p>Errors: {{ contactForm.get('emailAddress').errors | json }}</p>
+                                </div> */}
                             </div>
-
-                            { submitAttempted && !this.formValid() &&
-                                <div className="invalid-form-message">
-                                    <p>Invalid ... please check the details highlighted in red above</p>
-                                </div>
-                            }
-
-                            {/* <div>
-                                <p>Form Value: {{ contactForm.value | json }}</p>
-                                <p>Form Status: {{ contactForm.status | json }}</p>
-                                <p>Errors: {{ contactForm.controls.name?.errors | json }}</p>
-                                <p>Errors: {{ contactForm.controls.emailAddress?.errors | json }}</p>
-                                <p>Errors: {{ contactForm.get('emailAddress').errors | json }}</p>
-                            </div> */}
                         </div>
                     </div>
                 </div>

@@ -3,22 +3,29 @@
 
 
 footer {
-    position: fixed;
-    bottom: 0;
     width: 100vw;
     height: 6vh;
     color: $color-main-footer;
     background-color: $background-color-main-footer;
-    text-align: right;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+    @include flex($justify-content: space-around);
     z-index: 1;
 
     .links {
-        display: flex;
-        justify-content: space-between;
-        flex-basis: 30%;
+        @include flex($justify-content: space-between, $align-items: null);
+    }
+
+    .nav-link {
+        display: inline-block;
+        width: 10vw;
+        height: 3.5vh;
+        margin: 0.5vh 3vw 0 0;
+
+        img {
+            height: 100%;
+            width: 100%;
+        }
+
+        &:hover { transform: scale(1.1); }
     }
 }
 

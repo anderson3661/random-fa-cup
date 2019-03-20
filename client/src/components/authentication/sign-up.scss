@@ -2,68 +2,73 @@
 @import '../../sass/_variables';
 
 
-.container-main-content-sign-up {
-    width: 70%;
-    margin: 15vh auto 0 auto;
-    @include flex($justify-content: null, $align-items: null);                           // Flex needs to be here, otherwise the Login table shows with no white/gray background
+.outer-container-sign-up {
+    min-height: 94vh;
 
-    //The main container-card css is in App.scss
-    .container-card {
-        width: 100%;
-        padding: 1vh 2vw 11vh 2vw;
+    .container-main-content-sign-up {
+        width: 70%;
+        margin: 22vh auto 9vh auto;
+        @include flex($justify-content: null, $align-items: null);                           // Flex needs to be here, otherwise the Login table shows with no white/gray background
 
-        header {
-            @include flex($justify-content: space-between);
-            img {width: 3vw;}
-        }
+        //The main container-card css is in App.scss
+        .container-card {
+            width: 100%;
+            padding: 1vh 2vw 11vh 2vw;
 
-        .help-text { text-align: center; }
+            header {
+                @include flex($justify-content: space-between);
+                img {width: 3vw;}
+            }
 
-        .login {
-            @include flex($align-items: null); 
-            align-content: flex-start;
-    
-            .main-form {
-                width: 65%;
-                max-height: 40vh;
-                
-                .login-form {
-                    width: 100%;
-                    margin: 2vh auto;
+            .help-text { text-align: center; }
 
-                    .login-form-full-width {
+            .login {
+                @include flex($align-items: null); 
+                align-content: flex-start;
+        
+                .main-form {
+                    width: 65%;
+                    max-height: 40vh;
+                    
+                    .login-form {
                         width: 100%;
-                        padding: 2vh 0 0.5vh 0;
+                        margin: 2vh auto;
+
+                        .login-form-full-width {
+                            width: 100%;
+                            padding: 2vh 0 0.5vh 0;
+                        }
+
+                        .rememberMe {
+                            color: gray;
+                        }
+
+                        .errorMessage {
+                            color: red;
+                            margin: 0;
+                            padding: 0;
+                        }
                     }
 
-                    .rememberMe {
-                        color: gray;
+                    .submit-button {
+                        text-align: center;
+                        margin: 1vh 0;
                     }
 
-                    .errorMessage {
-                        color: red;
-                        margin: 0;
-                        padding: 0;
+                    .invalid-form-message p {
+                        color: $color-contact-form-invalid-message;
                     }
-                }
-
-                .submit-button {
-                    text-align: center;
-                    margin: 1vh 0;
-                }
-
-                .invalid-form-message p {
-                    color: $color-contact-form-invalid-message;
                 }
             }
         }
-    }
 
-    mat-form-field {
-        padding: 0;
-        margin: 0;
+        mat-form-field {
+            padding: 0;
+            margin: 0;
+        }
     }
 }
+
 
 @media screen and (max-width: 1280px) {
     .container-main-content-login {
