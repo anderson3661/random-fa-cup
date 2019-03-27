@@ -4,86 +4,100 @@
 
 .outer-container-draw {
     min-height: 94vh;
+    // min-height: 100%;
 
     .container-main-content-draw {
-        // min-height: 70vh;
         width: 90%;
         margin: 14vh 0 5vh 0;
 
-        &.competition-finished { width: 100%; }
+        &.competition-finished, &.not-at-this-stage { width: 100%; margin-top: 20vh; };
 
-        .draw {
+        .draw-header, .draw {
             width: 45vw;
             margin-left: 2.5vw;
         }
 
-        .secondary-information {
-            position: fixed;
-            left: 52.5vw;
-            width: 40vw;
-        }
-
-        &.drawInProgress {
-
-            .secondary-information {
+        &.first-round, &.second-round {
+            .draw-header {
+                position: fixed;
+                height: 14vh;
                 top: 10vh;
+                z-index: 1;
 
-                .my-watchlist, .premier-league-teams, .teams-to-be-drawn { padding-bottom: 1vh; overflow: auto; }
-                .my-watchlist, .premier-league-teams { margin-bottom: 2vh; }
-                .my-watchlist { height: 10vh; }
-                .premier-league-teams { height: 27vh; }
-                .teams-to-be-drawn { height: 40vh; }
+                // &.draw-in-progress { background-color: white; }
+                background-color: white;
+            }
 
-                .main-header { padding-bottom: 1vh; }
+            .filler-for-scroll {
+                position: fixed;
+                top: 8vh;
+                left: 2.5vw;
+                width: 49vw;
+                height: 2vh;
+                background-color: black;
+                z-index: 1;
+            }
+
+            .draw {
+                margin-top: 28.25vh;
+                // Needs to be absolute so that scroll works correctly 
+                // position: absolute;
+                // top: 28.25vh;
             }
         }
 
         &.drawComplete {
-
-            .secondary-information {
-                top: 14vh;
-
-                .my-watchlist, .premier-league-teams { 
-                    padding-bottom: 2vh;
-
-                    .main-header { padding-bottom: 2vh; }
-                }
-
-                .my-watchlist { margin-bottom: 3vh; }                
+            .draw-header {
+                position: relative;
+                top: 0;
+                height: 100%;
+                z-index: 0;
             }
         }
 
-        .draw {
-
-            padding-bottom: 3vh;
-
-            .main-header {
-                @include flex($justify-content: space-between);
-                padding-bottom: 2vh;
-
-                .image-left, .image-right { flex-basis: 20%; }
-                .image-right { text-align: right; }
-                img { width: 3vw; }
+        .secondary-information {
+            position: absolute;
+            top: 14vh;
+            left: 52.5vw;
+            width: 40vw;
+        }
+        
+        &.first-round, &.second-round, &.third-round { &.drawInProgress { .secondary-information { position: fixed; top: 10vh; left: 52.5vw; } } }
+        
+        &.first-round, &.second-round, &.third-round { &.drawInProgress { .secondary-information { .premier-league-teams { max-height: 27vh; overflow: auto; } } } }
+        // &.fourth-round, &.quarter-finals, &.semi-finals { &.drawInProgress { .secondary-information { .premier-league-teams { height: auto; } } } }
+        
+        &.first-round, &.second-round, &.third-round { &.drawInProgress { .secondary-information { .main-header { padding-bottom: 1vh; } } } }
+        &.fourth-round, &.quarter-finals, &.semi-finals { &.drawInProgress { .secondary-information { .main-header { padding-bottom: 2vh; } } } }
+        
+        &.first-round, &.second-round, &.third-round { &.drawInProgress { .secondary-information { .teams-to-be-drawn { max-height: 40vh; overflow: auto; } } } }
+        &.fourth-round, &.quarter-finals, &.semi-finals { &.drawInProgress { .secondary-information { .teams-to-be-drawn { height: auto; padding-bottom: 2vh; } } } }
+        
+        &.drawInProgress {
+            .secondary-information {
+                .my-watchlist, .premier-league-teams { padding-bottom: 1vh; overflow: auto; }
+                .my-watchlist, .premier-league-teams { margin-bottom: 2vh; }
+                .my-watchlist { max-height: 10vh; }
             }
+        }
+        
+        &.quarter-finals.drawComplete, &.semi-finals.drawComplete {
+            width: 100%;
+            margin-top: 20vh;
+            .draw-header { margin: 0 auto; }
+        }
 
-            .not-at-this-stage {
-                text-align: center;
+        &.drawComplete {
+            .secondary-information {
+                position: absolute;
+                top: 14vh;
+                .main-header { padding-bottom: 1vh; }
+                .my-watchlist, .premier-league-teams { padding-bottom: 2vh; }
+                .my-watchlist { margin-bottom: 3vh; }
             }
+        }
 
-            .draw-control-section {
-                display: flex;
-                align-items: center;
-                margin-bottom: 3vh;
-
-                .draw-update-button {
-                    margin-right: 2vw;
-                }
-
-                .draw-update-interval {
-                    flex-basis: 50%;
-                }
-            }
-
+        .draw-header, .draw {
             .draw-row {
                 &.versus {
                     font-size: 80%;
@@ -97,7 +111,7 @@
                         display: inline-block;
                         height: 2.25vh;
                         width: 2.25vh;
-                        background-color: darkred;
+                        background-color: $background-color-team-number-ball;
                         border-radius: 50%;
                         margin-right: 0.5vw;
                         @include flex();
@@ -105,30 +119,41 @@
 
                     .teamNumberInDraw {
                         position: absolute;
-                        color: white;
+                        color: $color-team-number-ball;
                         font-size: 70%;
                         font-weight: normal;
                         @include flex();
                     }
                 }
             }
+        }
 
-            &.competition-finished {
-                width: 50%;
-                margin: 0 auto;
+        .draw-header {
+            padding-bottom: 3vh;
+
+            .draw-control-section {
+                display: flex;
+                align-items: center;
+                margin-top: 2vh;
+                margin-bottom: 3vh;
+
+                .draw-update-button { margin-right: 2vw; }
+                .draw-update-interval { flex-basis: 50%; }
             }
+        }
+
+        .draw {
+            padding-bottom: 3vh;
         }
 
         .secondary-information {
             margin-left: 3vw;
 
             .teams-to-be-drawn, .premier-league-teams, .my-watchlist  {
-                background-color: rgba(250, 250, 240, 0.9);
+                background-color: $background-color-secondary-information-panels;
 
                 .main-header {
                     @include flex($justify-content: space-between);
-                    // padding-bottom: 1vh;
-    
                     h1, h2 { width: 100%; text-align: center; font-size: 120%; margin: 0.5vh 0 0 0; }
                 }
 
@@ -140,14 +165,14 @@
 
                 span {
                     font-size: 85%;
-                    &.division { color: gray; font-size: 80%;}
+                    &.division { color: $color-division-abbreviation; font-size: $font-size-division-abbreviation;}
                 }
 
                 p span {
                     font-weight: normal;
                     
-                    &.division { color: gray; font-size: 80%;}
-                    &.premierLeague { color: blue; }
+                    &.division { color: $color-division-abbreviation; font-size: $font-size-division-abbreviation;}
+                    &.premierLeague { color: $color-premier-league-teams; }
                 }
 
                 .teams {
@@ -164,7 +189,7 @@
                             display: inline-block;
                             height: 2.25vh;
                             width: 2.25vh;
-                            background-color: darkred;
+                            background-color: $background-color-team-number-ball;
                             border-radius: 50%;
                             margin-right: 0.5vw;
                             @include flex();
@@ -172,7 +197,7 @@
 
                         .teamNumberInDraw {
                             position: absolute;
-                            color: white;
+                            color: $color-team-number-ball;
                             font-size: 70%;
                             font-weight: normal;
                             @include flex();
@@ -183,8 +208,8 @@
                                 font-size: 85%;
                                 font-weight: normal;
                             
-                                &.division { color: gray; font-size: 70%;}
-                                &.premierLeague { color: blue; }
+                                &.division { color: $color-division-abbreviation; font-size: 70%;}
+                                &.premierLeague { color: $color-premier-league-teams; }
                             }
                         }                        
 
@@ -194,26 +219,8 @@
             }
         }
 
-        .fixtures {
-            width: 100%;
-            margin-bottom: 2.5vh;
-            font-size: 85%;
-        }
-
     }
 }
 
-// .fixtures-date {
-//     font-family: $font-family-date-of-fixtures;
-//     font-size: $font-size-date-of-fixtures;
-//     // background-color: $background-color-date-of-fixtures; 
-//     background-color: lightgray; 
-//     text-align: left;
-//     text-transform: uppercase;
-//     margin-bottom: 1vh;
-//     padding: 1vh 1vw;
-//     border-collapse: separate;
-// }
-
-@media screen and (min-width: 1024px) { .outer-container-draw { .container-main-content-draw { width: 90%; } } };
-@media screen and (max-width: 1024px) { .outer-container-draw { .container-main-content-draw { width: 90%; } } };
+// @media screen and (min-width: 1024px) { .outer-container-draw { .container-main-content-draw { width: 90%; } } };
+// @media screen and (max-width: 1024px) { .outer-container-draw { .container-main-content-draw { width: 90%; } } };

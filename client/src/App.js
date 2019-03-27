@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import Header from './components/nav/header';
+// import Header from './components/nav/header';
 import Footer from './components/nav/footer';
 import Routes from './components/nav/routes';
 

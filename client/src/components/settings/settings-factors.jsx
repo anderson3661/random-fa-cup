@@ -2,9 +2,7 @@ import React, { Component, Fragment } from "react";
 
 import { SEASON, COMPETITION_START_DATE, FIXTURE_UPDATE_INTERVAL, BASE_FOR_RANDOM_MULTIPLIER, AWAY_TEAM_FACTOR, IS_NOT_A_TOP_TEAM_FACTOR, DIVISION_FACTOR, GOALS_PER_MINUTE_FACTOR, IS_IT_A_GOAL_FACTOR } from '../../utilities/constants';
 
-import { haveSettingsFactorsValuesChanged, haveValidationErrorValuesChanged } from './administration-helpers';
-import AdminFieldInput from './admin-field-input';
-import * as helpers from '../../utilities/helper-functions/helpers';
+import SettingsFieldInput from './settings-field-input';
 
 
 class SettingsFactors extends Component {
@@ -23,7 +21,6 @@ class SettingsFactors extends Component {
     render() {
 
         const { hasCompetitionStarted, hasCompetitionFinished, settingsFactors, settingsFactorsValidationErrors } = this.props;
-        debugger;
 
         return (
             
@@ -35,7 +32,7 @@ class SettingsFactors extends Component {
                     <div className="grid-season-info competition-information">
 
                         <div className="fullWidth">
-                            <AdminFieldInput
+                            <SettingsFieldInput
                                 name={SEASON}
                                 label="Season"
                                 value={settingsFactors[SEASON]}
@@ -46,7 +43,7 @@ class SettingsFactors extends Component {
                         {settingsFactorsValidationErrors[SEASON] && <div className="validation-error">{settingsFactorsValidationErrors[SEASON]}</div>}
 
                         <div className="fullWidth">
-                            <AdminFieldInput
+                            <SettingsFieldInput
                                 name={COMPETITION_START_DATE}
                                 label="Competition Start Date"
                                 placeholder="e.g. 05 Aug 2017"
@@ -67,7 +64,7 @@ class SettingsFactors extends Component {
                     <div className="grid-season-info match-score-factors">
 
                         <div className="fullWidth">
-                            <AdminFieldInput
+                            <SettingsFieldInput
                                 name={FIXTURE_UPDATE_INTERVAL}
                                 label="Fixture Update Interval (seconds)"
                                 placeholder="e.g. 0.5"
@@ -79,7 +76,7 @@ class SettingsFactors extends Component {
                         {settingsFactorsValidationErrors[FIXTURE_UPDATE_INTERVAL] && <div className="validation-error">{settingsFactorsValidationErrors[FIXTURE_UPDATE_INTERVAL]}</div>}
 
                         <div className="fullWidth">
-                            <AdminFieldInput
+                            <SettingsFieldInput
                                 name={BASE_FOR_RANDOM_MULTIPLIER}
                                 label="Base For Random Multiplier"
                                 placeholder="e.g. 90"
@@ -91,7 +88,7 @@ class SettingsFactors extends Component {
                         {settingsFactorsValidationErrors[BASE_FOR_RANDOM_MULTIPLIER] && <div className="validation-error">{settingsFactorsValidationErrors[BASE_FOR_RANDOM_MULTIPLIER]}</div>}
 
                         <div className="fullWidth">
-                            <AdminFieldInput
+                            <SettingsFieldInput
                                 name={AWAY_TEAM_FACTOR}
                                 label="Away Team Factor"
                                 placeholder="e.g. 1.1"
@@ -103,7 +100,7 @@ class SettingsFactors extends Component {
                         {settingsFactorsValidationErrors[AWAY_TEAM_FACTOR] && <div className="validation-error">{settingsFactorsValidationErrors[AWAY_TEAM_FACTOR]}</div>}
 
                         <div className="fullWidth">
-                            <AdminFieldInput
+                            <SettingsFieldInput
                                 name={IS_NOT_A_TOP_TEAM_FACTOR}
                                 label="Is Not A Top Team Factor"
                                 placeholder="e.g. 1.1"
@@ -115,7 +112,7 @@ class SettingsFactors extends Component {
                         {settingsFactorsValidationErrors[IS_NOT_A_TOP_TEAM_FACTOR] && <div className="validation-error">{settingsFactorsValidationErrors[IS_NOT_A_TOP_TEAM_FACTOR]}</div>}
 
                         <div className="fullWidth">
-                            <AdminFieldInput
+                            <SettingsFieldInput
                                 name={DIVISION_FACTOR}
                                 label="Division Factor"
                                 placeholder="e.g. 1.1"
@@ -127,7 +124,7 @@ class SettingsFactors extends Component {
                         {settingsFactorsValidationErrors[DIVISION_FACTOR] && <div className="validation-error">{settingsFactorsValidationErrors[DIVISION_FACTOR]}</div>}
 
                         <div className="fullWidth">
-                            <AdminFieldInput
+                            <SettingsFieldInput
                                 name={IS_IT_A_GOAL_FACTOR}
                                 label="Is It A Goal Factor"
                                 placeholder="e.g. 2"
@@ -139,7 +136,7 @@ class SettingsFactors extends Component {
                         {settingsFactorsValidationErrors[IS_IT_A_GOAL_FACTOR] && <div className="validation-error">{settingsFactorsValidationErrors[IS_IT_A_GOAL_FACTOR]}</div>}
 
                         <div className="fullWidth">
-                            <AdminFieldInput
+                            <SettingsFieldInput
                                 name={GOALS_PER_MINUTE_FACTOR}
                                 label="Goals Per Minute Factor"
                                 placeholder="e.g. [{'minutes': 30, 'factor': 1.8}, {'minutes': 80, 'factor': 1.2}, {'minutes': 120, 'factor': 1}]"

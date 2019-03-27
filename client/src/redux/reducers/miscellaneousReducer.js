@@ -1,12 +1,16 @@
 import { LOADING_APP, LOAD_FROM_MISCELLANEOUS_DB, LOAD_FROM_ALL_DBS_STARTED, LOAD_FROM_ALL_DBS_FINISHED, CREATE_DOCUMENTS_IN_DBS_FOR_FIRST_TIME, UPDATE_MISCELLANEOUS_PROPERTY, LOADING_BACKEND_UPDATE } from '../actions/types';
+import { FIRST_ROUND } from '../../utilities/constants';
 
 const initialState = {
     hasCompetitionStarted: false,
     hasCompetitionFinished: false,
-    createDocumentsInDbsForFirstTime: false,
+    competitionRoundForNextDraw: FIRST_ROUND,
+    competitionRoundForPlay: FIRST_ROUND,
+    okToProceedWithDraw: true,
+    haveFixturesForCompetitionRoundBeenPlayed: false,
     loading: false,
     loadingUser: false,
-    loadingAdmin: false,
+    loadingSettings: false,
     loadingDraw: false,
     loadingLatestFixtures: false,
     loadingBackendError: false,

@@ -2,27 +2,60 @@ import { SEASON, COMPETITION_START_DATE, FIXTURE_UPDATE_INTERVAL, BASE_FOR_RANDO
 import * as helpers from '../../utilities/helper-functions/helpers';
 
 
-export const validateAdminFactors = (state) => {
-    const validationErrors = helpers.deepClone(state.adminFactorsValidationErrors);
-    checkAdminFactorsValidationErrors(state, validationErrors, [SEASON], key => key === "", "Please enter (in YYYY/YY format)");
-    checkAdminFactorsValidationErrors(state, validationErrors, [COMPETITION_START_DATE], key => key === "", "Please enter (in DD mmm YYYY format)");
-    checkAdminFactorsValidationErrors(state, validationErrors, [FIXTURE_UPDATE_INTERVAL], key => isNaN(key) || key <= 0, "Please enter a number greater than 0 (e.g. 0.5)");
-    checkAdminFactorsValidationErrors(state, validationErrors, [BASE_FOR_RANDOM_MULTIPLIER], key => isNaN(key) || key < 50 || key > 150, "Please enter an integer between 50 and 150 (e.g. 90)");
-    checkAdminFactorsValidationErrors(state, validationErrors, [AWAY_TEAM_FACTOR], key => isNaN(key) || key < 0.5 || key > 2, "Please enter a number between 0.5 and 2 (e.g. 1.25)");
-    checkAdminFactorsValidationErrors(state, validationErrors, [IS_NOT_A_TOP_TEAM_FACTOR], key => isNaN(key) || key < 1 || key > 2, "Please enter a number between 1 and 2 (e.g. 1.25)");
-    checkAdminFactorsValidationErrors(state, validationErrors, [DIVISION_FACTOR], key => isNaN(key) || key < 1 || key > 2, "Please enter a number between 1 and 2 (e.g. 1.25)");
-    checkAdminFactorsValidationErrors(state, validationErrors, [GOALS_PER_MINUTE_FACTOR], key => key === "", "Please enter an array of objects");
-    checkAdminFactorsValidationErrors(state, validationErrors, [IS_IT_A_GOAL_FACTOR], key => isNaN(key) || key < 1 || key > 5, "Please enter an integer between 1 and 5 inclusive (e.g. 2)");
+export const getSettingsFactors = (values, isGoalFactorsANestedArray, returnGoalFactorsAsANestedArray, returnTypeForGoalsPerMinuteFactor) => {
+    let settingsFactors;
+    let goalsPerMinuteFactor;
+    let goalFactorValues;
+
+    goalFactorValues = (isGoalFactorsANestedArray ? values.goalFactors : values);
+
+    goalsPerMinuteFactor = helpers.getGoalsPerMinuteFactors(goalFactorValues[GOALS_PER_MINUTE_FACTOR], returnTypeForGoalsPerMinuteFactor);
+
+    let goalFactors = {
+        [FIXTURE_UPDATE_INTERVAL]: parseFloat(goalFactorValues[FIXTURE_UPDATE_INTERVAL].toString().trim()),
+        [BASE_FOR_RANDOM_MULTIPLIER]: parseFloat(goalFactorValues[BASE_FOR_RANDOM_MULTIPLIER].toString().trim()),
+        [AWAY_TEAM_FACTOR]: parseFloat(goalFactorValues[AWAY_TEAM_FACTOR].toString().trim()),
+        [IS_NOT_A_TOP_TEAM_FACTOR]: parseFloat(goalFactorValues[IS_NOT_A_TOP_TEAM_FACTOR].toString().trim()),
+        [DIVISION_FACTOR]: parseFloat(goalFactorValues[DIVISION_FACTOR].toString().trim()),
+        [IS_IT_A_GOAL_FACTOR]: parseFloat(goalFactorValues[IS_IT_A_GOAL_FACTOR].toString().trim()),
+        [GOALS_PER_MINUTE_FACTOR]: goalsPerMinuteFactor,
+    };
+
+    settingsFactors = {
+        [SEASON]: values[SEASON].trim(),
+        [COMPETITION_START_DATE]: values[COMPETITION_START_DATE].trim(),
+    };
+
+    if (returnGoalFactorsAsANestedArray) {
+        settingsFactors.goalFactors = goalFactors;
+    } else {
+        settingsFactors = { ...settingsFactors, ...goalFactors};
+    }
+
+    return settingsFactors;
+}
+
+export const validateSettingsFactors = (state) => {
+    const validationErrors = helpers.deepClone(state.settingsFactorsValidationErrors);
+    checkSettingsFactorsValidationErrors(state, validationErrors, [SEASON], key => key === "", "Please enter (in YYYY/YY format)");
+    checkSettingsFactorsValidationErrors(state, validationErrors, [COMPETITION_START_DATE], key => key === "", "Please enter (in DD mmm YYYY format)");
+    checkSettingsFactorsValidationErrors(state, validationErrors, [FIXTURE_UPDATE_INTERVAL], key => isNaN(key) || key <= 0, "Please enter a number greater than 0 (e.g. 0.5)");
+    checkSettingsFactorsValidationErrors(state, validationErrors, [BASE_FOR_RANDOM_MULTIPLIER], key => isNaN(key) || key < 50 || key > 150, "Please enter an integer between 50 and 150 (e.g. 90)");
+    checkSettingsFactorsValidationErrors(state, validationErrors, [AWAY_TEAM_FACTOR], key => isNaN(key) || key < 0.5 || key > 2, "Please enter a number between 0.5 and 2 (e.g. 1.25)");
+    checkSettingsFactorsValidationErrors(state, validationErrors, [IS_NOT_A_TOP_TEAM_FACTOR], key => isNaN(key) || key < 1 || key > 2, "Please enter a number between 1 and 2 (e.g. 1.25)");
+    checkSettingsFactorsValidationErrors(state, validationErrors, [DIVISION_FACTOR], key => isNaN(key) || key < 1 || key > 2, "Please enter a number between 1 and 2 (e.g. 1.25)");
+    checkSettingsFactorsValidationErrors(state, validationErrors, [GOALS_PER_MINUTE_FACTOR], key => key === "", "Please enter an array of objects");
+    checkSettingsFactorsValidationErrors(state, validationErrors, [IS_IT_A_GOAL_FACTOR], key => isNaN(key) || key < 1 || key > 5, "Please enter an integer between 1 and 5 inclusive (e.g. 2)");
     return validationErrors;
 }
 
-const checkAdminFactorsValidationErrors = (state, validationErrors, objectKey, comparison, message) => {
+const checkSettingsFactorsValidationErrors = (state, validationErrors, objectKey, comparison, message) => {
     validationErrors[objectKey] = (comparison(state[objectKey[0]]) ? message : '');
 }
 
-export const areThereAdminFactorsValidationErrors = (adminFactorsValidationErrors) => {
+export const areThereSettingsFactorsValidationErrors = (settingsFactorsValidationErrors) => {
     let anyValidationErrors = false;
-    Object.entries(adminFactorsValidationErrors).forEach(([key, val]) => {
+    Object.entries(settingsFactorsValidationErrors).forEach(([key, val]) => {
         if (val !== "") anyValidationErrors = true;
     });
     return anyValidationErrors; 
@@ -120,11 +153,11 @@ export const haveValidationErrorValuesChanged = (originalValues, updatedValues) 
     return false;
 }
 
-export const areThereAnyChangesToAdminFactorsValues = (originalValues, updatedValues, nestedObject = '') => {
+export const areThereAnyChangesToSettingsFactorsValues = (originalValues, updatedValues, nestedObject = '') => {
     let anyChanges = false;
     Object.entries(updatedValues).forEach(([key, val]) => {
         if (val && typeof val === 'object') {
-            areThereAnyChangesToAdminFactorsValues(val, originalValues, key);  // recurse.
+            areThereAnyChangesToSettingsFactorsValues(val, originalValues, key);  // recurse.
         } else {
             let oldValue = (nestedObject !== '' ? originalValues[nestedObject][key] : originalValues[key]);
             if (val !== oldValue) {
@@ -193,13 +226,13 @@ export const getDeletedMyWatchlistTeamsToSendToDb = (originalValues, updatedValu
     return deletedTeams;
 }
 
-export const getUpdatesToAdminFactorsToSendToDb = (originalValues, updatedValues) => {
-    let updatedAdminFactors = {};
+export const getUpdatesToSettingsFactorsToSendToDb = (originalValues, updatedValues) => {
+    let updatedSettingsFactors = {};
 
-    addToObjectIfChanged(updatedAdminFactors, updatedValues, originalValues, SEASON);
-    addToObjectIfChanged(updatedAdminFactors, updatedValues, originalValues, COMPETITION_START_DATE);
+    addToObjectIfChanged(updatedSettingsFactors, updatedValues, originalValues, SEASON);
+    addToObjectIfChanged(updatedSettingsFactors, updatedValues, originalValues, COMPETITION_START_DATE);
 
-    return updatedAdminFactors;
+    return updatedSettingsFactors;
 }
 
 export const getUpdatesToGoalFactorsToSendToDb = (originalValues, updatedValues) => {

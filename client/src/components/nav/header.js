@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import { RESET_STATE_TO_DEFAULTS } from '../../redux/actions/types';
+import { LOGOUT_AND_RESET_STATE_TO_DEFAULTS } from '../../redux/actions/types';
 import { INCLUDE_MONGODB_OPTION, FA_CUP_SMALL_IMAGE } from '../../utilities/constants';
 import * as helpers from '../../utilities/helper-functions/helpers';
 
@@ -26,30 +26,35 @@ class Header extends Component {
         }
     }
 
-    logout = () => this.props.dispatch({ type: RESET_STATE_TO_DEFAULTS });
+    logout = () => this.props.dispatch({ type: LOGOUT_AND_RESET_STATE_TO_DEFAULTS });
         
     openSlideMenu = () => { this.refs.sideMenu.style.width = '250px'; };
     closeSlideMenu = () => { this.refs.sideMenu.style.width = '0'; };
 
     shouldComponentUpdate(nextProps, nextState) {
-        console.log(this.props);
-        debugger;
-        return (
-            helpers.hasObjectValueChanged(this.state, nextState, 'displayNavBackground') ||
-            helpers.hasObjectValueChanged(this.props, nextProps, 'hasCompetitionStarted') ||
-            helpers.hasObjectValueChanged(this.props, nextProps, 'isHomeNav') ||
-            helpers.hasObjectValueChanged(this.props, nextProps, 'isDrawNav') ||
-            helpers.hasObjectValueChanged(this.props, nextProps, 'isFixturesLatestNav') ||
-            helpers.hasObjectValueChanged(this.props, nextProps, 'isFixturesAndResultsNav') ||
-            helpers.hasObjectValueChanged(this.props, nextProps, 'isSettingsNav') ||
-            helpers.haveObjectValuesChanged(this.props, nextProps, 'nextCompetitionRoundForDraw') ||
-            helpers.haveObjectValuesChanged(this.props, nextProps, 'competitionRoundForPlay')
-        );
+        // Have commented this out for now, as links such as Help, Contact, About, Log In etc don't work - therefore probably easier to just let the component render
+        // console.log(this.props);
+        // debugger;
+        // return (
+        //     helpers.hasObjectValueChanged(this.state, nextState, 'displayNavBackground') ||
+        //     helpers.hasObjectValueChanged(this.props, nextProps, 'hasCompetitionStarted') ||
+        //     helpers.hasObjectValueChanged(this.props, nextProps, 'okToProceedWithDraw') ||
+        //     helpers.haveObjectValuesChanged(this.props, nextProps, 'competitionRoundForNextDrawLabel') ||
+        //     helpers.haveObjectValuesChanged(this.props, nextProps, 'competitionRoundForPlayLabel') ||
+        //     helpers.hasObjectValueChanged(this.props, nextProps, 'isHomeNav') ||
+        //     helpers.hasObjectValueChanged(this.props, nextProps, 'isDrawNav') ||
+        //     helpers.hasObjectValueChanged(this.props, nextProps, 'isFixturesLatestNav') ||
+        //     helpers.hasObjectValueChanged(this.props, nextProps, 'isFixturesAndResultsNav') ||
+        //     helpers.hasObjectValueChanged(this.props, nextProps, 'isSettingsNav')
+        // );
+        return true;
     }
 
     render () {
-        const { hasCompetitionStarted, nextCompetitionRoundForDraw, competitionRoundForPlay, isHomeNav, isDrawNav, isFixturesLatestNav, isFixturesAndResultsNav, isSettingsNav } = this.props;
+        const { authenticated, hasCompetitionStarted, hasCompetitionFinished, okToProceedWithDraw, competitionRoundForNextDrawLabel, competitionRoundForPlayLabel,
+                isHomeNav, isDrawNav, isFixturesLatestNav, isFixturesAndResultsNav, isSettingsNav } = this.props;
         const { displayNavBackground } = this.state;
+        debugger;
 
         return (
             <Fragment>
@@ -67,15 +72,15 @@ class Header extends Component {
                             </NavLink>
                         }
 
-                        { !isHomeNav && !isDrawNav && nextCompetitionRoundForDraw.okToProceedWithDraw &&
+                        { authenticated && !isHomeNav && !hasCompetitionFinished && !isDrawNav && okToProceedWithDraw &&
                             <NavLink exact to="/draw" className="nav-link" activeClassName="active-link">
-                                <div className="football draw"><span>{helpers.getCompetitionRoundForDrawLabel(nextCompetitionRoundForDraw)}</span></div>
+                                <div className="football draw"><span>{competitionRoundForNextDrawLabel}</span></div>
                             </NavLink>
                         }
 
-                        { !isHomeNav && !isFixturesLatestNav && competitionRoundForPlay.okToProceedWithPlay &&
+                        { !isHomeNav && !isFixturesLatestNav && !okToProceedWithDraw &&
                             <NavLink to="/fixtures-latest" className="nav-link" activeClassName="active-link">
-                                <div className="football latest-fixtures"><span>{helpers.getCompetitionRoundForPlayLabel(competitionRoundForPlay)}</span></div>
+                                <div className="football latest-fixtures"><span>{competitionRoundForPlayLabel}</span></div>
                             </NavLink>
                         }
 
@@ -96,9 +101,9 @@ class Header extends Component {
                         <div className="login-section">
                             <div className="login-buttons">
                                 <ul className="navbar-authentication">
-                                    {!this.props.authenticated && <li><NavLink to="/login" className="nav-link" onClick={this.props.closeSlideMenu}>Log in</NavLink></li>}
-                                    {!this.props.authenticated && <li><NavLink to="/sign-up" className="nav-link-button" onClick={this.props.closeSlideMenu}>Sign up</NavLink></li>}
-                                    {this.props.authenticated && <li><NavLink to="/login" className="nav-link-button" onClick={this.logout}>Log out</NavLink></li>}
+                                    {!authenticated && <li><NavLink to="/login" className="nav-link" onClick={this.props.closeSlideMenu}>Log in</NavLink></li>}
+                                    {!authenticated && <li><NavLink to="/sign-up" className="nav-link-button" onClick={this.props.closeSlideMenu}>Sign up</NavLink></li>}
+                                    {authenticated && <li><NavLink to="/login" className="nav-link-button" onClick={this.logout}>Log out</NavLink></li>}
                                 </ul>
                             </div>
                         </div>
@@ -114,13 +119,19 @@ class Header extends Component {
 };
 
 const mapStateToProps = (state, ownProps) => {
-    const { hasCompetitionStarted, hasCompetitionFinished } = state.default.miscellaneous;
-    const { fixturesForCompetition } = state.default;
+    const { authenticated } = state.default.user;
+    const { hasCompetitionStarted, hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw, haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays } = state.default.miscellaneous;
+    debugger;
 
     return {
+        authenticated,
         hasCompetitionStarted,
-        nextCompetitionRoundForDraw: helpers.getNextCompetitionRoundForDraw(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished),
-        competitionRoundForPlay: helpers.getCompetitionRoundForPlay(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished),
+        hasCompetitionFinished,
+        competitionRoundForNextDraw,
+        okToProceedWithDraw,
+        competitionRoundForPlay: competitionRoundForPlay,
+        competitionRoundForNextDrawLabel: helpers.getCompetitionRoundForNextDrawLabel(competitionRoundForNextDraw),
+        competitionRoundForPlayLabel: helpers.getCompetitionRoundForPlayLabel(competitionRoundForPlay, haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays),
         isHomeNav: (ownProps.isHomeNav === undefined ? false : ownProps.isHomeNav),
         isDrawNav: (ownProps.isDrawNav === undefined ? false : ownProps.isDrawNav),
         isFixturesLatestNav: (ownProps.isFixturesLatestNav === undefined ? false : ownProps.isFixturesLatestNav),

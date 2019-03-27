@@ -1,5 +1,5 @@
-import { LOAD_FROM_ADMIN_FACTORS_DB, ADMIN_FACTORS_SAVE_CHANGES } from '../actions/types';
-import { DEFAULT_VALUE_SEASON, DEFAULT_VALUE_COMPETITION_START_DATE, DEFAULT_VALUE_FIXTURE_UPDATE_INTERVAL, DEFAULT_VALUE_BASE_FOR_RANDOM_MULTIPLIER, DEFAULT_VALUE_AWAY_TEAM_FACTOR, DEFAULT_VALUE_IS_NOT_A_TOP_TEAM_FACTOR, DEFAULT_VALUE_DIVISION_FACTOR, DEFAULT_VALUE_GOALS_PER_MINUTE_FACTOR, DEFAULT_VALUE_IS_IT_A_GOAL_FACTOR } from '../../utilities/constants';
+import { LOAD_FROM_SETTINGS_FACTORS_DB, SETTINGS_FACTORS_SAVE_CHANGES } from '../actions/types';
+import { DEFAULT_VALUE_SEASON, DEFAULT_VALUE_COMPETITION_START_DATE, DEFAULT_VALUE_FIXTURE_UPDATE_INTERVAL, DEFAULT_VALUE_BASE_FOR_RANDOM_MULTIPLIER, DEFAULT_VALUE_AWAY_TEAM_FACTOR, DEFAULT_VALUE_IS_NOT_A_TOP_TEAM_FACTOR, DEFAULT_VALUE_DIVISION_FACTOR, DEFAULT_VALUE_GOALS_PER_MINUTE_FACTOR, DEFAULT_VALUE_IS_IT_A_GOAL_FACTOR, DEFAULT_VALUE_IS_IT_A_GOAL_FROM_A_PENALTY_FACTOR } from '../../utilities/constants';
 
 const initialState = {
     season: DEFAULT_VALUE_SEASON,
@@ -11,19 +11,20 @@ const initialState = {
         baseForRandomMultiplier: DEFAULT_VALUE_BASE_FOR_RANDOM_MULTIPLIER,
         likelihoodOfAGoalDuringASetPeriod: DEFAULT_VALUE_GOALS_PER_MINUTE_FACTOR,
         isItAGoal: DEFAULT_VALUE_IS_IT_A_GOAL_FACTOR,
+        isItAGoalFromAPenalty: DEFAULT_VALUE_IS_IT_A_GOAL_FROM_A_PENALTY_FACTOR,
         fixtureUpdateInterval: DEFAULT_VALUE_FIXTURE_UPDATE_INTERVAL,
     },
     dataStorage: 'Browser',
 }
 
-export default function adminFactorsReducer(state = initialState, action) {
+export default function settingsFactorsReducer(state = initialState, action) {
     let newState;
     switch (action.type) {
 
-        case LOAD_FROM_ADMIN_FACTORS_DB :
+        case LOAD_FROM_SETTINGS_FACTORS_DB :
             return Object.assign({}, state, action.data);
 
-        case ADMIN_FACTORS_SAVE_CHANGES :
+        case SETTINGS_FACTORS_SAVE_CHANGES :
             debugger;
             newState = Object.assign({}, state);
 

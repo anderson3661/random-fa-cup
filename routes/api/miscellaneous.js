@@ -50,9 +50,13 @@ router.put('/:id', (req, res) => {
 router.post('/', (req, res) => {
     const newMiscellaneous = new Miscellaneous({
         userDocumentId: req.body.userDocumentId,
-        haveRound1FixturesBeenCreated: req.body.haveRound1FixturesBeenCreated,
         hasCompetitionStarted: req.body.hasCompetitionStarted,
         hasCompetitionFinished: req.body.hasCompetitionFinished,
+        competitionRoundForNextDraw: req.body.competitionRoundForNextDraw,
+        competitionRoundForPlay: req.body.competitionRoundForPlay,
+        okToProceedWithDraw: req.body.okToProceedWithDraw,
+        haveFixturesForCompetitionRoundBeenPlayed: req.body.haveFixturesForCompetitionRoundBeenPlayed,
+        haveFixturesProducedReplays: req.body.haveFixturesProducedReplays,
     });
 
     newMiscellaneous.save()
@@ -65,8 +69,8 @@ router.post('/', (req, res) => {
 
 
 // ***************** DELETE BY USER *******************
-// @route DELETE api/admin-factors/:id
-// @desc  Delete an Admin Factor document
+// @route DELETE api/miscellaneous/:id
+// @desc  Delete an Miscellaneous document
 // @access Public
 router.delete('/:userDocumentId', (req, res) => {
     Miscellaneous.findOneAndDelete({ userDocumentId: req.params.userDocumentId })
@@ -74,16 +78,6 @@ router.delete('/:userDocumentId', (req, res) => {
         .then(() => res.json({success: true}))
         .catch(err => res.status(404).json({success: false}))
 });
-
-
-// ***************** DELETE ALL (NOT USED) *******************
-// @route DELETE api/miscellaneous
-// @desc  Delete all Miscellaneous documents
-// @access Public
-// router.delete('/', (req, res) => {
-//     // Return success true or false as the http response
-//     Miscellaneous.deleteMany({}, err => err ? res.status(404).json({success: false}) : res.json({success: true}))
-// });
 
 
 module.exports = router;

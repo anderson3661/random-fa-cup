@@ -9,7 +9,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import { userLogin } from '../../redux/actions/userActions';
 
-import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE } from '../../utilities/constants';
+import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, REDIRECT_TO_HOME } from '../../utilities/constants';
 
 import "./login.scss";
 
@@ -29,8 +29,10 @@ class Login extends Component {
 
         this.state = {
             formFields: {
-                userEmailAddress: 'm@m.com',
-                userPassword: 'Password123'
+                // userEmailAddress: 'm@m.com',
+                // userPassword: 'Password123',
+                userEmailAddress: '',
+                userPassword: '',
             },
             formErrors: {
                 userEmailAddress: '',
@@ -87,8 +89,8 @@ class Login extends Component {
             console.log(`
                 -- SUBMITTING --
                 Email Address: ${formFields.userEmailAddress}
-                // Password: ${formFields.userPassword}
-            `);
+                `);
+            // Password: ${formFields.userPassword}
 
         } else {
             console.log("FORM INVALID");
@@ -105,8 +107,8 @@ class Login extends Component {
 
     componentWillReceiveProps(nextProps, prevState) {
         if (nextProps.user.authenticated && !this.props.user.authenticated) {
-            // Re-route to the administration page
-            this.props.history.push('/administration');
+            // Re-route to the Settings page
+            this.props.history.push(REDIRECT_TO_HOME);
         } else if (this.state.submitAttempted && nextProps.user.authenticationAttempted) {
             this.setState({ authenticationFailed: true });
         }
@@ -161,7 +163,7 @@ class Login extends Component {
                                     </div>
                                     {submitAttempted && formErrors.userPassword.length > 0 ? <div className="errorMessage">{formErrors.userPassword}</div> : <div>&nbsp;</div>}
 
-                                    <div className="remember-me">
+                                    {/* <div className="remember-me">
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
@@ -173,7 +175,7 @@ class Login extends Component {
                                             }
                                             label="Remember me"
                                         />                        
-                                    </div>
+                                    </div> */}
 
                                 </form>
 
@@ -194,7 +196,7 @@ class Login extends Component {
                                     </div>
                                 }
 
-                                <div className="forgotten-password"><NavLink to={'/password-reset'}>Forgotten your password?</NavLink></div>
+                                {/* <div className="forgotten-password"><NavLink to={'/password-reset'}>Forgotten your password?</NavLink></div> */}
                                 
                             </div>
                         </div>
@@ -206,6 +208,7 @@ class Login extends Component {
 };
 
 const mapStateToProps = (state, ownProps) => {
+    debugger;
     return { 
         user: state.default.user,
     }

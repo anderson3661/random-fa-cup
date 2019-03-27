@@ -17,19 +17,6 @@ router.get('/:userDocumentId', (req, res) => {
 });
 
 
-// ***************** GET (NOT USED) *******************
-// @route GET api/teams
-// @desc  Get all team documents
-// @access Public
-// router.get('/', (req, res) => {
-//     Team.find()
-//         // .sort({ date: -1 })
-//         .then(teams => {
-//             return res.json(teams)
-//         })
-// });
-
-
 // ***************** PUT *******************
 // @route PUT (or POST/PATCH) api/teams/
 // @desc  Update team documents using bulkWrite
@@ -84,16 +71,6 @@ router.delete('/:userDocumentId', (req, res) => {
     .then(() => res.json({success: true}))
     .catch(err => res.status(404).json({success: false}))
 });
-
-
-// ***************** DELETE ALL (NOT USED) *******************
-// @route DELETE api/teams
-// @desc  Delete all teams
-// @access Public
-// router.delete('/', (req, res) => {
-//     // Return success true or false as the http response
-//     Team.deleteMany({}, err => err ? res.status(404).json({success: false}) : res.json({success: true}))
-// });
 
 
 module.exports = router;

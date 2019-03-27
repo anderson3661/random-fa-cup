@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
-const AdminFactorsSchema = new Schema({
+const SettingsFactorsSchema = new Schema({
     // _id: mongoose.Schema.Types.ObjectId,
     userDocumentId: { type: String, required: true },
     season: { type: String, required: true },
@@ -21,4 +21,4 @@ const AdminFactorsSchema = new Schema({
     }
 });
 
-module.exports = AdminFactors = mongoose.model('admin-factors', AdminFactorsSchema);
+module.exports = SettingsFactors = mongoose.model('settings-factors', SettingsFactorsSchema);

@@ -169,6 +169,7 @@ export const DEFAULT_VALUE_DIVISION_FACTOR = 1.25;
 export const DEFAULT_VALUE_IS_NOT_A_TOP_TEAM_FACTOR = 1.25;
 export const DEFAULT_VALUE_GOALS_PER_MINUTE_FACTOR = [{'minutes': 30, 'factor': 1.8}, {'minutes': 80, 'factor': 1.2}, {'minutes': 140, 'factor': 1}];
 export const DEFAULT_VALUE_IS_IT_A_GOAL_FACTOR = 2;
+export const DEFAULT_VALUE_IS_IT_A_GOAL_FROM_A_PENALTY_FACTOR = 80;
 
 export const SEASON = 'season';
 export const COMPETITION_START_DATE = 'competitionStartDate';
@@ -183,14 +184,14 @@ export const HAVE_SEASONS_FIXTURES_BEEN_CREATED = 'haveSeasonsFixturesBeenCreate
 
 export const API_ENDPOINT_USERS = '/api/users';
 export const API_ENDPOINT_MISCELLANEOUS = '/api/miscellaneous';
-export const API_ENDPOINT_ADMIN_FACTORS = '/api/admin-factors';
+export const API_ENDPOINT_SETTINGS_FACTORS = '/api/settings-factors';
 export const API_ENDPOINT_TEAMS = '/api/teams';
 export const API_ENDPOINT_MY_WATCHLIST_TEAMS = '/api/my-watchlist-teams';
 export const API_ENDPOINT_FIXTURES = '/api/fixtures';
 
 export const API_ENDPOINTS_TO_LOAD_ALL_DATA = [
     API_ENDPOINT_MISCELLANEOUS,
-    API_ENDPOINT_ADMIN_FACTORS,
+    API_ENDPOINT_SETTINGS_FACTORS,
     API_ENDPOINT_TEAMS,
     API_ENDPOINT_MY_WATCHLIST_TEAMS,
     API_ENDPOINT_FIXTURES, 
@@ -198,7 +199,7 @@ export const API_ENDPOINTS_TO_LOAD_ALL_DATA = [
 
 export const API_ENDPOINTS_TO_DELETE_ALL_DATA = [
     API_ENDPOINT_MISCELLANEOUS,
-    API_ENDPOINT_ADMIN_FACTORS,
+    API_ENDPOINT_SETTINGS_FACTORS,
     API_ENDPOINT_TEAMS,
     API_ENDPOINT_FIXTURES, 
 ]
@@ -221,12 +222,20 @@ export const DIVISIONS_HEADINGS = ['Premier League', 'Championship', 'League One
 export const DIVISIONS_ABBREVIATIONS = ['PL', 'C', 'L1', 'L2', 'NL'];
 
 export const COMPETITION_ROUNDS = ['1st-round', '2nd-round', '3rd-round', '4th-round', 'quarter-finals', 'semi-finals', 'final'];
+export const COMPETITION_ROUNDS_FOR_CSS = ['first-round', 'second-round', 'third-round', 'fourth-round', 'quarter-finals', 'semi-finals', 'final'];
 export const COMPETITION_ROUNDS_HEADINGS = ['1st Round', '2nd Round', '3rd Round', '4th Round', 'Quarter Finals', 'Semi Finals', 'Final'];
 export const COMPETITION_ROUNDS_HEADINGS_ABBREVIATED = ['R1', 'R2', 'R3', 'R4', 'QF', 'SF', 'Final'];
 export const COMPETITION_ROUNDS_FIXTURES = ['round1', 'round2', 'round3', 'round4', 'quarterFinal', 'semiFinal', 'final'];
+export const FIRST_ROUND = '1st-round';
+export const SECOND_ROUND = '2nd-round';
+export const THIRD_ROUND = '3rd-round';
+export const FOURTH_ROUND = '4th-round';
 export const QUARTER_FINALS = 'quarter-finals';
 export const SEMI_FINALS = 'semi-finals';
 export const FINAL = 'final';
 
 export const IS_FIXTURES = false;
 export const IS_REPLAYS = true;
+
+export const REDIRECT_TO_HOME = '/home';
+export const REDIRECT_TO_SETTINGS = '/settings';

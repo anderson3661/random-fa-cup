@@ -2,6 +2,7 @@ import { LOADING_BACKEND_UPDATE, LOAD_FROM_USERS_DB, USER_AUTHENTICATION, USER_S
 import { isUserAuthenticated, userSignUpDoesUserAlreadyExist, createDocumentInASingleDocumentDb } from '../../utilities/data-backend';
 import { API_ENDPOINT_USERS } from '../../utilities/constants';
 import { loadFromAllDbsStarted } from './miscellaneousActions';
+import { settingsResetApp } from './settingsActions';
 
 // ACTION CREATORS
 
@@ -28,6 +29,7 @@ export const userSignup = (userDetails) => async (dispatch) => {
         } else {
             const results = await createDocumentInASingleDocumentDb(userDetails, API_ENDPOINT_USERS, 'User');
             dispatch({ type: LOAD_FROM_USERS_DB, data: { ...results, authenticated: true }});            // The API call returns an object so update the store
+            dispatch(settingsResetApp());                                                                // Need to reset the app (as is used on the Settings screen)
         }
         dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingUser: false }});
     } catch(error) {

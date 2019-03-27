@@ -1,4 +1,4 @@
-import { TEAMS_DEFAULT, FIXTURES_DEFAULT, COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES, API_ENDPOINT_USERS, API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_ADMIN_FACTORS, API_ENDPOINT_TEAMS, API_ENDPOINT_MY_WATCHLIST_TEAMS, API_ENDPOINT_FIXTURES, API_ENDPOINTS_TO_DELETE_ALL_DATA, HAVE_SEASONS_FIXTURES_BEEN_CREATED, DIVISIONS, NUMBER_OF_TEAMS } from './constants';
+import { TEAMS_DEFAULT, FIXTURES_DEFAULT, COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES, API_ENDPOINT_USERS, API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_SETTINGS_FACTORS, API_ENDPOINT_TEAMS, API_ENDPOINT_MY_WATCHLIST_TEAMS, API_ENDPOINT_FIXTURES, API_ENDPOINTS_TO_DELETE_ALL_DATA, HAVE_SEASONS_FIXTURES_BEEN_CREATED, DIVISIONS, NUMBER_OF_TEAMS } from './constants';
 
 // const APP_DATA_LOCAL_STORAGE = "football_AppInfo";
 
@@ -35,7 +35,7 @@ export async function fetchDataFromAllDbs(documentIdInUsersDb) {
     // This is called by the starting function getAppDataFromDb, to load the data from the databases into arrays (and update the Redux store)
     let res;
     let dataFromMiscellaneousDb;
-    let dataFromAdminFactorsDb;
+    let dataFromSettingsFactorsDb;
     let dataFromTeamsDb;
     let dataFromMyWatchlistTeamsDb;
     let dataFromFixturesDb;
@@ -48,10 +48,10 @@ export async function fetchDataFromAllDbs(documentIdInUsersDb) {
         dataFromMiscellaneousDb = await res.json();
         console.log('dataFromMiscellaneousDb', dataFromMiscellaneousDb);
 
-        res = await fetch(API_ENDPOINT_ADMIN_FACTORS + "/" + documentIdInUsersDb);
+        res = await fetch(API_ENDPOINT_SETTINGS_FACTORS + "/" + documentIdInUsersDb);
         if (!res.ok) throw Error(res.statusText);
-        dataFromAdminFactorsDb = await res.json();
-        console.log('dataFromAdminFactorsDb', dataFromAdminFactorsDb);
+        dataFromSettingsFactorsDb = await res.json();
+        console.log('dataFromSettingsFactorsDb', dataFromSettingsFactorsDb);
 
         res = await fetch(API_ENDPOINT_TEAMS + "/" + documentIdInUsersDb);
         if (!res.ok) throw Error(res.statusText);
@@ -70,7 +70,7 @@ export async function fetchDataFromAllDbs(documentIdInUsersDb) {
         // Now format the individual fixtures into sets of fixtures
         let setsOfFixtures = await formatFixtures(dataFromFixturesDb);
 
-        return { dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures };
+        return { dataFromMiscellaneousDb, dataFromSettingsFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures };
 
     } catch(err) {
         console.log(err);
@@ -78,19 +78,19 @@ export async function fetchDataFromAllDbs(documentIdInUsersDb) {
     }
 }
 
-export const errorWithNumbersOfDocumentsInDatabases = (dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures) => {
+export const errorWithNumbersOfDocumentsInDatabases = (dataFromMiscellaneousDb, dataFromSettingsFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures) => {
     // Data has been loaded from the databases, but there is one or more inconsistencies with the number of documents
     // const numberOffixturesForCompetition = dataFromMiscellaneousDb[0][NUMBER_OF_FIXTURES_FOR_SEASON];
     const haveSeasonsFixturesBeenCreated = dataFromMiscellaneousDb[0][HAVE_SEASONS_FIXTURES_BEEN_CREATED];
     console.log('An unknown error has occured with the databases');
     console.log('Documents in Miscellaneous database:', dataFromMiscellaneousDb.length);
-    console.log('Documents in Admin Factors database:', dataFromAdminFactorsDb.length);
+    console.log('Documents in Settings Factors database:', dataFromSettingsFactorsDb.length);
     console.log('Documents in Teams database:', dataFromTeamsDb.length);
     console.log('Documents in My Watchlist Teams database:', dataFromMyWatchlistTeamsDb.length);
     console.log('Documents in Fixtures database:', dataFromFixturesDb.length);
     console.log('haveSeasonsFixturesBeenCreated in state:', haveSeasonsFixturesBeenCreated);
     if (dataFromMiscellaneousDb.length !== 1) throw new Error(`There should only be 1 miscellaneous document on the DB, but there are ${dataFromMiscellaneousDb.length}`);
-    if (dataFromAdminFactorsDb.length !== 1) throw new Error(`There should only be 1 admin-factors document on the DB, but there are ${dataFromAdminFactorsDb.length}`);
+    if (dataFromSettingsFactorsDb.length !== 1) throw new Error(`There should only be 1 setting-factors document on the DB, but there are ${dataFromSettingsFactorsDb.length}`);
     if (dataFromTeamsDb.length !== NUMBER_OF_TEAMS) throw new Error(`There should be ${NUMBER_OF_TEAMS} teams documents on the DB, but there are ${dataFromTeamsDb.length}`);
     if (haveSeasonsFixturesBeenCreated && dataFromFixturesDb.length === 0) throw new Error(`There are 0 fixtures documents on the DB, but haveSeasonsFixturesBeenCreated is true`);
     // if (haveSeasonsFixturesBeenCreated && dataFromFixturesDb.length !== numberOffixturesForCompetition * numberOfTeams / 2) throw new Error(`There are ${dataFromFixturesDb.length} fixtures documents on the DB, but there should be ${numberOffixturesForCompetition * numberOfTeams}`);
@@ -99,9 +99,9 @@ export const errorWithNumbersOfDocumentsInDatabases = (dataFromMiscellaneousDb, 
     // if (setsOfFixtures.length !== dataFromFixturesDb.length / numberOffixturesForCompetition) throw new Error(`There are ${setsOfFixtures.length} sets of fixtures, but there but there should be ${dataFromFixturesDb.length / numberOffixturesForCompetition}`);
 }
 
-export const doesFixturesDbContainCorrectNumberOfDocuments = (dataFromMiscellaneousDb, dataFromAdminFactorsDb, dataFromFixturesDb, setsOfFixtures) => {
+export const doesFixturesDbContainCorrectNumberOfDocuments = (dataFromMiscellaneousDb, dataFromSettingsFactorsDb, dataFromFixturesDb, setsOfFixtures) => {
     const numberOfTeams = TEAMS_DEFAULT.length;
-    // const numberOffixturesForCompetition = dataFromAdminFactorsDb[0][NUMBER_OF_FIXTURES_FOR_SEASON];
+    // const numberOffixturesForCompetition = dataFromSettingsFactorsDb[0][NUMBER_OF_FIXTURES_FOR_SEASON];
     const numberOffixturesForCompetition = 0;
     const haveSeasonsFixturesBeenCreated = dataFromMiscellaneousDb[0][HAVE_SEASONS_FIXTURES_BEEN_CREATED];
     return true;
@@ -174,7 +174,7 @@ export const deleteAllDocumentsInDbs = (documentIdInUsersDb) => {
 export const createDocumentInASingleDocumentDb = (obj, apiEndpoint, dbDescription, documentIdInUsersDb) => {
     // This function is called when the app is reset, or the app is loaded for the first time after the user has registered.
     // The Miscellaneous document in the database is a single document which stores various values required by the app.
-    // The AdminFactors document in the database is a single document which stores the values entered (excluding teams) on the Administration screen.
+    // The SettingsFactors document in the database is a single document which stores the values entered (excluding teams) on the Settings screen.
 
     try {
         if (documentIdInUsersDb) obj.userDocumentId = documentIdInUsersDb;
@@ -216,7 +216,6 @@ export const createMyWatchlistTeamsDocumentsInDb = (myWatchlistTeams, documentId
     // The My Watchlist Team documents in the database just store a document for each team with the team's name.
     let bulkData = [];
     let i;
-    let j;
 
     debugger;
     for (i = 0; i < myWatchlistTeams.length; i++) {
@@ -277,7 +276,7 @@ export const mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray = (originalVa
 }
 
 export const updateTeamsDocumentsInDb = (updatedValues) => {
-    // This function is called when changes to the teams on the Administration screen are then saved
+    // This function is called when changes to the teams on the Settings screen are then saved
     let bulkData = [];
 
         updatedValues.forEach(updatedValue => {
@@ -293,7 +292,7 @@ export const updateTeamsDocumentsInDb = (updatedValues) => {
 }
 
 export const updateMyWatchlistTeamsDocumentsInDb = (updatedValues) => {
-    // This function is called when changes to the My Watchlist Teams on the Administration screen are then saved
+    // This function is called when changes to the My Watchlist Teams on the Settings screen are then saved
     let bulkData = [];
 
         updatedValues.forEach(updatedValue => {
@@ -309,7 +308,7 @@ export const updateMyWatchlistTeamsDocumentsInDb = (updatedValues) => {
 }
 
 export const deleteMyWatchlistTeamsDocumentsInDb = (deletedValues) => {
-    // This function is called when changes to the My Watchlist Teams on the Administration screen are then saved
+    // This function is called when changes to the My Watchlist Teams on the Settings screen are then saved
     let bulkData = [];
 
     deletedValues.forEach(updatedValue => {
@@ -345,8 +344,8 @@ export const updateMiscellaneousDocumentInDb = (miscellaneousDocumentIdInDb, cha
     return sendDataToAPIEndpoint(API_ENDPOINT_MISCELLANEOUS + "/" + miscellaneousDocumentIdInDb, 'Miscellaneous', 'PUT', changes);
 }
 
-export const updateAdminFactorsDocumentInDb = (adminFactorsDocumentIdInDb, changes) => {
-    return sendDataToAPIEndpoint(API_ENDPOINT_ADMIN_FACTORS + "/" + adminFactorsDocumentIdInDb, 'Admin Factors', 'PUT', changes);
+export const updateSettingsFactorsDocumentInDb = (settingsFactorsDocumentIdInDb, changes) => {
+    return sendDataToAPIEndpoint(API_ENDPOINT_SETTINGS_FACTORS + "/" + settingsFactorsDocumentIdInDb, 'Settings Factors', 'PUT', changes);
 }
 
 async function sendDataToAPIEndpoint(apiEndpoint, dataName, method, dataToSend) {
@@ -360,7 +359,7 @@ async function sendDataToAPIEndpoint(apiEndpoint, dataName, method, dataToSend) 
         if (res.ok) {
             results = await res.json();
             console.log('results', results);
-            const plural = (apiEndpoint === API_ENDPOINT_ADMIN_FACTORS ? '' : 's');
+            const plural = (apiEndpoint === API_ENDPOINT_SETTINGS_FACTORS ? '' : 's');
             console.log(`${dataName} document${plural} successfully ${method === 'POST' ? 'created' : (method === 'PUT' ? 'updated' : method)} in db`);
             return Promise.resolve(results);
         } else {

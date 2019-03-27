@@ -1,51 +1,91 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
 
+import CompetitionRound from './competition-round';
 import TeamsLeftByDivision from './teams-left-by-division';
 import * as helpers from '../../utilities/helper-functions/helpers';
-
-import { MAIN_BACKGROUND_IMAGE, FA_CUP_IMAGE, COMPETITION_ROUNDS, COMPETITION_ROUNDS_HEADINGS } from '../../utilities/constants';
-
+import { MAIN_BACKGROUND_IMAGE, FA_CUP_IMAGE, COMPETITION_ROUNDS, SEASON } from '../../utilities/constants';
 
 import './home.scss';
 
 
+// No need for class as component never updates
 const Home = (props) => {
 
-    const { teamsForCompetition, fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished } = props;
+    const { authenticated, fixturesForCompetition, hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw,
+            haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays, teamsRemainingInCompetitionByDivision } = props;
 
     return (
 
         <div className="container-home">
             <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
 
-            {/* <div className="nav-home"></div> */}
-
             <div className="fa-cup-image">
                 <img src={FA_CUP_IMAGE} alt=""></img>
             </div>
 
-            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 1)}
-            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 2)}
-            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 3)}
-            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 4)}
-            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 5)}
-            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 6)}
-            {roundDiv(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, 7)}
+            {COMPETITION_ROUNDS.map((competitionRound, competitionRoundOfFootballIndex) => {
 
-            {!hasCompetitionFinished &&
-                <TeamsLeftByDivision
-                    teamsForCompetition={teamsForCompetition}
-                    fixturesForCompetition={fixturesForCompetition}
-                    hasCompetitionStarted={hasCompetitionStarted}
-                />
-            }
+                let displayPlayReplaysLabel = false, displayPlayFixturesLabel = false, displayPlay = false, displayFixturesAndResultsLabel = false, displayResultsLabel = false, displayFixturesLabel = false, displayFixturesOrResults = false;
+
+                const isCompetitionExpectingDraw = authenticated && okToProceedWithDraw;
+                const isCompetitionExpectingToPlayFixtures = authenticated && !haveFixturesForCompetitionRoundBeenPlayed;
+                const isCompetitionExpectingToPlayReplays = haveFixturesForCompetitionRoundBeenPlayed && haveFixturesProducedReplays;
+                const isCompetitionExpectingToShowReplays = okToProceedWithDraw && haveFixturesForCompetitionRoundBeenPlayed && haveFixturesProducedReplays;
+
+                const competitionRoundForNextDrawIndex = helpers.getCompetitionRoundIndex(competitionRoundForNextDraw);
+                const competitionRoundForPlayIndex = helpers.getCompetitionRoundIndex(competitionRoundForPlay);
+
+                const displayDrawLabel = (!hasCompetitionFinished && isCompetitionExpectingDraw && competitionRoundOfFootballIndex === competitionRoundForNextDrawIndex);
+
+                if (!displayDrawLabel) {
+                    
+                    if (!isCompetitionExpectingDraw) {
+                        // Display 'Play Rx Fixtures' or 'Play Rx Replays'
+                        displayPlayFixturesLabel = isCompetitionExpectingToPlayFixtures && (competitionRoundOfFootballIndex === competitionRoundForPlayIndex);
+                        displayPlayReplaysLabel = isCompetitionExpectingToPlayReplays && (competitionRoundOfFootballIndex === competitionRoundForPlayIndex);
+                        displayPlay = displayPlayReplaysLabel || displayPlayFixturesLabel;
+                    }
+                    
+                    if (!displayPlay) {
+                        // Display 'Fixtures & Results' or 'Fixtures' or 'Results'
+                        displayFixturesAndResultsLabel = isCompetitionExpectingToShowReplays && (competitionRoundOfFootballIndex === competitionRoundForPlayIndex);
+                        displayResultsLabel = hasCompetitionFinished || (!displayFixturesAndResultsLabel && competitionRoundOfFootballIndex < competitionRoundForPlayIndex);
+                        displayFixturesLabel = (!displayFixturesAndResultsLabel && !displayResultsLabel && competitionRoundOfFootballIndex < competitionRoundForNextDrawIndex);
+                        displayFixturesOrResults = displayFixturesAndResultsLabel || displayResultsLabel || displayFixturesLabel;
+                    }
+                }
+
+                const isCompetitionRoundActive = displayDrawLabel || displayPlay || displayFixturesOrResults;
+                const linkTo = displayDrawLabel ? '/draw' : (displayPlay ? '/fixtures-latest' : (displayFixturesOrResults ? '/fixtures-and-results' : ""));
+                
+                if (competitionRoundOfFootballIndex === 5) {
+                    debugger;
+                }
+
+                return(
+                    <CompetitionRound
+                        key={competitionRoundOfFootballIndex}
+                        linkTo={linkTo}
+                        competitionRoundOfFootball={competitionRound}
+                        isCompetitionRoundActive={isCompetitionRoundActive}
+                        displayDrawLabel={displayDrawLabel}
+                        displayPlayReplaysLabel={displayPlayReplaysLabel}
+                        displayPlayFixturesLabel={displayPlayFixturesLabel}
+                        displayResultsLabel={displayResultsLabel}
+                        displayFixturesLabel={displayFixturesLabel}
+                        displayFixturesAndResultsLabel={displayFixturesAndResultsLabel}
+                    />
+                )
+
+            })}
+
+            {authenticated && !hasCompetitionFinished && <TeamsLeftByDivision teamsRemainingInCompetitionByDivision={teamsRemainingInCompetitionByDivision} />}
 
             {hasCompetitionFinished &&
                 <div className="container-card display-winners">
-                    <p className="heading">2018/19 Winners</p>
-                    <p className="winners">Manchester United</p>
+                    <p className="heading">{`${props.settingsFactors[SEASON]} Winners`}</p>
+                    <p className="winners">{helpers.getWinningTeamInFinal(fixturesForCompetition[fixturesForCompetition.length - 1].finalFixtures)}</p>
                 </div>
             }
             
@@ -53,50 +93,23 @@ const Home = (props) => {
     );
 }
  
-const roundDiv = (fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished, roundNumberOfFootball) => {
-    const competitionRound = COMPETITION_ROUNDS[roundNumberOfFootball - 1];
-    const nextCompetitionRoundForDraw = helpers.getNextCompetitionRoundForDraw(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished);
-    const competitionRoundIndexForDraw = COMPETITION_ROUNDS.indexOf(nextCompetitionRoundForDraw.competitionRound);
-    const competitionRoundForPlay = helpers.getCompetitionRoundForPlay(fixturesForCompetition, hasCompetitionStarted, hasCompetitionFinished);
-    const labelContainsReplaysIndex = competitionRoundForPlay.label.indexOf("Replays");
-    const competitionRoundPlayReplays = (labelContainsReplaysIndex !== -1);
-    const competitionRoundIndexForPlay = COMPETITION_ROUNDS_HEADINGS.indexOf(labelContainsReplaysIndex === -1 ? competitionRoundForPlay.label : competitionRoundForPlay.label.substr(0, labelContainsReplaysIndex - 1));
-    const isThisCompetitionRoundActiveForDraw = (roundNumberOfFootball === (competitionRoundIndexForDraw + 1));
-    const isThisCompetitionRoundActiveForPlay = (roundNumberOfFootball === (competitionRoundIndexForPlay + 1));
-    const canDisplayDrawLabel = (nextCompetitionRoundForDraw.okToProceedWithDraw && isThisCompetitionRoundActiveForDraw);
-    const canDisplayPlayFixturesLabel = (competitionRoundForPlay.okToProceedWithPlay && isThisCompetitionRoundActiveForPlay);
-    const canDisplayFixturesAndResultsLabel = (
-            hasCompetitionFinished ||
-            (isThisCompetitionRoundActiveForPlay && !competitionRoundForPlay.okToProceedWithPlay) ||
-            ((competitionRoundIndexForPlay === -1 && roundNumberOfFootball < (competitionRoundIndexForDraw + 1)) ||
-            (!isThisCompetitionRoundActiveForPlay && roundNumberOfFootball <= (competitionRoundIndexForPlay + (competitionRoundPlayReplays ? 2 : 1)))));
-    const isCompetitionRoundActive = (canDisplayDrawLabel || canDisplayPlayFixturesLabel || canDisplayFixturesAndResultsLabel);
-    const isCompetitionRoundFinished = helpers.haveAllFixturesAndReplaysForCompetitionRoundFinished(fixturesForCompetition, roundNumberOfFootball - 1);
-    const areReplaysForCompetitionRoundStillToBePlayed = helpers.areReplaysForCompetitionRoundStillToBePlayed(fixturesForCompetition, roundNumberOfFootball - 1);
-    const linkTo = canDisplayDrawLabel ? '/draw' : (canDisplayPlayFixturesLabel ? '/fixtures-latest' : (canDisplayFixturesAndResultsLabel ? '/fixtures-and-results' : ""));
-    if (roundNumberOfFootball === 5) {
-        debugger;
-    }
-    return (
-        <NavLink to={linkTo} className="nav-link" activeClassName="active-link">
-            <div className={`competition-round ${"_" + competitionRound} ${isCompetitionRoundActive ? "active" : "deactivated"}`}>
-                <div className="competition-round-label">{COMPETITION_ROUNDS_HEADINGS[roundNumberOfFootball - 1]}</div>
-                {canDisplayDrawLabel && <div>Draw</div>}
-                {canDisplayPlayFixturesLabel && <div>Play {competitionRoundPlayReplays ? "Replays" : "Fixtures"}</div>}
-                {canDisplayFixturesAndResultsLabel && <div className="fixtures-and-results">{isCompetitionRoundFinished ? "Results" : (areReplaysForCompetitionRoundStillToBePlayed ? "Fixtures / Results" : "Fixtures") }</div>}
-            </div>
-        </NavLink>
-    )
-}
+const mapStateToProps = (state) => {
+    const { authenticated } = state.default.user;
+    const { hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw, haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays } = state.default.miscellaneous;
+    const { teamsForCompetition, fixturesForCompetition, settingsFactors } = state.default;
 
-
-const mapStateToProps = (state, ownProps) => {
-    const { hasCompetitionStarted, hasCompetitionFinished } = state.default.miscellaneous;
     return {
-        teamsForCompetition: state.default.teamsForCompetition,
-        fixturesForCompetition: state.default.fixturesForCompetition,
-        hasCompetitionStarted,
+        authenticated,
+        teamsForCompetition: teamsForCompetition,
+        fixturesForCompetition: fixturesForCompetition,
+        settingsFactors: settingsFactors,
         hasCompetitionFinished,
+        competitionRoundForNextDraw,
+        competitionRoundForPlay,
+        okToProceedWithDraw,
+        haveFixturesForCompetitionRoundBeenPlayed,
+        haveFixturesProducedReplays,
+        teamsRemainingInCompetitionByDivision: helpers.getTeamsRemainingInCompetitionByDivision(teamsForCompetition, fixturesForCompetition, helpers.getPreviousCompetitionRound(competitionRoundForNextDraw)),
     }
 }
 

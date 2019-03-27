@@ -5,7 +5,7 @@ const path = require('path');
 
 const users = require('./routes/api/users');
 const miscellaneous = require('./routes/api/miscellaneous');
-const adminFactors = require('./routes/api/admin-factors');
+const settingsFactors = require('./routes/api/settings-factors');
 const teams = require('./routes/api/teams');
 const myWatchlistTeams = require('./routes/api/my-watchlist-teams');
 const fixtures = require('./routes/api/fixtures');
@@ -27,7 +27,7 @@ mongoose.connect(db, { useNewUrlParser: true })
 //Use routes
 app.use('/api/users', users);
 app.use('/api/miscellaneous', miscellaneous);
-app.use('/api/admin-factors', adminFactors);
+app.use('/api/settings-factors', settingsFactors);
 app.use('/api/teams', teams);
 app.use('/api/my-watchlist-teams', myWatchlistTeams);
 app.use('/api/fixtures', fixtures);

@@ -1,40 +1,29 @@
 const express = require('express');
 const router = express.Router();
 
-const MODEL_NAME = 'adminFactors';
+const MODEL_NAME = 'settingsFactors';
 
-//AdminFactors Model
-const AdminFactors = require('../../models/AdminFactors');
+//SettingsFactors Model
+const SettingsFactors = require('../../models/SettingsFactors');
 
 
 // ***************** GET *******************
-// @route GET api/admin-factors
-// @desc  Get all Admin Factors documents  (should only be 1 for each user)
+// @route GET api/settings-factors
+// @desc  Get all Settings Factors documents  (should only be 1 for each user)
 // @access Public
 router.get('/:userDocumentId', (req, res) => {
-    AdminFactors.find({ userDocumentId: req.params.userDocumentId })
+    SettingsFactors.find({ userDocumentId: req.params.userDocumentId })
         .then(results => res.json(results))
 });
 
 
-// ***************** GET (NOT USED) *******************
-// @route GET api/admin-factors
-// @desc  Get all Admin Factors documents  (should only be 1)
-// @access Public
-// router.get('/', (req, res) => {
-//     AdminFactors.find()
-//         // .sort({ date: -1 })
-//         .then(adminFactors => res.json(adminFactors))
-// });
-
-
 // ***************** PUT *******************
-// @route PUT (or POST/PATCH) api/admin-factors/:id
-// @desc  Update the Admin Factors document
+// @route PUT (or POST/PATCH) api/settings-factors/:id
+// @desc  Update the Settings Factors document
 // @access Public
 router.put('/:id', (req, res) => {
 
-    AdminFactors.findOneAndUpdate({ _id: req.params.id}, req.body)
+    SettingsFactors.findOneAndUpdate({ _id: req.params.id}, req.body)
         .then(results => {
             const response = res.json(results);
             console.log(`${MODEL_NAME.toUpperCase()} - updated - response - statusCode: ${response.statusCode}, statusMessage: ${response.statusMessage}`);
@@ -44,8 +33,8 @@ router.put('/:id', (req, res) => {
 
 
 // ***************** PUT (UNUSED) *******************
-// @route PUT (or POST/PATCH) api/admin-factors/:id
-// @desc  Update the Admin Factors document
+// @route PUT (or POST/PATCH) api/settings-factors/:id
+// @desc  Update the Settings Factors document
 // @access Public
 // router.put('/:id', (req, res) => {
     // console.log('Starting');
@@ -54,10 +43,10 @@ router.put('/:id', (req, res) => {
     // console.log(req.body.teamName);
     // const updatedTeam = { teamName: req.body.teamName, isATopTeam: req.body.isATopTeam };
 
-    // AdminFactors.findOneAndUpdate({ _id: req.params.id}, req.body)
+    // SettingsFactors.findOneAndUpdate({ _id: req.params.id}, req.body)
     // Team.findByIdAndUpdate(req.params.id, updatedTeam)
     // Team.findById(req.params.id)
-        // .then(adminFactors => adminFactors.save())
+        // .then(settingsFactors => settingsFactors.save())
         // .then(results => console.log(results))
         // .then(team => {
         //     console.log(res.json(team));
@@ -69,18 +58,18 @@ router.put('/:id', (req, res) => {
 
 
 // ***************** POST *******************
-// @route POST api/admin-factors
-// @desc  Create an Admin Factors document
+// @route POST api/settings-factors
+// @desc  Create an Settings Factors document
 // @access Public
 router.post('/', (req, res) => {
-    const newAdminFactors = new AdminFactors({
+    const newSettingsFactors = new SettingsFactors({
         userDocumentId: req.body.userDocumentId,
         season: req.body.season,
         competitionStartDate: req.body.competitionStartDate,
         goalFactors: req.body.goalFactors
     });
 
-    newAdminFactors.save()
+    newSettingsFactors.save()
         .then(results => {
             const response = res.json(results);
             console.log(`${MODEL_NAME.toUpperCase()} - inserted - response - statusCode: ${response.statusCode}, statusMessage: ${response.statusMessage}`);
@@ -90,25 +79,15 @@ router.post('/', (req, res) => {
 
 
 // ***************** DELETE BY USER *******************
-// @route DELETE api/admin-factors/:id
-// @desc  Delete an Admin Factor document
+// @route DELETE api/settings-factors/:id
+// @desc  Delete an Settings Factor document
 // @access Public
 router.delete('/:userDocumentId', (req, res) => {
-    AdminFactors.findOneAndDelete({ userDocumentId: req.params.userDocumentId })
-        // .then(adminFactor => adminFactor.remove().then(() => res.json({success: true})))        
+    SettingsFactors.findOneAndDelete({ userDocumentId: req.params.userDocumentId })
+        // .then(settingsFactor => settingsFactor.remove().then(() => res.json({success: true})))        
         .then(() => res.json({success: true}))
         .catch(err => res.status(404).json({success: false}))
 });
     
     
-// ***************** DELETE ALL (NOT USED) *******************
-// @route DELETE api/admin-factors
-// @desc  Delete all Admin Factors documents
-// @access Public
-// router.delete('/', (req, res) => {
-//     // Return success true or false as the http response
-//     AdminFactors.deleteMany({}, err => err ? res.status(404).json({success: false}) : res.json({success: true}))
-// });
-
-
 module.exports = router;

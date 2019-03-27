@@ -79,16 +79,6 @@ router.post('/', (req, res) => {
 });
 
 
-// ***************** DELETE *******************
-// @route DELETE api/users
-// @desc  Delete all users
-// @access Public
-// router.delete('/', (req, res) => {
-//     // Return success true or false as the http response
-//     User.deleteMany({}, err => err ? res.status(404).json({success: false}) : res.json({success: true}))
-// });
-
-
 // ***************** DELETE (UNUSED) *******************
 // @route DELETE api/users/:id
 // @desc  Delete a user

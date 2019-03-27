@@ -1,14 +1,13 @@
 import React, { Component, Fragment } from "react";
-
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
-import FixtureRow from "../fixture-row/fixture-row";
+import FixtureRow from "../common/fixture-row";
 import * as helpers from '../../utilities/helper-functions/helpers';
-
 import { FOOTBALL_IMAGE } from '../../utilities/constants';
 
 import "../../utilities/css/fixtures.scss";
+
 
 class FixturesAndResultsFixtureSet extends Component {
 
@@ -19,8 +18,6 @@ class FixturesAndResultsFixtureSet extends Component {
     render() {
 
         const { fixtures, teamsForCompetition, hasCompetitionStarted, displayFixtures, displayResults, displayHeader } = this.props;
-
-        debugger;
 
         return (
 

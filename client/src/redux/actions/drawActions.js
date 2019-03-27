@@ -4,19 +4,25 @@ import { updateMiscellaneousDocumentInDb, createFixturesDocumentsInDb, mergeDocu
 
 // ACTION CREATORS
 
-export const updateDbsAndStoreAfterDraw = (fixturesMadeByDraw) => async (dispatch, getState) => {
+export const updateDbsAndStoreAfterDraw = (fixturesMadeByDraw, competitionRoundForNextDraw) => async (dispatch, getState) => {
     try {
         debugger;
         dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingDraw: true }});
+
         const results = await createFixturesDocumentsInDb(fixturesMadeByDraw, getState().default.user._id);
         const updatedData = mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray(fixturesMadeByDraw, results);
         dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: {fixtures: updatedData }});
+
+        const data = { competitionRoundForNextDraw, okToProceedWithDraw: false };
+        await updateMiscellaneousDocumentInDb(getState().default.miscellaneous._id, data);
+        dispatch({ type: UPDATE_MISCELLANEOUS_PROPERTY, data });
 
         if (!getState().default.miscellaneous.hasCompetitionStarted) {
             const data = { hasCompetitionStarted: true };
             await updateMiscellaneousDocumentInDb(getState().default.miscellaneous._id, data);
             dispatch({ type: UPDATE_MISCELLANEOUS_PROPERTY, data });
         }
+
         dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingDraw: false }});
     } catch(error) {
         console.log('Error from updateDbsAndStoreAfterDraw', error);

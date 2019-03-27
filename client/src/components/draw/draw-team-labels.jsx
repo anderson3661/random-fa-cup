@@ -1,6 +1,6 @@
 import React, { Fragment } from "react";
 
-import { DIVISIONS, DIVISIONS_ABBREVIATIONS } from '../../utilities/constants';
+import * as helpers from '../../utilities/helper-functions/helpers';
 
 const DrawTeamLabels = (props) => {
     let slash;
@@ -24,7 +24,7 @@ const DrawTeamLabels = (props) => {
         teamLast = teamName.substr(teamsSlashIndex + 2);
         divisionFirst = division.substr(0, slashIndex - 1);
         divisionLast = division.substr(slashIndex + 2);
-        divisionAbbreviation = (division === 'premierLeague' ? null : DIVISIONS_ABBREVIATIONS[DIVISIONS.indexOf(division)]);
+        divisionAbbreviation = helpers.getDivisionAbbreviationForFixtureOrDrawRow(division);
     }
 
     return (
@@ -35,17 +35,17 @@ const DrawTeamLabels = (props) => {
                     {positionAfter ?
                         <Fragment>
                             <span className={divisionFirst}>{teamFirst}</span>&nbsp;
-                            <span className="division">{divisionFirst === 'premierLeague' ? null : DIVISIONS_ABBREVIATIONS[DIVISIONS.indexOf(divisionFirst)]}</span>
+                            <span className="division">{helpers.getDivisionAbbreviationForFixtureOrDrawRow(divisionFirst)}</span>
                             &nbsp;{slash}&nbsp;
                             <span className={divisionLast}>{teamLast}</span>&nbsp;
-                            <span className="division">{divisionLast === 'premierLeague' ? null : DIVISIONS_ABBREVIATIONS[DIVISIONS.indexOf(divisionLast)]}</span>
+                            <span className="division">{helpers.getDivisionAbbreviationForFixtureOrDrawRow(divisionLast)}</span>
                         </Fragment>
                     :
                         <Fragment>
-                            <span className="division">{divisionFirst === 'premierLeague' ? null : DIVISIONS_ABBREVIATIONS[DIVISIONS.indexOf(divisionFirst)]}</span>&nbsp;
+                            <span className="division">{helpers.getDivisionAbbreviationForFixtureOrDrawRow(divisionFirst)}</span>&nbsp;
                             <span className={divisionFirst}>{teamFirst}</span>
                             &nbsp;{slash}&nbsp;
-                            <span className="division">{divisionLast === 'premierLeague' ? null : DIVISIONS_ABBREVIATIONS[DIVISIONS.indexOf(divisionLast)]}</span>&nbsp;
+                            <span className="division">{helpers.getDivisionAbbreviationForFixtureOrDrawRow(divisionLast)}</span>&nbsp;
                             <span className={divisionLast}>{teamLast}</span>
                         </Fragment>
                     }

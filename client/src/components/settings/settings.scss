@@ -2,9 +2,9 @@
 @import '../../sass/_variables';
 
 
-.outer-container-administration {
+.outer-container-settings {
 
-    .container-main-content-administration {
+    .container-main-content-settings {
         width: 80%;
         margin: 14vh auto 8vh auto;
 
@@ -96,9 +96,9 @@
             @include flex($justify-content: space-around);
         }
         
-        .container-admin {
+        .container-settings {
 
-            .container-admin-factors {
+            .container-settings-factors {
                 display: flex;
                 margin: 0 0 0 0;
                 
@@ -113,25 +113,25 @@
                 .grid-season-info.match-score-factors .fullWidth .likelihoodOfAGoalDuringASetPeriod-input-field { width: 100%; }
             }
 
-            .container-admin-teams, .container-admin-my-watchlist-teams {
+            .container-settings-teams, .container-settings-my-watchlist-teams {
                 display: flex;
                 flex-wrap: wrap;
                 > div { width: 40%; margin-bottom: 3vh; }
             }
 
-            .container-admin-my-watchlist-teams button { margin: 0.5vh 0; }
-            .container-admin-my-watchlist-teams button.button-add-team { margin-bottom: 1vh; }
+            .container-settings-my-watchlist-teams button { margin: 0.5vh 0; }
+            .container-settings-my-watchlist-teams button.button-add-team { margin-bottom: 1vh; }
 
-            table.admin-teams {
+            table.settings-teams {
                 width: 100%;
                 border-collapse: collapse;
                 margin-bottom: 1vh;
                 
-                .admin-team-number { width: 15%; text-align: center; }
-                .admin-team-team { width: 50%; text-align: left}
-                .admin-team-top-team { width: 15%; text-align: center}
+                .settings-team-number { width: 15%; text-align: center; }
+                .settings-team-team { width: 50%; text-align: left}
+                .settings-team-top-team { width: 15%; text-align: center}
             
-                .teams-header { background-color: $background-color-admin-teams-header; }
+                .teams-header { background-color: $background-color-settings-teams-header; }
                 .teams-header th { padding: 0.5vh 0.5vw; font-size: 90%;}
             
                 .team-row input { width: 100%; padding: 0.1vh 0.25vw;}   
@@ -140,7 +140,7 @@
                     border-bottom: 1px solid lightgray;
                     // padding: 0.5vh 0.5vw;
 
-                    &.admin-team-number { font-size: 80%; }
+                    &.settings-team-number { font-size: 80%; }
                 }
             
                 input { color: #495057; }
@@ -150,7 +150,7 @@
                 // .teamName-input-field { border-bottom: 1px solid lightgray; }
 
                 input#teamName { text-align: left; font-weight: 700; font-size: 100%; }
-                td.admin-team-isATopTeam { text-align: center; }
+                td.settings-team-isATopTeam { text-align: center; }
             }
         
         }
@@ -173,36 +173,36 @@
 
 @media all and (min-width: 1280px) {
 
-    // .container-admin-teams { max-width: 45%; }
+    // .container-settings-teams { max-width: 45%; }
 }
 
 @media all and (max-width: 1280px) {
 
-    // .container-admin > div { margin: 0 auto; }
+    // .container-settings > div { margin: 0 auto; }
 
 }
 
 @media all and (max-width: 1024px) {
-    .outer-container-administration {
-        .container-main-content-administration {
+    .outer-container-settings {
+        .container-main-content-settings {
             width: 90%;
             header {
                 flex-direction: column;
                 span { padding-bottom: 1vh; }
             }
-            .container-admin .container-admin-factors .buttons { @include flex($flex-direction: column); }
+            .container-settings .container-settings-factors .buttons { @include flex($flex-direction: column); }
         }
     }
 }
 
 @media all and (max-width: 768px) {
-    .outer-container-administration {
-        .container-main-content-administration {
-            .container-admin {
+    .outer-container-settings {
+        .container-main-content-settings {
+            .container-settings {
                 display: initial;
                 > div { width: 100%; margin: 0 auto; }
-                .container-admin-teams { width: 100%; margin-bottom: 3vh;}
-                .container-admin-factors { margin: 0; }
+                .container-settings-teams { width: 100%; margin-bottom: 3vh;}
+                .container-settings-factors { margin: 0; }
             }
         }
     }

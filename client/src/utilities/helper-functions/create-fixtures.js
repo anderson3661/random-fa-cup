@@ -52,13 +52,13 @@ const createSetOfFixtures = (teamsRemainingInCompetition) => {
     return setOfFixtures;
 }
 
-const getFixturesDate = (date) => {
-    let fixturesDate;
-    let fixturesDateNew;
+// const getFixturesDate = (date) => {
+//     let fixturesDate;
+//     let fixturesDateNew;
 
-    fixturesDate = new Date(date);
-    fixturesDateNew = new Date(fixturesDate);
-    fixturesDateNew.setDate(fixturesDateNew.getDate() + 7);
+//     fixturesDate = new Date(date);
+//     fixturesDateNew = new Date(fixturesDate);
+//     fixturesDateNew.setDate(fixturesDateNew.getDate() + 7);
 
-    return fixturesDateNew.toDateString();
-}
+//     return fixturesDateNew.toDateString();
+// }

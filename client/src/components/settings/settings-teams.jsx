@@ -2,9 +2,7 @@ import React, { Component } from "react";
 import Checkbox from '@material-ui/core/Checkbox';
 
 import { DIVISIONS_HEADINGS } from '../../utilities/constants';
-import { haveTeamValuesChanged, haveValidationErrorValuesChanged } from './administration-helpers';
-import AdminFieldInput from './admin-field-input';
-import * as helpers from '../../utilities/helper-functions/helpers';
+import SettingsFieldInput from './settings-field-input';
 
 
 class SettingsTeams extends Component {
@@ -36,13 +34,13 @@ class SettingsTeams extends Component {
 
                 <h2>{ DIVISIONS_HEADINGS[divisionIndex] + ' Teams' }</h2>
 
-                <table className="admin-teams">
+                <table className="settings-teams">
 
                     <thead>
                         <tr className="teams-header">
-                            <th className="admin-team-number">No.</th>
-                            <th className="admin-team-team">Team</th>
-                            <th className="admin-team-top-team">Top Team?</th>
+                            <th className="settings-team-number">No.</th>
+                            <th className="settings-team-team">Team</th>
+                            <th className="settings-team-top-team">Top Team?</th>
                         </tr>
                     </thead>
 
@@ -51,10 +49,10 @@ class SettingsTeams extends Component {
                             const teamsValidationError = teamsValidationErrors[teamIndex].errors;
                             return (
                                 <tr key={teamIndex} className="team-row">
-                                    <td className="admin-team-number">{teamIndex + 1}</td>
+                                    <td className="settings-team-number">{teamIndex + 1}</td>
 
                                     <td>
-                                        <AdminFieldInput
+                                        <SettingsFieldInput
                                             name="teamName"
                                             value={team.teamName}
                                             disabled={hasCompetitionStarted}
@@ -65,9 +63,9 @@ class SettingsTeams extends Component {
                                         {teamsValidationError && <div className="validation-error">{teamsValidationError}</div>}
                                     </td>
 
-                                    <td className="admin-team-isATopTeam">
+                                    <td className="settings-team-isATopTeam">
                                         <Checkbox
-                                            className="admin-team-isATopTeam"
+                                            className="settings-team-isATopTeam"
                                             checked={team.isATopTeam}
                                             disabled={hasCompetitionStarted}
                                             onChange={this.handleTopTeamsInputChange.bind(this, divisionIndex, teamIndex)}

@@ -29,12 +29,12 @@ class SettingsMyWatchlistTeams extends Component {
                 <h2>My Watchlist Teams</h2>
                 <Button className="button-add-team" variant="contained" color="primary" id="addTeam" size="small" disabled={!authenticated || hasCompetitionFinished} onClick={this.handleAddTeam}>Add Team</Button>
 
-                <table className="admin-teams">
+                <table className="settings-teams">
 
                     <thead>
                         <tr className="teams-header">
-                            <th className="admin-team-number">No.</th>
-                            <th className="admin-team-team">Team</th>
+                            <th className="settings-team-number">No.</th>
+                            <th className="settings-team-team">Team</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -43,7 +43,7 @@ class SettingsMyWatchlistTeams extends Component {
                         {myWatchlistTeams.map((team, teamIndex) => {
                             return (
                                 <tr key={teamIndex} className="team-row">
-                                    <td className="admin-team-number">{teamIndex + 1}</td>
+                                    <td className="settings-team-number">{teamIndex + 1}</td>
 
                                     <td>
                                         <Select

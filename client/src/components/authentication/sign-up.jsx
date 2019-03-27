@@ -8,7 +8,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import { userSignup } from '../../redux/actions/userActions';
 
-import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE } from '../../utilities/constants';
+import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, REDIRECT_TO_SETTINGS } from '../../utilities/constants';
 
 import "./sign-up.scss";
 
@@ -114,11 +114,11 @@ class SignUp extends Component {
     }
 
     componentWillReceiveProps(nextProps, prevState) {
-        console.log(this.state);
+        // console.log(this.state);
         debugger;
         if (nextProps.user.authenticated && !this.props.user.authenticated) {
-            // Re-route to the administration page
-            this.props.history.push('/administration');
+            // Re-route to the Settings page
+            this.props.history.push(REDIRECT_TO_SETTINGS);
         } else if (this.state.submitAttempted && nextProps.user.signUpUserAlreadyExists) {
             this.setState({ userAlreadyExists: true });
         } else if (this.state.submitAttempted && nextProps.user.signUpAttempted) {
@@ -190,7 +190,7 @@ class SignUp extends Component {
                                     </div>
                                     {submitAttempted && formErrors.userConfirmPassword.length > 0 ? <div className="errorMessage">{formErrors.userConfirmPassword}</div> : <div>&nbsp;</div>}
 
-                                    <div className="remember-me">
+                                    {/* <div className="remember-me">
                                         <FormControlLabel
                                             control={
                                                 <Checkbox
@@ -202,7 +202,7 @@ class SignUp extends Component {
                                             }
                                             label="Remember me"
                                         />                        
-                                    </div>
+                                    </div> */}
 
                                 </form>
 

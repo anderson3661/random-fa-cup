@@ -4,8 +4,9 @@ import { API_ENDPOINT_FIXTURES } from '../../utilities/constants';
 
 // ACTION CREATORS
 
-export const updateDbsAndStoreAfterLatestResults = (latestFixtures, replays, replayUpdatesInFixturesDb, replayUpdatesInStore, finalFixture) => async (dispatch, getState) => {
+export const updateDbsAndStoreAfterLatestResults = (latestFixtures, replays, replayUpdatesInFixturesDb, replayUpdatesInStore, finalFixture, miscellaneousUpdates) => async (dispatch, getState) => {
     try {
+
         dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingLatestFixtures: true }});
         await updateDocumentsInDbAfterLatestResults(latestFixtures, API_ENDPOINT_FIXTURES, 'Fixtures');
         dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: { fixtures: latestFixtures }});
@@ -33,6 +34,10 @@ export const updateDbsAndStoreAfterLatestResults = (latestFixtures, replays, rep
             await updateMiscellaneousDocumentInDb(getState().default.miscellaneous._id, miscellaneousPropertiesToUpdate);
             dispatch({ type: UPDATE_MISCELLANEOUS_PROPERTY, data: { ...miscellaneousPropertiesToUpdate }});
         }
+
+        await updateMiscellaneousDocumentInDb(getState().default.miscellaneous._id, miscellaneousUpdates);
+        dispatch({ type: UPDATE_MISCELLANEOUS_PROPERTY, data: miscellaneousUpdates });
+
         dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingLatestFixtures: false }});
     } catch(error) {
         console.log('Error from updateDbsAndStoreAfterLatestResults', error);

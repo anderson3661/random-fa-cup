@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 
-import FieldInput from './admin-crud-field-input';
+import FieldInput from './settings-crud-field-input';
 
 
-class AdminFieldInput extends Component {
+class SettingsFieldInput extends Component {
     // It uses lodash debounce so that it isn't updating state on every key press
 
     constructor(props) {
@@ -56,4 +56,4 @@ class AdminFieldInput extends Component {
     }
 }
 
-export default AdminFieldInput;
+export default SettingsFieldInput;

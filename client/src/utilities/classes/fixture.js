@@ -1,12 +1,18 @@
 import * as helpers from '../helper-functions/helpers';
 
-import { DEFAULT_VALUE_COMPETITION_START_DATE, DEFAULT_VALUE_COMPETITION_START_TIME, DIVISIONS } from '../constants';
+import { DEFAULT_VALUE_COMPETITION_START_DATE, DEFAULT_VALUE_COMPETITION_START_TIME, DIVISIONS, SEMI_FINALS, FINAL } from '../constants';
 
 const EXTRA_MINUTES_FIRST_HALF = 5;
 const EXTRA_MINUTES_SECOND_HALF = 9;
+const EXTRA_MINUTES_EXTRA_TIME_FIRST_HALF = 2;
+const EXTRA_MINUTES_EXTRA_TIME_SECOND_HALF = 3;
 
 const HALF_TIME = "Half-Time";
+const HALF_TIME_IN_EXTRA_TIME = "Half-Time (ET)";
 const FULL_TIME = "Full-Time";
+const FULL_TIME_AFTER_90_MINUTES = "Full-Time (90)";
+const FULL_TIME_AFTER_EXTRA_TIME = "Full-Time (AET)";
+const FULL_TIME_AFTER_PENALTIES = "Full-Time (pens)";
 
 
 export class Fixture {
@@ -21,18 +27,27 @@ export class Fixture {
     awayTeamDivision;
     homeTeamsScore;
     awayTeamsScore;
-    homeTeamsGoals = "";
+    homeTeamsScoreAfter90Minutes;
+    awayTeamsScoreAfter90Minutes
+    homeTeamsScorePenalties;
+    awayTeamsScorePenalties;
+    homeTeamsGoals;
     awayTeamsGoals;
     isFirstHalf;
+    isExtraTime;
+    isPenalties;
     injuryTimeFirstHalf;
     injuryTimeSecondHalf;
+    injuryTimeExtraTimeFirstHalf;
+    injuryTimeExtraTimeSecondHalf;
     statutoryMinutes;
     maxNumberOfMinutes;
     minutesPlayed;
     minutesInfo;
     hasFixtureFinished;
+    hasPenaltiesStarted;
     isReplay;
-
+    penalties = []
     goalFactors;
     props;
 
@@ -49,109 +64,130 @@ export class Fixture {
         this.isReplay = fixture.isReplay;
     }
 
-    getFixtureObject() {
-        return {
-            _id: this._id,
-            competitionRound: this.competitionRound,
-            dateOfFixture: this.dateOfFixture,
-            timeOfFixture: this.timeOfFixture,
-            homeTeam: this.homeTeam,
-            awayTeam: this.awayTeam,
-            homeTeamDivision: this.homeTeamDivision,
-            awayTeamDivision: this.awayTeamDivision,
-            homeTeamsScore: this.homeTeamsScore,
-            awayTeamsScore: this.awayTeamsScore,
-            homeTeamsGoals: this.homeTeamsGoals,
-            awayTeamsGoals: this.awayTeamsGoals,
-            injuryTimeFirstHalf: this.injuryTimeFirstHalf,
-            injuryTimeSecondHalf: this.injuryTimeSecondHalf,
-            minutesPlayed: this.minutesPlayed,
-            minutesInfo: this.minutesInfo,
-            hasFixtureFinished: this.hasFixtureFinished,
-            isReplay: this.isReplay,
-        }
-    }
-
     setUpFixture(goalFactors) {
         this.isFirstHalf = true;
+        this.isExtraTime = false;
+        this.isPenalties = false;
         this.hasFixtureFinished = false;
+        this.hasPenaltiesStarted = false;
         this.minutesPlayed = 0;
         this.minutesInfo = '';
 
         this.injuryTimeFirstHalf = Math.floor(Math.random() * EXTRA_MINUTES_FIRST_HALF + 1);
         this.injuryTimeSecondHalf = Math.floor(Math.random() * EXTRA_MINUTES_SECOND_HALF + 1);
+        this.injuryTimeExtraTimeFirstHalf = Math.floor(Math.random() * EXTRA_MINUTES_EXTRA_TIME_FIRST_HALF + 1);
+        this.injuryTimeExtraTimeSecondHalf = Math.floor(Math.random() * EXTRA_MINUTES_EXTRA_TIME_SECOND_HALF + 1);
 
-        // Goal Factors on the Administration screen needs to be a string, and here it is transposed into an array
+        // Goal Factors on the Settings screen needs to be a string, and here it is transposed into an array
         this.goalFactors = helpers.getGoalsPerMinuteFactors(goalFactors.likelihoodOfAGoalDuringASetPeriod, 'array');
     }
 
-    startFixture(haveFixturesBeenPaused) {
+    startFixture() {
         //Set the scores to zero for the start of the fixture
-        if (this.isFirstHalf) {
+        if (this.isFirstHalf && !this.isExtraTime) {
             this.homeTeamsScore = 0;
             this.awayTeamsScore = 0;
+            this.homeTeamsScorePenalties = 0;
+            this.awayTeamsScorePenalties = 0;
             this.homeTeamsGoals = "";
             this.awayTeamsGoals = "";
         }
 
-        this.statutoryMinutes = (this.isFirstHalf) ? 45 : 90;
-        this.minutesPlayed = (this.isFirstHalf) ? 0 : 45;
-        this.maxNumberOfMinutes = this.statutoryMinutes + ((this.isFirstHalf) ? this.injuryTimeFirstHalf : this.injuryTimeSecondHalf);
+        if (this.isPenalties) {
+            this.minutesPlayed = 0;         // This records the number of penalties taken for each team
+            this.penalties = [];
+            this.hasPenaltiesStarted = true;
+        } else if (this.isExtraTime) {
+            this.statutoryMinutes = (this.isFirstHalf) ? 105 : 120;
+            this.minutesPlayed = (this.isFirstHalf) ? 90 : 105;
+            this.maxNumberOfMinutes = this.statutoryMinutes + ((this.isFirstHalf) ? this.injuryTimeExtraTimeFirstHalf : this.injuryTimeExtraTimeSecondHalf);
+        } else {
+            this.statutoryMinutes = (this.isFirstHalf) ? 45 : 90;
+            this.minutesPlayed = (this.isFirstHalf) ? 0 : 45;
+            this.maxNumberOfMinutes = this.statutoryMinutes + ((this.isFirstHalf) ? this.injuryTimeFirstHalf : this.injuryTimeSecondHalf);
+        }
     }
 
     updateFixture(teams, goalFactors) {
         let i;
-        // let updateTable;
         let minutesinMatchFactor;
         let homeTeamUpdate;
         let awayTeamUpdate;
         let isFirstHalfBeforeUpdate;
 
-        // updateTable = false;
         homeTeamUpdate = false;
         awayTeamUpdate = false;
 
-        if (this.minutesPlayed < this.maxNumberOfMinutes) {
+        if (!this.hasFixtureFinished && this.isPenalties && this.minutesPlayed < 120) {
 
-            minutesinMatchFactor = 0;
-
-            // for (i = 0; i < this.goalFactors[0].length; i++) {
-            for (i = 0; i < this.goalFactors.length; i++) {
-                // if (this.minutesPlayed <= this.goalFactors[0][i].minutes) {
-                if (this.minutesPlayed <= this.goalFactors[i].minutes) {
-                    // minutesinMatchFactor = this.goalFactors[0][i].factor;
-                    minutesinMatchFactor = this.goalFactors[i].factor;
-                    break;
-                }
-            }
+            debugger;
 
             this.minutesPlayed++;
 
-            if (this.minutesPlayed <= this.maxNumberOfMinutes) {
-                homeTeamUpdate = this.hasTeamScored(teams, goalFactors, "home", minutesinMatchFactor);
-                awayTeamUpdate = this.hasTeamScored(teams, goalFactors, "away", minutesinMatchFactor);
+            this.penalties.push( { hasHomeTeamScored: this.hasTeamScored(teams, goalFactors, "home", 1), hasAwayTeamScored: this.hasTeamScored(teams, goalFactors, "away", 1) } );
+
+            if ((this.minutesPlayed >= 5 && ((this.homeTeamsScorePenalties - this.awayTeamsScorePenalties) !== 0)) ||
+            (this.minutesPlayed === 4 && Math.abs(this.homeTeamsScorePenalties - this.awayTeamsScorePenalties) > 1) ||
+            (this.minutesPlayed === 3 && Math.abs(this.homeTeamsScorePenalties - this.awayTeamsScorePenalties) > 2)) {
+                debugger;
+                this.minutesInfo = FULL_TIME_AFTER_PENALTIES;
+                this.hasFixtureFinished = true;
             }
 
-            isFirstHalfBeforeUpdate = this.isFirstHalf;         // Get a handle to whether it is the first half (as this is needed for the Goal 'typing' Updates), before it is updated below.
+        } else if (!this.isPenalties) {
 
-            //Check for half time or end of fixtures
-            if (this.minutesPlayed === this.maxNumberOfMinutes) {
-                if (this.isFirstHalf) {
-                    this.minutesInfo = HALF_TIME;
-                    this.isFirstHalf = false;
-                } else {
-                    this.minutesInfo = FULL_TIME;
-                    this.hasFixtureFinished = true;
+            if (this.minutesPlayed < this.maxNumberOfMinutes) {
+
+                minutesinMatchFactor = 0;
+
+                for (i = 0; i < this.goalFactors.length; i++) {
+                    if (this.minutesPlayed <= this.goalFactors[i].minutes) {
+                        minutesinMatchFactor = this.goalFactors[i].factor;
+                        break;
+                    }
                 }
-            } else {
-                this.minutesInfo = this.minutesPlayed + ((this.minutesPlayed === 1) ? " min" : " mins");
+
+                this.minutesPlayed++;
+
+                if (this.minutesPlayed <= this.maxNumberOfMinutes) {
+                    homeTeamUpdate = this.hasTeamScored(teams, goalFactors, "home", minutesinMatchFactor);
+                    awayTeamUpdate = this.hasTeamScored(teams, goalFactors, "away", minutesinMatchFactor);
+                }
+
+                isFirstHalfBeforeUpdate = this.isFirstHalf;         // Get a handle to whether it is the first half (as this is needed for the Goal 'typing' Updates), before it is updated below.
+
+                //Check for half time or end of fixtures
+                if (this.minutesPlayed === this.maxNumberOfMinutes) {
+                    if (this.isFirstHalf && !this.isExtraTime) {
+                        this.minutesInfo = HALF_TIME;
+                        this.isFirstHalf = false;
+                    } else if ((this.isReplay || this.competitionRound === SEMI_FINALS || this.competitionRound === FINAL) &&
+                               !this.isExtraTime && this.homeTeamsScore === this.awayTeamsScore) {                 // Replays, Semi Finals and Final go to extra time and penalties
+                        this.homeTeamsScoreAfter90Minutes = this.homeTeamsScore;
+                        this.awayTeamsScoreAfter90Minutes = this.awayTeamsScore;
+                        this.isFirstHalf = true;
+                        this.isExtraTime = true;
+                        this.minutesInfo = FULL_TIME_AFTER_90_MINUTES;
+                    } else if (this.isExtraTime && this.isFirstHalf) {
+                        this.isFirstHalf = false;
+                        this.minutesInfo = HALF_TIME_IN_EXTRA_TIME;
+                    } else if (this.isExtraTime && !this.isFirstHalf && !this.isPenalties) {
+                        this.minutesInfo = FULL_TIME_AFTER_EXTRA_TIME;
+                        if (this.homeTeamsScore === this.awayTeamsScore) {
+                            this.isPenalties = true
+                         } else {
+                             this.hasFixtureFinished = true;
+                         }
+                    } else {
+                        this.minutesInfo = FULL_TIME;
+                        this.hasFixtureFinished = true;
+                    }
+                } else {
+                    this.minutesInfo = this.minutesPlayed + ((this.minutesPlayed === 1) ? " min" : " mins");
+                }
+
             }
-
         }
-
-        // if (updateTable) {
-            // debugger;
-        // }
 
         return {homeTeamUpdate, awayTeamUpdate, isFirstHalfBeforeUpdate};
     }
@@ -167,7 +203,6 @@ export class Fixture {
         let thisTeamsDivision;
         let oppositionTeamsDivision;
         let isItAGoalFactor;
-
         
         awayTeamFactor = (whichTeam === "home") ? 1 : goalFactors.isAwayTeam;
         
@@ -189,20 +224,29 @@ export class Fixture {
             }
         }
         
-        isItAGoalFactor = goalFactors.isItAGoal;
+        // isItAGoalFactor = this.isPenalties ? goalFactors.isItAGoalFromAPenalty : goalFactors.isItAGoal;
+        isItAGoalFactor = this.isPenalties ? 80 : goalFactors.isItAGoal;
 
         // Has a goal been scored
         if (Math.floor(Math.random() * goalFactors.baseForRandomMultiplier * minutesinMatchFactor * awayTeamFactor * isNotATopTeamFactor * divisionFactor) < isItAGoalFactor) {
 
-            this[whichTeam + "TeamsScore"] += 1;
+            if (this.isPenalties) {
 
-            if (this.minutesPlayed > this.statutoryMinutes) {
-                this[whichTeam + "TeamsGoals"] += this.statutoryMinutes.toString() + "(+" + (this.minutesPlayed - this.statutoryMinutes).toString() + ")  ";
+                this[whichTeam + "TeamsScorePenalties"] += 1;
+                return true;        // Return true to update the penalties array
+
             } else {
-                this[whichTeam + "TeamsGoals"] += this.minutesPlayed + "  ";
-            }
 
-            return true       // Return true to re-display
+                this[whichTeam + "TeamsScore"] += 1;
+
+                if (this.minutesPlayed > this.statutoryMinutes) {
+                    this[whichTeam + "TeamsGoals"] += this.statutoryMinutes.toString() + "(+" + (this.minutesPlayed - this.statutoryMinutes).toString() + ")  ";
+                } else {
+                    this[whichTeam + "TeamsGoals"] += this.minutesPlayed + "  ";
+                }
+
+                return true       // Return true to re-display
+            }
         }
         return false;
     }

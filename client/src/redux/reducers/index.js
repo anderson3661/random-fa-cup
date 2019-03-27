@@ -2,16 +2,16 @@ import { combineReducers } from 'redux';
 
 import userReducer from './userReducer';
 import miscellaneousReducer from './miscellaneousReducer';
-import adminFactorsReducer from './adminFactorsReducer';
-import adminTeamsReducer from './adminTeamsReducer';
-import adminMyWatchlistTeamsReducer from './adminMyWatchlistTeamsReducer';
+import settingsFactorsReducer from './settingsFactorsReducer';
+import settingsTeamsReducer from './settingsTeamsReducer';
+import settingsMyWatchlistTeamsReducer from './settingsMyWatchlistTeamsReducer';
 import fixturesReducer from './fixturesReducer';
 
 export default combineReducers({
     user: userReducer,
     miscellaneous: miscellaneousReducer,
-    adminFactors: adminFactorsReducer,
-    teamsForCompetition: adminTeamsReducer,
-    myWatchlistTeams: adminMyWatchlistTeamsReducer,
+    settingsFactors: settingsFactorsReducer,
+    teamsForCompetition: settingsTeamsReducer,
+    myWatchlistTeams: settingsMyWatchlistTeamsReducer,
     fixturesForCompetition: fixturesReducer,
 });

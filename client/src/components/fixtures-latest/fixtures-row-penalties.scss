@@ -1,0 +1,39 @@
+@import '../../sass/mixins';
+@import '../../sass/_variables';
+
+
+.fixtures-row-penalties-summary, .fixtures-row-penalties {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+    font-size: $font-size-penalties;
+    color: $color-penalties;
+}
+
+.fixtures-row-penalties-summary .fixtures-row-scores.penalties {
+    border-bottom: none;
+}
+
+.fixtures-row-penalties:last-child {
+    // border-bottom: 1px solid $color-fixture-border-bottom;
+    border-bottom: 1px solid lightgray;
+}
+
+.penaltiesInfo, .penalty.number {
+    text-align: center;
+    margin-bottom: 1vh;
+}
+
+.teamScorePenalties, .penalty.homeTeam, .penalty.awayTeam {
+    // width: $width-fixture-team-penalties;
+    width: 35%;
+    margin-bottom: 1vh;
+}
+
+.teamScorePenalties.homeTeam, .penalty.homeTeam { text-align: right; padding-right: 0.5vw; }
+.teamScorePenalties.awayTeam, .penalty.awayTeam { text-align: left; padding-left: 0.5vw; }
+
+.teamScorePenalties.homeTeam, .teamScorePenalties.awayTeam {
+    font-size: $font-size-penalties-team-score;
+    color: $color-penalties-team-score;
+}

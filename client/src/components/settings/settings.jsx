@@ -3,27 +3,26 @@ import { connect } from 'react-redux';
 import { Prompt } from 'react-router';
 
 import { MAIN_BACKGROUND_IMAGE, GOALS_PER_MINUTE_FACTOR, DIVISIONS } from '../../utilities/constants';
-import { getAdminFactors } from '../../utilities/data';
 import * as helpers from '../../utilities/helper-functions/helpers';
 import SettingsHeader from './settings-header';
 import SettingsFactors from './settings-factors';
 import SettingsTeams from './settings-teams';
 import SettingsMyWatchlistTeams from './settings-my-watchlist-teams';
 
-import { areThereAdminFactorsValidationErrors, areThereTeamsValidationErrors, areThereAnyChangesToTeamValues, areThereAnyChangesToMyWatchlistTeamValues,
-         areThereAnyChangesToAdminFactorsValues, getUpdatesToTeamsToSendToDb, getNewMyWatchlistTeamsToSendToDb,
-         getUpdatesToMyWatchlistTeamsToSendToDb, getDeletedMyWatchlistTeamsToSendToDb, getUpdatesToAdminFactorsToSendToDb, getUpdatesToGoalFactorsToSendToDb,
-         getNewTeamsArray, getNewMyWatchlistTeamsArray, deleteTeamFromMyWatchlistTeamsArray, validateAdminFactors, validateTeams,
-         getTeamsValidationError, blankTeamsValidationError } from './administration-helpers';
+import { getSettingsFactors, areThereSettingsFactorsValidationErrors, areThereTeamsValidationErrors, areThereAnyChangesToTeamValues, areThereAnyChangesToMyWatchlistTeamValues,
+         areThereAnyChangesToSettingsFactorsValues, getUpdatesToTeamsToSendToDb, getNewMyWatchlistTeamsToSendToDb,
+         getUpdatesToMyWatchlistTeamsToSendToDb, getDeletedMyWatchlistTeamsToSendToDb, getUpdatesToSettingsFactorsToSendToDb, getUpdatesToGoalFactorsToSendToDb,
+         getNewTeamsArray, getNewMyWatchlistTeamsArray, deleteTeamFromMyWatchlistTeamsArray, validateSettingsFactors, validateTeams,
+         getTeamsValidationError, blankTeamsValidationError } from './settings-helpers';
 
-import { adminSaveChanges, adminResetApp } from '../../redux/actions/administrationActions';
+import { settingsSaveChanges, settingsResetApp } from '../../redux/actions/settingsActions';
 
 import ConfirmationDialog from '../dialogs/confirmationDialog';
 import ConfirmationYesNo from '../dialogs/confirmYesNo';
 
 import Loading from '../loading/loading';
 
-import "./administration.scss";
+import "./settings.scss";
 
 const LOCAL_STATE = {
     dataStorage: 'browser',
@@ -37,7 +36,7 @@ const LOCAL_STATE = {
     haveChangesBeenMade: false,
 }
 
-class Administration extends Component {
+class Settings extends Component {
 
     input;
     data;
@@ -48,25 +47,25 @@ class Administration extends Component {
 
         this.state = Object.assign({},
                         LOCAL_STATE,
-                        getAdminFactors(props.adminFactors, true, false, 'string'),
+                        getSettingsFactors(props.settingsFactors, true, false, 'string'),
                         { teams: props.teamsForCompetition },
-                        { adminFactorsValidationErrors: this.createAdminFactorsValidationErrorsArray(props)},
+                        { settingsFactorsValidationErrors: this.createSettingsFactorsValidationErrorsArray(props)},
                         { teamsValidationErrors: this.createTeamValidationErrorsArray(props)},
                         { myWatchlistTeams: props.myWatchlistTeams },
                     );
 
-        this.updateOriginalValues('props', props.adminFactors);
+        this.updateOriginalValues('props', props.settingsFactors);
 
         this.teamsForCompetitionFlattened = helpers.getTeamsForCompetitionFlattened(props.teamsForCompetition);
     }
 
-    createAdminFactorsValidationErrorsArray = (props) => {
-        let adminFactorsValidationErrors = {};
-        const adminFactorsObject = getAdminFactors(props.adminFactors, true, false, 'string');
-        Object.entries(adminFactorsObject).forEach(([key, val]) => {
-            adminFactorsValidationErrors = Object.assign({}, adminFactorsValidationErrors, { [key]: '' });
+    createSettingsFactorsValidationErrorsArray = (props) => {
+        let settingsFactorsValidationErrors = {};
+        const settingsFactorsObject = getSettingsFactors(props.settingsFactors, true, false, 'string');
+        Object.entries(settingsFactorsObject).forEach(([key, val]) => {
+            settingsFactorsValidationErrors = Object.assign({}, settingsFactorsValidationErrors, { [key]: '' });
         });
-        return adminFactorsValidationErrors;
+        return settingsFactorsValidationErrors;
     }
 
     createTeamValidationErrorsArray = (props) => {
@@ -79,7 +78,7 @@ class Administration extends Component {
 
     updateOriginalValues = (sourceType, sourceArray) => {
         // These are used to see whether any values have changed so that a warning can be issued if the user trys to navigate away from the page
-        this.originalValuesAdminFactors = Object.assign({}, getAdminFactors(sourceArray, sourceType === 'props', false, 'string'));
+        this.originalValuesSettingsFactors = Object.assign({}, getSettingsFactors(sourceArray, sourceType === 'props', false, 'string'));
         // this.originalValuesTeams = this.state.teams.map(a => ({...a}));         // Deep clone of object
         this.originalValuesTeams = helpers.deepClone(this.state.teams);
         this.originalValuesMyWatchlistTeams = helpers.deepClone(this.state.myWatchlistTeams);
@@ -87,19 +86,19 @@ class Administration extends Component {
 
     componentWillReceiveProps(nextProps, prevState) {
         // The following is required in order to display the correct dialog message (i.e. it has either worked, or there has been a backend error)
-        // console.log('nextProps loadAdmin', nextProps.miscellaneous.loadingAdmin);
-        // console.log('nextProps error loadAdmin', nextProps.miscellaneous.loadingBackendError);
-        // console.log('this.props loadAdmin', this.props.miscellaneous.loadingAdmin);
+        // console.log('nextProps loadingSettings', nextProps.miscellaneous.loadingSettings);
+        // console.log('nextProps error loadingSettings', nextProps.miscellaneous.loadingBackendError);
+        // console.log('this.props loadingSettings', this.props.miscellaneous.loadingSettings);
 
-        if (!nextProps.miscellaneous.loadingAdmin && this.props.miscellaneous.loadingAdmin) {
+        if (!nextProps.miscellaneous.loadingSettings && this.props.miscellaneous.loadingSettings) {
             this.checkForBackEndChanges(nextProps, 'dialogSaveChangesIsActive', 'dialogSaveChangesIsOpen');
             this.checkForBackEndChanges(nextProps, 'dialogResetAppIsActive', 'dialogResetAppConfirmIsOpen');
         }
         
-        let nextPropsAdminFactors = getAdminFactors(nextProps.adminFactors, true, true, 'string');      // Flatten the array to make it easier to compare
-        let thisPropsAdminFactors = getAdminFactors(this.props.adminFactors, true, true, 'string');      // Flatten the array to make it easier to compare
+        let nextPropsSettingsFactors = getSettingsFactors(nextProps.settingsFactors, true, true, 'string');      // Flatten the array to make it easier to compare
+        let thisPropsSettingsFactors = getSettingsFactors(this.props.settingsFactors, true, true, 'string');      // Flatten the array to make it easier to compare
 
-        this.setStateOnChangeAdminFactors(nextPropsAdminFactors, thisPropsAdminFactors);
+        this.setStateOnChangeSettingsFactors(nextPropsSettingsFactors, thisPropsSettingsFactors);
 
         this.setStateOnChangeTeams(nextProps);
 
@@ -107,7 +106,7 @@ class Administration extends Component {
     }
 
     checkForBackEndChanges = (nextProps, localStateActionIsActive, localStateFieldToUpdate) => {
-        // If the new value of loadingAdmin is false and the old value is true then the appropriate update (i.e. to Save Changes or Reset App) has completed.
+        // If the new value of loadingSettings is false and the old value is true then the appropriate update (i.e. to Save Changes or Reset App) has completed.
         // If that has returned an error then display the error dialog, otherwise display the appropriate dialog to say that the process has completed.
         let saveChangesIsActive = (localStateActionIsActive === 'dialogSaveChangesIsActive');
         let resetAppIsActive = (localStateActionIsActive === 'dialogResetAppIsActive');
@@ -126,12 +125,12 @@ class Administration extends Component {
         }
     }
 
-    setStateOnChangeAdminFactors = (obj, objPrevious, nestedObject = '') => {
-        // If any of the AdminFactors values have changed then update local state
+    setStateOnChangeSettingsFactors = (obj, objPrevious, nestedObject = '') => {
+        // If any of the SettingsFactors values have changed then update local state
         let haveChangesBeenMade = false;
         Object.entries(obj).forEach(([key, val]) => {
             if (val && typeof val === 'object') {
-                this.setStateOnChangeAdminFactors(val, objPrevious, key);  // recurse.
+                this.setStateOnChangeSettingsFactors(val, objPrevious, key);  // recurse.
             } else {
                 let valPrevious = (nestedObject !== '' ? objPrevious[nestedObject][key] : objPrevious[key]);
                 if (val !== valPrevious) {
@@ -158,11 +157,11 @@ class Administration extends Component {
         }
     }
 
-    handleChangeAdminFactorsFields = (objectKey) => (updatedValue) => {
-        // handleChangeAdminFactorsFields = (field) => (e) => {
+    handleChangeSettingsFactorsFields = (objectKey) => (updatedValue) => {
+        // handleChangeSettingsFactorsFields = (field) => (e) => {
         this.setState({ [objectKey]: updatedValue.trim() }, this.updateHaveChangesBeenMadeAfterUserEdit);
-        const validationErrors = helpers.deepClone(this.state.adminFactorsValidationErrors);
-        if (validationErrors[objectKey] !== '') this.setState({ adminFactorsValidationErrors: Object.assign({}, validationErrors, { [objectKey]: '' }) });        
+        const validationErrors = helpers.deepClone(this.state.settingsFactorsValidationErrors);
+        if (validationErrors[objectKey] !== '') this.setState({ settingsFactorsValidationErrors: Object.assign({}, validationErrors, { [objectKey]: '' }) });        
     }
 
     handleTeamsInputChange = (divisionIndex, teamIndex, updatedValue) => {
@@ -190,30 +189,30 @@ class Administration extends Component {
     }
 
     updateHaveChangesBeenMadeAfterUserEdit = () => {
-        // This is called whenever the user makes a change to the teams or any of the admin factors
+        // This is called whenever the user makes a change to the teams or any of the settings factors
         if (areThereAnyChangesToTeamValues( this.originalValuesTeams, this.state.teams) ||
             areThereAnyChangesToMyWatchlistTeamValues(this.originalValuesMyWatchlistTeams, this.state.myWatchlistTeams) ||
-            areThereAnyChangesToAdminFactorsValues(this.originalValuesAdminFactors, getAdminFactors(this.state, false, false, 'string'))) {
+            areThereAnyChangesToSettingsFactorsValues(this.originalValuesSettingsFactors, getSettingsFactors(this.state, false, false, 'string'))) {
                 this.setState({ haveChangesBeenMade: true });
         }
     }
 
     handleSaveChanges = (e) => {
-        let adminFactors;
+        let settingsFactors;
         let updatedTeams;
         let newMyWatchlistTeams;
         let updatedMyWatchlistTeams;
         let deletedMyWatchlistTeams;
-        let updatedAdminFactors;
+        let updatedSettingsFactors;
         let updatedGoalFactors;
 
         e.preventDefault();
 
         debugger;
         
-        const adminFactorsValidationErrors = validateAdminFactors(this.state);
-        if (areThereAdminFactorsValidationErrors(adminFactorsValidationErrors)) {
-            this.setState({ adminFactorsValidationErrors });
+        const settingsFactorsValidationErrors = validateSettingsFactors(this.state);
+        if (areThereSettingsFactorsValidationErrors(settingsFactorsValidationErrors)) {
+            this.setState({ settingsFactorsValidationErrors: settingsFactorsValidationErrors });
             return;
         }
         
@@ -229,23 +228,23 @@ class Administration extends Component {
         updatedMyWatchlistTeams = getUpdatesToMyWatchlistTeamsToSendToDb(this.originalValuesMyWatchlistTeams, this.state.myWatchlistTeams);
         deletedMyWatchlistTeams = getDeletedMyWatchlistTeamsToSendToDb(this.originalValuesMyWatchlistTeams, this.state.myWatchlistTeams);
 
-        adminFactors = getAdminFactors(this.state, false, true, 'string');
-        updatedAdminFactors = getUpdatesToAdminFactorsToSendToDb(this.originalValuesAdminFactors, adminFactors);
-        updatedGoalFactors = getUpdatesToGoalFactorsToSendToDb(this.originalValuesAdminFactors, adminFactors);
+        settingsFactors = getSettingsFactors(this.state, false, true, 'string');
+        updatedSettingsFactors = getUpdatesToSettingsFactorsToSendToDb(this.originalValuesSettingsFactors, settingsFactors);
+        updatedGoalFactors = getUpdatesToGoalFactorsToSendToDb(this.originalValuesSettingsFactors, settingsFactors);
         
         // Update the GOALS_PER_MINUTE_FACTOR (i.e. likelihoodOfAGoal) property, which is stored as a string so need to convert it to an array so that it gets saved in the database as an array
-        adminFactors.goalFactors[GOALS_PER_MINUTE_FACTOR] = helpers.getGoalsPerMinuteFactors(adminFactors.goalFactors[GOALS_PER_MINUTE_FACTOR], 'array');
+        settingsFactors.goalFactors[GOALS_PER_MINUTE_FACTOR] = helpers.getGoalsPerMinuteFactors(settingsFactors.goalFactors[GOALS_PER_MINUTE_FACTOR], 'array');
 
         // If any of the nested goalFactors object values have changes then send the whole nested goalFactors object, otherwise the database doesn't get updated correctly
-        if (helpers.doesObjectHaveAnyProperties(updatedGoalFactors)) updatedAdminFactors.goalFactors = adminFactors.goalFactors;
+        if (helpers.doesObjectHaveAnyProperties(updatedGoalFactors)) updatedSettingsFactors.goalFactors = settingsFactors.goalFactors;
         
         // if (updatedTeams.length === 0 && newMyWatchlistTeams.length === 0 && updatedMyWatchlistTeams.length === 0 && deletedMyWatchlistTeams.length === 0 &&
-        //     !helpers.doesObjectHaveAnyProperties(updatedAdminFactors)) return;         // If no changes have been made then exit
+        //     !helpers.doesObjectHaveAnyProperties(updatedSettingsFactors)) return;         // If no changes have been made then exit
 
         this.setState({ dialogSaveChangesIsActive: true });
 
-        this.props.dispatch(adminSaveChanges(updatedTeams, newMyWatchlistTeams, updatedMyWatchlistTeams, deletedMyWatchlistTeams, updatedAdminFactors,
-            { teams: this.state.teams, myWatchlistTeams: this.state.myWatchlistTeams, adminFactors }
+        this.props.dispatch(settingsSaveChanges(updatedTeams, newMyWatchlistTeams, updatedMyWatchlistTeams, deletedMyWatchlistTeams, updatedSettingsFactors,
+            { teams: this.state.teams, myWatchlistTeams: this.state.myWatchlistTeams, settingsFactors: settingsFactors }
         ));
     }
 
@@ -256,7 +255,7 @@ class Administration extends Component {
         this.setState({ dialogResetAppYesSelected: value }, () => {
             if (this.state.dialogResetAppYesSelected) {
                 this.setState({ dialogResetAppIsActive: true });
-                this.props.dispatch(adminResetApp());              // Delete the stored app data in the database and create new documents from the default values
+                this.props.dispatch(settingsResetApp());              // Delete the stored app data in the database and create new documents from the default values
             } else {
                 this.setState({ dialogResetAppYesNoIsOpen: false });
             }
@@ -269,18 +268,17 @@ class Administration extends Component {
 
 
     render() {
-        const { haveChangesBeenMade, teams, myWatchlistTeams, adminFactorsValidationErrors, teamsValidationErrors } = this.state;
+        const { haveChangesBeenMade, teams, myWatchlistTeams, settingsFactorsValidationErrors, teamsValidationErrors } = this.state;
         const { authenticated } = this.props.user;
-        const { loadingAdmin, hasCompetitionStarted, hasCompetitionFinished } = this.props.miscellaneous;
-        debugger;
-
+        const { loadingSettings, hasCompetitionStarted, hasCompetitionFinished } = this.props.miscellaneous;
+        
         return (
             <Fragment>
-                <div className="outer-container-administration">
+                <div className="outer-container-settings">
                     <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
-                    { loadingAdmin ? <Loading /> : null }
+                    { loadingSettings ? <Loading /> : null }
                     <Prompt when={haveChangesBeenMade} message={`Are you sure you want to abandon these unsaved changes'} ?`} />
-                    <div className="container-main-content-administration">
+                    <div className="container-main-content-settings">
 
                         <SettingsHeader
                             authenticated={authenticated}
@@ -289,25 +287,25 @@ class Administration extends Component {
                             onResetApp={this.handleResetApp}
                         />
 
-                        {(areThereAdminFactorsValidationErrors(adminFactorsValidationErrors) || areThereTeamsValidationErrors(teamsValidationErrors)) &&
+                        {(areThereSettingsFactorsValidationErrors(settingsFactorsValidationErrors) || areThereTeamsValidationErrors(teamsValidationErrors)) &&
                             <div className="container-card display-validation-errors-message">
                                 <h2>Unable to save ... please correct the errors highlighted in red</h2>
                             </div>
                         }
 
-                        <div className="container-admin">
+                        <div className="container-settings">
 
-                            <div className="container-admin-factors">
+                            <div className="container-settings-factors">
                                 <SettingsFactors
                                     hasCompetitionStarted={hasCompetitionStarted}
                                     hasCompetitionFinished={hasCompetitionFinished}
-                                    settingsFactors={getAdminFactors(this.state, false, false, 'string')}
-                                    settingsFactorsValidationErrors={adminFactorsValidationErrors}
-                                    onChangeSettingsFactorsFields={this.handleChangeAdminFactorsFields}
+                                    settingsFactors={getSettingsFactors(this.state, false, false, 'string')}
+                                    settingsFactorsValidationErrors={settingsFactorsValidationErrors}
+                                    onChangeSettingsFactorsFields={this.handleChangeSettingsFactorsFields}
                                 />
                             </div>
 
-                            <div className="container-admin-teams">
+                            <div className="container-settings-teams">
                                 {teams.map((division, divisionIndex) => {
                                     const divisionObjectKey = helpers.getObjectKey(division);
                                     return (
@@ -324,7 +322,7 @@ class Administration extends Component {
                                 })};
                             </div>
 
-                            <div className="container-admin-my-watchlist-teams">
+                            <div className="container-settings-my-watchlist-teams">
                                 <SettingsMyWatchlistTeams
                                     hasCompetitionFinished={hasCompetitionFinished}
                                     teamsForCompetitionFlattened={this.teamsForCompetitionFlattened}
@@ -338,7 +336,7 @@ class Administration extends Component {
 
                         </div>
 
-                        {(areThereAdminFactorsValidationErrors(adminFactorsValidationErrors) || areThereTeamsValidationErrors(teamsValidationErrors)) &&
+                        {(areThereSettingsFactorsValidationErrors(settingsFactorsValidationErrors) || areThereTeamsValidationErrors(teamsValidationErrors)) &&
                             <div className="container-card display-validation-errors-message">
                                 <h2>Unable to save ... please correct the errors highlighted in red</h2>
                             </div>
@@ -370,10 +368,10 @@ const mapStateToProps = (state, ownProps) => {
         user: state.default.user,
         teamsForCompetition: state.default.teamsForCompetition,
         myWatchlistTeams: state.default.myWatchlistTeams,
-        adminFactors: state.default.adminFactors,
+        settingsFactors: state.default.settingsFactors,
         miscellaneous: state.default.miscellaneous,
     }
 }
 
 
-export default connect(mapStateToProps, null)(Administration);
+export default connect(mapStateToProps, null)(Settings);
