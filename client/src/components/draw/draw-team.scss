@@ -13,8 +13,8 @@
         flex-basis: $width-fixture-row-team-name;
         @include flex($justify-content: null);
     }
-    .homeTeamsName { @extend %teamName; text-align: right; padding-right: 0.75vw; justify-content: flex-end; }
-    .awayTeamsName { @extend %teamName; text-align: left;  padding-left: 0.75vw; justify-content: flex-start; }
+    .homeTeamsName { @extend %teamName; text-align: right; padding-right: 0.75vw; justify-content: flex-end; flex-wrap: wrap; }
+    .awayTeamsName { @extend %teamName; text-align: left;  padding-left: 0.75vw; justify-content: flex-start; flex-wrap: wrap; }
 
     .homeTeamsName span.divisionAbbreviation, .awayTeamsName span.divisionAbbreviation { color: lightgray; font-size: 80%; }
 

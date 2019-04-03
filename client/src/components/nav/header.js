@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 
 import { LOGOUT_AND_RESET_STATE_TO_DEFAULTS } from '../../redux/actions/types';
 import { INCLUDE_MONGODB_OPTION, FA_CUP_SMALL_IMAGE } from '../../utilities/constants';
+import { refreshLatestFixtures } from '../../redux/actions/fixturesActions';
 import * as helpers from '../../utilities/helper-functions/helpers';
 
 import './header.scss';
@@ -11,7 +12,10 @@ import './header.scss';
 
 class Header extends Component {
 
-    state = { displayNavBackground: false }
+    state = {
+        reRenderAfterReplays: false,                    // If replays have finished then fixtures for the next round will be played next.  In order to re-render this header component need to set state so that the option appears                                             
+        displayNavBackground: false,
+    }
 
     handleScroll = this.handleScroll.bind(this);
 
@@ -31,6 +35,27 @@ class Header extends Component {
     openSlideMenu = () => { this.refs.sideMenu.style.width = '250px'; };
     closeSlideMenu = () => { this.refs.sideMenu.style.width = '0'; };
 
+    componentWillReceiveProps(nextProps, prevState) {
+
+        // If replays have finished then fixtures for the next round will be played next.  In order to re-render this header component need to set state so that the option appears
+        if (nextProps.loadingRefreshHeaderAfterLatestFixtures && !this.props.loadingRefreshHeaderAfterLatestFixtures) {
+            this.setState({ reRenderAfterReplays: true });
+        }
+
+        // If replays have finished then fixtures for the next round will be played next.  In order to re-render this header component need to set state so that the option appears
+        // However, as this header component is always 'live' (apart from when accessing the Home component), need to reset reRenderAfterReplays, otherwise it will always be true once set
+        if (this.state.reRenderAfterReplays && !nextProps.loadingRefreshHeaderAfterLatestFixtures && !this.props.loadingRefreshHeaderAfterLatestFixtures) {
+            this.setState({ reRenderAfterReplays: false });
+        }   
+    }
+
+    handleLatestFixtures = () => {
+        // If replays have finished then fixtures for the next round will be played next.  Need to trigger a re-render of the Latest Fixtures component
+        // so that the currently displayed replays are replaced by the fixtures for the next round
+        if (this.props.isFixturesLatestNav) {
+            this.props.dispatch(refreshLatestFixtures());
+        }
+    }
     shouldComponentUpdate(nextProps, nextState) {
         // Have commented this out for now, as links such as Help, Contact, About, Log In etc don't work - therefore probably easier to just let the component render
         // console.log(this.props);
@@ -53,8 +78,7 @@ class Header extends Component {
     render () {
         const { authenticated, hasCompetitionStarted, hasCompetitionFinished, okToProceedWithDraw, competitionRoundForNextDrawLabel, competitionRoundForPlayLabel,
                 isHomeNav, isDrawNav, isFixturesLatestNav, isFixturesAndResultsNav, isSettingsNav } = this.props;
-        const { displayNavBackground } = this.state;
-        debugger;
+        const { reRenderAfterReplays, displayNavBackground } = this.state;
 
         return (
             <Fragment>
@@ -78,9 +102,9 @@ class Header extends Component {
                             </NavLink>
                         }
 
-                        { !isHomeNav && !isFixturesLatestNav && !okToProceedWithDraw &&
+                        { !isHomeNav && (reRenderAfterReplays ? true : !isFixturesLatestNav) && !okToProceedWithDraw &&
                             <NavLink to="/fixtures-latest" className="nav-link" activeClassName="active-link">
-                                <div className="football latest-fixtures"><span>{competitionRoundForPlayLabel}</span></div>
+                                <div className="football latest-fixtures" onClick={this.handleLatestFixtures} ><span>{competitionRoundForPlayLabel}</span></div>
                             </NavLink>
                         }
 
@@ -120,8 +144,7 @@ class Header extends Component {
 
 const mapStateToProps = (state, ownProps) => {
     const { authenticated } = state.default.user;
-    const { hasCompetitionStarted, hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw, haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays } = state.default.miscellaneous;
-    debugger;
+    const { hasCompetitionStarted, hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw, haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays, loadingRefreshHeaderAfterLatestFixtures } = state.default.miscellaneous;
 
     return {
         authenticated,
@@ -137,6 +160,7 @@ const mapStateToProps = (state, ownProps) => {
         isFixturesLatestNav: (ownProps.isFixturesLatestNav === undefined ? false : ownProps.isFixturesLatestNav),
         isFixturesAndResultsNav: (ownProps.isFixturesAndResultsNav === undefined ? false : ownProps.isFixturesAndResultsNav),
         isSettingsNav: (ownProps.isSettingsNav === undefined ? false : ownProps.isSettingsNav),
+        loadingRefreshHeaderAfterLatestFixtures,
     }
 }
 

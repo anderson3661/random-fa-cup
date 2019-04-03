@@ -1,18 +1,8 @@
 import * as helpers from '../helper-functions/helpers';
 
-import { DEFAULT_VALUE_COMPETITION_START_DATE, DEFAULT_VALUE_COMPETITION_START_TIME, DIVISIONS, SEMI_FINALS, FINAL } from '../constants';
-
-const EXTRA_MINUTES_FIRST_HALF = 5;
-const EXTRA_MINUTES_SECOND_HALF = 9;
-const EXTRA_MINUTES_EXTRA_TIME_FIRST_HALF = 2;
-const EXTRA_MINUTES_EXTRA_TIME_SECOND_HALF = 3;
-
-const HALF_TIME = "Half-Time";
-const HALF_TIME_IN_EXTRA_TIME = "Half-Time (ET)";
-const FULL_TIME = "Full-Time";
-const FULL_TIME_AFTER_90_MINUTES = "Full-Time (90)";
-const FULL_TIME_AFTER_EXTRA_TIME = "Full-Time (AET)";
-const FULL_TIME_AFTER_PENALTIES = "Full-Time (pens)";
+import { DEFAULT_VALUE_COMPETITION_START_DATE, DEFAULT_VALUE_COMPETITION_START_TIME, DIVISIONS, SEMI_FINALS, FINAL,
+         EXTRA_MINUTES_FIRST_HALF, EXTRA_MINUTES_SECOND_HALF, EXTRA_MINUTES_EXTRA_TIME_FIRST_HALF, EXTRA_MINUTES_EXTRA_TIME_SECOND_HALF,    
+         HALF_TIME, HALF_TIME_IN_EXTRA_TIME, FULL_TIME, FULL_TIME_AFTER_90_MINUTES, FULL_TIME_AFTER_EXTRA_TIME, FULL_TIME_AFTER_PENALTIES} from '../constants';
 
 
 export class Fixture {
@@ -36,6 +26,7 @@ export class Fixture {
     isFirstHalf;
     isExtraTime;
     isPenalties;
+    isHomeTeamTakingPenaltiesFirst;
     injuryTimeFirstHalf;
     injuryTimeSecondHalf;
     injuryTimeExtraTimeFirstHalf;
@@ -64,7 +55,7 @@ export class Fixture {
         this.isReplay = fixture.isReplay;
     }
 
-    setUpFixture(goalFactors) {
+    setUpFixture = (goalFactors) => {
         this.isFirstHalf = true;
         this.isExtraTime = false;
         this.isPenalties = false;
@@ -82,7 +73,7 @@ export class Fixture {
         this.goalFactors = helpers.getGoalsPerMinuteFactors(goalFactors.likelihoodOfAGoalDuringASetPeriod, 'array');
     }
 
-    startFixture() {
+    startFixture = () => {
         //Set the scores to zero for the start of the fixture
         if (this.isFirstHalf && !this.isExtraTime) {
             this.homeTeamsScore = 0;
@@ -97,6 +88,7 @@ export class Fixture {
             this.minutesPlayed = 0;         // This records the number of penalties taken for each team
             this.penalties = [];
             this.hasPenaltiesStarted = true;
+            this.isHomeTeamTakingPenaltiesFirst = helpers.whichTeamIsTakingPenaltiesFirst();
         } else if (this.isExtraTime) {
             this.statutoryMinutes = (this.isFirstHalf) ? 105 : 120;
             this.minutesPlayed = (this.isFirstHalf) ? 90 : 105;
@@ -108,28 +100,39 @@ export class Fixture {
         }
     }
 
-    updateFixture(teams, goalFactors) {
+    updateFixture = (teams, goalFactors, competitionRound) => {
         let i;
         let minutesinMatchFactor;
         let homeTeamUpdate;
         let awayTeamUpdate;
         let isFirstHalfBeforeUpdate;
+        let penalty;
+        let numberOfPenaltiesTaken;
 
         homeTeamUpdate = false;
         awayTeamUpdate = false;
 
         if (!this.hasFixtureFinished && this.isPenalties && this.minutesPlayed < 120) {
 
-            debugger;
-
+            // With penalties, each team takes one and then the screen re-renders
             this.minutesPlayed++;
+            numberOfPenaltiesTaken = this.minutesPlayed;
 
-            this.penalties.push( { hasHomeTeamScored: this.hasTeamScored(teams, goalFactors, "home", 1), hasAwayTeamScored: this.hasTeamScored(teams, goalFactors, "away", 1) } );
+            if (this.penalties.length === 0 ||
+               (this.penalties.length > 0 && this.penalties[this.penalties.length - 1].hasHomeTeamTakenPenalty && this.penalties[this.penalties.length - 1].hasAwayTeamTakenPenalty)) {
+                this.penalties.push({ hasHomeTeamTakenPenalty: false, hasHomeTeamScored: false, hasAwayTeamTakenPenalty: false, hasAwayTeamScored: false });
+            }
 
-            if ((this.minutesPlayed >= 5 && ((this.homeTeamsScorePenalties - this.awayTeamsScorePenalties) !== 0)) ||
-            (this.minutesPlayed === 4 && Math.abs(this.homeTeamsScorePenalties - this.awayTeamsScorePenalties) > 1) ||
-            (this.minutesPlayed === 3 && Math.abs(this.homeTeamsScorePenalties - this.awayTeamsScorePenalties) > 2)) {
-                debugger;
+            penalty = this.penalties[this.penalties.length - 1];
+            if ((this.isHomeTeamTakingPenaltiesFirst && !penalty.hasHomeTeamTakenPenalty) || (!this.isHomeTeamTakingPenaltiesFirst && penalty.hasAwayTeamTakenPenalty)) {
+                penalty.hasHomeTeamTakenPenalty = true;
+                penalty.hasHomeTeamScored = this.hasTeamScored(teams, goalFactors, "home", 1, competitionRound);
+            } else {
+                penalty.hasAwayTeamTakenPenalty = true;
+                penalty.hasAwayTeamScored = this.hasTeamScored(teams, goalFactors, "away", 1, competitionRound);
+            }
+
+            if (helpers.havePenaltiesForFixtureFinished(numberOfPenaltiesTaken, this.penalties, this.homeTeamsScorePenalties, this.awayTeamsScorePenalties, this.isHomeTeamTakingPenaltiesFirst)) {
                 this.minutesInfo = FULL_TIME_AFTER_PENALTIES;
                 this.hasFixtureFinished = true;
             }
@@ -150,8 +153,15 @@ export class Fixture {
                 this.minutesPlayed++;
 
                 if (this.minutesPlayed <= this.maxNumberOfMinutes) {
-                    homeTeamUpdate = this.hasTeamScored(teams, goalFactors, "home", minutesinMatchFactor);
-                    awayTeamUpdate = this.hasTeamScored(teams, goalFactors, "away", minutesinMatchFactor);
+                    homeTeamUpdate = this.hasTeamScored(teams, goalFactors, "home", minutesinMatchFactor, competitionRound);
+                    awayTeamUpdate = this.hasTeamScored(teams, goalFactors, "away", minutesinMatchFactor, competitionRound);
+                    if (homeTeamUpdate && awayTeamUpdate) {
+                        if (Math.floor(Math.random() * 2) === 0) {
+                            this.homeTeamsGoals = this.homeTeamsGoals.trim() + "* "
+                        } else {
+                            this.awayTeamsGoals = this.awayTeamsGoals.trim() + "* "
+                        }
+                    }
                 }
 
                 isFirstHalfBeforeUpdate = this.isFirstHalf;         // Get a handle to whether it is the first half (as this is needed for the Goal 'typing' Updates), before it is updated below.
@@ -192,7 +202,7 @@ export class Fixture {
         return {homeTeamUpdate, awayTeamUpdate, isFirstHalfBeforeUpdate};
     }
 
-    hasTeamScored(teams, goalFactors, whichTeam, minutesinMatchFactor) {
+    hasTeamScored = (teams, goalFactors, whichTeam, minutesinMatchFactor, competitionRound) => {
         let thisTeam;
         let oppositionTeam;
         let awayTeamFactor;
@@ -204,7 +214,12 @@ export class Fixture {
         let oppositionTeamsDivision;
         let isItAGoalFactor;
         
-        awayTeamFactor = (whichTeam === "home") ? 1 : goalFactors.isAwayTeam;
+        // Semi Finals and Final are played on neutral grounds so no home team advantage
+        if (competitionRound === SEMI_FINALS || competitionRound === FINAL) {
+            awayTeamFactor = 1;
+        } else {
+            awayTeamFactor = (whichTeam === "home") ? 1 : goalFactors.isAwayTeam;
+        }
         
         thisTeam = this[whichTeam + "Team"];
         oppositionTeam = this[(whichTeam === "home" ? "away" : "home") + "Team"];
@@ -224,8 +239,7 @@ export class Fixture {
             }
         }
         
-        // isItAGoalFactor = this.isPenalties ? goalFactors.isItAGoalFromAPenalty : goalFactors.isItAGoal;
-        isItAGoalFactor = this.isPenalties ? 80 : goalFactors.isItAGoal;
+        isItAGoalFactor = this.isPenalties ? goalFactors.isItAGoalFromAPenalty : goalFactors.isItAGoal;
 
         // Has a goal been scored
         if (Math.floor(Math.random() * goalFactors.baseForRandomMultiplier * minutesinMatchFactor * awayTeamFactor * isNotATopTeamFactor * divisionFactor) < isItAGoalFactor) {

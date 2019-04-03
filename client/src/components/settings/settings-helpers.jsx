@@ -1,4 +1,4 @@
-import { SEASON, COMPETITION_START_DATE, FIXTURE_UPDATE_INTERVAL, BASE_FOR_RANDOM_MULTIPLIER, AWAY_TEAM_FACTOR, IS_NOT_A_TOP_TEAM_FACTOR, GOALS_PER_MINUTE_FACTOR, IS_IT_A_GOAL_FACTOR, DIVISION_FACTOR } from '../../utilities/constants';
+import { SEASON, COMPETITION_START_DATE, FIXTURE_UPDATE_INTERVAL, BASE_FOR_RANDOM_MULTIPLIER, AWAY_TEAM_FACTOR, IS_NOT_A_TOP_TEAM_FACTOR, GOALS_PER_MINUTE_FACTOR, IS_IT_A_GOAL_FACTOR, IS_IT_A_GOAL_PENALTY_FACTOR, DIVISION_FACTOR } from '../../utilities/constants';
 import * as helpers from '../../utilities/helper-functions/helpers';
 
 
@@ -18,6 +18,7 @@ export const getSettingsFactors = (values, isGoalFactorsANestedArray, returnGoal
         [IS_NOT_A_TOP_TEAM_FACTOR]: parseFloat(goalFactorValues[IS_NOT_A_TOP_TEAM_FACTOR].toString().trim()),
         [DIVISION_FACTOR]: parseFloat(goalFactorValues[DIVISION_FACTOR].toString().trim()),
         [IS_IT_A_GOAL_FACTOR]: parseFloat(goalFactorValues[IS_IT_A_GOAL_FACTOR].toString().trim()),
+        [IS_IT_A_GOAL_PENALTY_FACTOR]: parseFloat(goalFactorValues[IS_IT_A_GOAL_PENALTY_FACTOR].toString().trim()),
         [GOALS_PER_MINUTE_FACTOR]: goalsPerMinuteFactor,
     };
 
@@ -46,6 +47,7 @@ export const validateSettingsFactors = (state) => {
     checkSettingsFactorsValidationErrors(state, validationErrors, [DIVISION_FACTOR], key => isNaN(key) || key < 1 || key > 2, "Please enter a number between 1 and 2 (e.g. 1.25)");
     checkSettingsFactorsValidationErrors(state, validationErrors, [GOALS_PER_MINUTE_FACTOR], key => key === "", "Please enter an array of objects");
     checkSettingsFactorsValidationErrors(state, validationErrors, [IS_IT_A_GOAL_FACTOR], key => isNaN(key) || key < 1 || key > 5, "Please enter an integer between 1 and 5 inclusive (e.g. 2)");
+    checkSettingsFactorsValidationErrors(state, validationErrors, [IS_IT_A_GOAL_PENALTY_FACTOR], key => isNaN(key) || key < 50 || key > 100, "Please enter an integer between 50 and 100 inclusive (e.g. 80)");
     return validationErrors;
 }
 

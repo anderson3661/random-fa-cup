@@ -39,6 +39,7 @@ class App extends Component {
         return (
             <Router>
                 <div className="outer-container">
+                    {loading && !loadingError && <div className="loading-filler"></div>}             {/* Used on the initial load screen to put the footer at the bottom of the screen */}
                     {/* <Header authenticated={ this.props.user.authenticated } dispatch={ this.props.dispatch } /> */}
                     { loadingError ? <LoadingError /> : (loading ? <Loading /> : <Routes />) }
                     <Footer />

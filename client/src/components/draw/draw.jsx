@@ -23,7 +23,6 @@ const START_DRAW = "Start Draw";
 const CONTINUE_DRAW = "Continue Draw";
 const DRAW_COMPLETED = "Draw Completed";
 
-const DRAW_UPDATE_INTERVAL = 0.1;
 
 class Draw extends Component {
 
@@ -50,7 +49,7 @@ class Draw extends Component {
         this.handleStartDraw = this.handleStartDraw.bind(this);
         this.handleChangeDrawUpdateInterval = this.handleChangeDrawUpdateInterval.bind(this);
 
-        const { teamsForCompetition, myWatchlistTeams, fixturesForCompetition, hasCompetitionFinished, competitionRoundForNextDraw, okToProceedWithDraw } = this.props;
+        const { authenticated, drawUpdateInterval, teamsForCompetition, myWatchlistTeams, fixturesForCompetition, hasCompetitionFinished, competitionRoundForNextDraw, okToProceedWithDraw } = this.props;
 
         this.competitionRound = competitionRoundForNextDraw;
         this.competitionRoundForCSS = helpers.getCompetitionRoundForCSS(this.competitionRound);
@@ -73,7 +72,7 @@ class Draw extends Component {
 
         }
 
-        this.displayHeader = (hasCompetitionFinished ? 'Competition Finished' : helpers.getCompetitionRoundHeader(this.competitionRound) + " Draw");
+        this.displayHeader = (!authenticated ? 'Draw' : (hasCompetitionFinished ? 'Competition Finished' : helpers.getCompetitionRoundHeader(this.competitionRound) + " Draw"));
 
         this.state = {
             isDrawInProgress: false,
@@ -81,7 +80,7 @@ class Draw extends Component {
             hasDrawBeenPaused: false,
             startDrawButtonEnabled: true,
             startDrawButtonText: START_DRAW,
-            drawUpdateInterval: DRAW_UPDATE_INTERVAL,
+            drawUpdateInterval: drawUpdateInterval,
             dialogDrawCompletedIsOpen: false,
             teamsToBeDrawn: this.teamsRemainingInCompetitionFlattened && this.teamsRemainingInCompetitionFlattened.map((team, i) => Object.assign({}, team, { teamNumberInDraw: i})),
         }
@@ -89,6 +88,10 @@ class Draw extends Component {
         if (this.state.teamsToBeDrawn) {
             this.areAnyMyWatchlistTeamsInTheDraw = helpers.areAnyMyWatchlistTeamsInTheDraw(this.state.teamsToBeDrawn, myWatchlistTeams);
         }
+    }
+
+    componentDidMount() {
+        helpers.goToTopOfPage();
     }
 
     componentWillReceiveProps(nextProps, prevState) {
@@ -235,8 +238,13 @@ class Draw extends Component {
 
                     <Prompt when={isDrawInProgress} message="Are you sure you want to abandon the draw ?"/>
 
-                    {!okToProceedWithDraw && !this.displayCompletedDraw ?
-                        <CompetitionFinishedOrWrongStage hasCompetitionFinished={hasCompetitionFinished} displayHeader={this.displayHeader} displayType="draw" />
+                    {!authenticated || (!okToProceedWithDraw && !this.displayCompletedDraw) ?
+                        <CompetitionFinishedOrWrongStage
+                            authenticated={authenticated}
+                            hasCompetitionFinished={hasCompetitionFinished}
+                            displayHeader={this.displayHeader}
+                            displayType="draw"
+                        />
 
                         :
 
@@ -310,6 +318,7 @@ const mapStateToProps = (state) => {
     return {
         authenticated,
         miscellaneous: state.default.miscellaneous,
+        drawUpdateInterval: state.default.settingsFactors.goalFactors.fixtureUpdateInterval,
         fixturesForCompetition: state.default.fixturesForCompetition,
         teamsForCompetition: state.default.teamsForCompetition,
         myWatchlistTeams: state.default.myWatchlistTeams,

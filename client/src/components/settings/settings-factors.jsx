@@ -1,8 +1,10 @@
 import React, { Component, Fragment } from "react";
 
-import { SEASON, COMPETITION_START_DATE, FIXTURE_UPDATE_INTERVAL, BASE_FOR_RANDOM_MULTIPLIER, AWAY_TEAM_FACTOR, IS_NOT_A_TOP_TEAM_FACTOR, DIVISION_FACTOR, GOALS_PER_MINUTE_FACTOR, IS_IT_A_GOAL_FACTOR } from '../../utilities/constants';
+import { SEASON, FIXTURE_UPDATE_INTERVAL, BASE_FOR_RANDOM_MULTIPLIER, AWAY_TEAM_FACTOR, IS_NOT_A_TOP_TEAM_FACTOR, DIVISION_FACTOR, GOALS_PER_MINUTE_FACTOR, IS_IT_A_GOAL_FACTOR, IS_IT_A_GOAL_PENALTY_FACTOR } from '../../utilities/constants';
 
 import SettingsFieldInput from './settings-field-input';
+import * as helpers from '../../utilities/helper-functions/helpers';
+import { haveSettingsFactorsValuesChanged, haveValidationErrorValuesChanged } from './settings-helpers';
 
 
 class SettingsFactors extends Component {
@@ -11,15 +13,14 @@ class SettingsFactors extends Component {
 
     handleChangeSettingsFactorsFields = (objectKey) => this.props.onChangeSettingsFactorsFields(objectKey);
 
-    // shouldComponentUpdate(nextProps) {
-    //     debugger;
-    //     return helpers.hasObjectValueChanged(this.props.settingsFactors, nextProps.settingsFactors, 'hasCompetitionStarted') ||
-    //            haveSettingsFactorsValuesChanged(this.props.settingsFactors, nextProps.settingsFactors) ||
-    //            haveValidationErrorValuesChanged(this.props.settingsFactorsValidationErrors, nextProps.settingsFactorsValidationErrors);
-    // }
+    shouldComponentUpdate(nextProps) {
+        return helpers.hasObjectValueChanged(this.props, nextProps, 'hasCompetitionStarted') ||
+               helpers.hasObjectValueChanged(this.props, nextProps, 'hasCompetitionFinished') ||
+               haveSettingsFactorsValuesChanged(this.props.settingsFactors, nextProps.settingsFactors) ||
+               haveValidationErrorValuesChanged(this.props.settingsFactorsValidationErrors, nextProps.settingsFactorsValidationErrors);
+    }
 
     render() {
-
         const { hasCompetitionStarted, hasCompetitionFinished, settingsFactors, settingsFactorsValidationErrors } = this.props;
 
         return (
@@ -42,7 +43,7 @@ class SettingsFactors extends Component {
                         </div>
                         {settingsFactorsValidationErrors[SEASON] && <div className="validation-error">{settingsFactorsValidationErrors[SEASON]}</div>}
 
-                        <div className="fullWidth">
+                        {/* <div className="fullWidth">
                             <SettingsFieldInput
                                 name={COMPETITION_START_DATE}
                                 label="Competition Start Date"
@@ -52,7 +53,7 @@ class SettingsFactors extends Component {
                                 onChangeInputFieldValue={this.handleChangeSettingsFactorsFields(COMPETITION_START_DATE)}
                             />
                         </div>
-                        {settingsFactorsValidationErrors[COMPETITION_START_DATE] && <div className="validation-error">{settingsFactorsValidationErrors[COMPETITION_START_DATE]}</div>}
+                        {settingsFactorsValidationErrors[COMPETITION_START_DATE] && <div className="validation-error">{settingsFactorsValidationErrors[COMPETITION_START_DATE]}</div>} */}
 
                     </div>
 
@@ -134,6 +135,18 @@ class SettingsFactors extends Component {
                             />
                         </div>
                         {settingsFactorsValidationErrors[IS_IT_A_GOAL_FACTOR] && <div className="validation-error">{settingsFactorsValidationErrors[IS_IT_A_GOAL_FACTOR]}</div>}
+
+                        <div className="fullWidth">
+                            <SettingsFieldInput
+                                name={IS_IT_A_GOAL_PENALTY_FACTOR}
+                                label="Is It A Goal Factor (Penalty)"
+                                placeholder="e.g. 80"
+                                value={settingsFactors[IS_IT_A_GOAL_PENALTY_FACTOR]}
+                                disabled={hasCompetitionFinished}
+                                onChangeInputFieldValue={this.handleChangeSettingsFactorsFields(IS_IT_A_GOAL_PENALTY_FACTOR)}
+                            />
+                        </div>
+                        {settingsFactorsValidationErrors[IS_IT_A_GOAL_PENALTY_FACTOR] && <div className="validation-error">{settingsFactorsValidationErrors[IS_IT_A_GOAL_PENALTY_FACTOR]}</div>}
 
                         <div className="fullWidth">
                             <SettingsFieldInput

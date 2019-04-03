@@ -6,10 +6,6 @@
     width: 85%;
     margin: 13vh auto 10vh auto;
 
-    &.show-goal-updates {
-        width: 90%;
-    }
-
     .container-card {
         &.latest-fixtures-header {
             @include flex($justify-content: space-between);
@@ -17,6 +13,11 @@
             padding-bottom: 2vh;
 
             .fixture-update-interval { flex-basis: 30% }
+
+            &.semis-or-final {
+                width: 50%;
+                .fixture-update-interval { flex-basis: 40% }
+            }
         }
     }
 
@@ -85,62 +86,7 @@
             }
         }
     
-        &.show-goal-updates {
-            grid-template-columns: 2.5fr minmax(400px, 2fr) 2.5fr;
-            grid-column-gap: 5vw;
 
-            .fixtures.in-play-updates {
-                overflow: auto;
-                height: 68vh;
-                h3 {
-                    margin-top: 0;
-                    text-align: center;
-                }
-            
-                p {
-                    color: black; 
-                    font-family: "Courier";
-                    line-height: 1.2;
-                    font-size: 75%;
-                    // margin: 1vh 0 0 1vw;
-                    margin: 0.75vh 0 0 0;
-                    white-space: nowrap;
-                    // overflow: hidden;
-                    overflow: initial;
-                    // width: 30em;
-                    width: 100%;
-                    animation: typing 4s steps(40, end), blink-caret .75s step-end infinite;
-            
-                    span.mins {
-                        margin-right: 0.5vw;
-                        padding: 0.75vh 0.25vw;
-                        background-color: $background-color-half-time-score;
-                        font-weight: 600;
-                    }
-
-                    span { font-weight: normal; }
-                    span.team.goal { font-weight: 700; color: blue; }
-
-                  }
-                  
-                  @keyframes typing { 
-                    from { width: 0; }
-                    to { width: 100% }
-                  }
-
-                  @keyframes blink-caret {                      /* The typewriter cursor effect */
-                    from, to { border-color: transparent }
-                    50% { border-color: orange; }
-                  }
-            }
-        }
-    }
-}
-
-.container-main-content-latest-fixtures.show-goal-updates {
-    width: 90%;
-    .split-grid {
-        grid-column-gap: 2vw;
     }
 }
 
@@ -168,25 +114,25 @@
 //     }
 // }
 
-// @media screen and (max-width: 768px) {
-//     .container-main-content-latest-fixtures {
+@media screen and (max-width: 768px) {
+    .container-main-content-latest-fixtures {
 
-//         header {
-//             flex-wrap: wrap;
-//         }
+        header {
+            flex-wrap: wrap;
+        }
 
-//         .split-grid {
-//             grid-template-columns: 1fr;
-//             grid-column-gap: 0;
-//             grid-row-gap: 3vh;
-//             &.show-goal-updates {
-//                 grid-template-columns: 1fr;
-//                 .container-card.fixtures { order: 2; }
-//                 .container-card.in-play-updates{ order: 1; }
-//                 .container-card.premier-league-teams { order: 3; }
-//                 .container-card.premier-league-teams-repeat { display: none }
-//                 .fixtures.in-play-updates p { font-size: 80% }
-//             }
-//         }
-//     }
-// }
+        .split-grid {
+            grid-template-columns: 1fr;
+            grid-column-gap: 0;
+            grid-row-gap: 3vh;
+            &.show-goal-updates {
+                grid-template-columns: 1fr;
+                .container-card.fixtures { order: 2; }
+                .container-card.in-play-updates{ order: 1; }
+                .container-card.premier-league-teams { order: 3; }
+                .container-card.premier-league-teams-repeat { display: none }
+                .fixtures.in-play-updates p { font-size: 80% }
+            }
+        }
+    }
+}

@@ -26,6 +26,7 @@ const RouteToThisStage = ({ fixturesForCompetition, fixtureNumberForCSS, whichTe
                         />
                     )
                 }
+                return null;
             })}
         </div>
     </div>

@@ -18,6 +18,7 @@ export const getEmptySetOfFixtures = () => {
 export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForCompetition, fixtures, competitionRound, competitionRoundForPlay) => {
     // If haveFixturesForCompetitionRoundBeenPlayed is true then replays are due to be played (if any)
     let i;
+    let replaysJustFinished = false;
     let nextSetOfFixtures = [];
     let miscellaneousUpdates = {};
 
@@ -28,7 +29,6 @@ export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForComp
     const competitionRoundIndex = helpers.getCompetitionRoundIndex(competitionRound);
     const nextCompetitionRoundForPlay = helpers.getNextCompetitionRound(competitionRoundForPlay);
 
-    debugger;
     if (!fixtures[0].isReplay) {
 
         // These are NOT replays, so if any of the fixtures are drawn then create the replay fixtures (but no replays are allowed in the semi-final or final)
@@ -60,7 +60,6 @@ export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForComp
     } else {
         // These are replays so need to update the fixtures database with the scores and also clarify the draw for the next round
         // The replayUpdatesInFixturesDb array is used to update the draw for the next round
-        debugger;
         nextSetOfFixtures = [...helpers.getFixturesArray(fixturesForCompetition, competitionRoundIndex + 1, IS_FIXTURES)];
         for (i = 0; i < nextSetOfFixtures.length; i++) {
             const updatesToNextRound = {};
@@ -74,11 +73,12 @@ export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForComp
         }
         miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay, okToProceedWithDraw: false,
                                  haveFixturesForCompetitionRoundBeenPlayed: false, haveFixturesProducedReplays: false };
+               
+        replaysJustFinished = true;
     }
 
     // If the competition is at the semi-final stage then need to create a fixture for the final as there obviously isn't a draw
     if (helpers.isCompetitionAtSemiFinalStage(competitionRoundIndex)) {
-        debugger;
         const semiFinal1WinningTeamsName = helpers.getWinningTeamsNameFromFixture(fixtures[0]);
         const semiFinal2WinningTeamsName = helpers.getWinningTeamsNameFromFixture(fixtures[1]);
         const semiFinal1WinningTeamsDivision = helpers.getWinningTeamsDivisionFromFixture(fixtures[0]);
@@ -97,7 +97,7 @@ export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForComp
         miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay, okToProceedWithDraw: false, haveFixturesForCompetitionRoundBeenPlayed: false, haveFixturesProducedReplays: false };
     }
     
-    dispatch(updateDbsAndStoreAfterLatestResults(fixtures, replays, replayUpdatesInFixturesDb, nextSetOfFixtures, finalFixture, miscellaneousUpdates));
+    dispatch(updateDbsAndStoreAfterLatestResults(fixtures, replays, replayUpdatesInFixturesDb, nextSetOfFixtures, finalFixture, miscellaneousUpdates, replaysJustFinished));
 
 }
 

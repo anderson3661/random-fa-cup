@@ -4,7 +4,7 @@ import TextField from "@material-ui/core/TextField";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 
-import { FOOTBALL_IMAGE } from '../../utilities/constants';
+import { FOOTBALL_IMAGE, PAUSE_FIXTURES, PAUSE_PENALTIES, SEMI_FINALS, FINAL } from '../../utilities/constants';
 
 
 class FixturesLatestHeader extends Component {
@@ -23,14 +23,12 @@ class FixturesLatestHeader extends Component {
 
     render() {
 
-        const { authenticated, hasCompetitionStarted, hasCompetitionFinished, displayHeader,
-                startFixturesButtonText, startFixturesButtonEnabled,
-                fixtureUpdateInterval, areFixturesInPlay, haveFixturesBeenPaused,
-                showGoalUpdates } = this.props;
+        const { authenticated, hasCompetitionStarted, hasCompetitionFinished, competitionRound, displayHeader, startFixturesButtonText, startFixturesButtonEnabled,
+                fixtureUpdateInterval, areFixturesInPlay, haveFixturesBeenPaused, showGoalUpdates } = this.props;
 
         return (
 
-            <div className="container-card latest-fixtures-header">
+            <div className={`container-card latest-fixtures-header ${competitionRound === SEMI_FINALS || competitionRound === FINAL ? 'semis-or-final' : ''}`}>
 
                 <div className="main-header">
                     {(hasCompetitionFinished || !hasCompetitionStarted) && <div className="image-left"><img src={FOOTBALL_IMAGE} alt="" /></div>}
@@ -60,25 +58,27 @@ class FixturesLatestHeader extends Component {
                                 placeholder="e.g. 0.5"
                                 className="form-control"
                                 fullWidth
-                                disabled={areFixturesInPlay && !haveFixturesBeenPaused}
+                                disabled={areFixturesInPlay && !haveFixturesBeenPaused && (startFixturesButtonText === PAUSE_FIXTURES || startFixturesButtonText === PAUSE_PENALTIES) }
                                 value={fixtureUpdateInterval}
                                 onChange={this.handleChangeFixtureUpdateInterval.bind(this)}
                             />
                         </div>
 
-                        <div className="showGoalUpdates">
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        className="showGoalsText"
-                                        checked={showGoalUpdates}
-                                        onChange={this.handleChangeShowGoalUpdates.bind(this)}
-                                        value={showGoalUpdates.toString()}
-                                    />
-                                }
-                                label="Show Goal Updates"
-                            />                        
-                        </div>
+                        {competitionRound !== SEMI_FINALS && competitionRound !== FINAL &&
+                            <div className="showGoalUpdates">
+                                <FormControlLabel
+                                    control={
+                                        <Checkbox
+                                            className="showGoalsText"
+                                            checked={showGoalUpdates}
+                                            onChange={this.handleChangeShowGoalUpdates.bind(this)}
+                                            value={showGoalUpdates.toString()}
+                                        />
+                                    }
+                                    label="Show Goal Updates"
+                                />                        
+                            </div>
+                        }
 
                     </Fragment>
                 }

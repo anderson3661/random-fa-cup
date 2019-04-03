@@ -5,18 +5,45 @@
 .fixtures-row-penalties-summary, .fixtures-row-penalties {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     text-align: center;
     font-size: $font-size-penalties;
     color: $color-penalties;
+    margin-top: 0.5vh;
 }
 
 .fixtures-row-penalties-summary .fixtures-row-scores.penalties {
     border-bottom: none;
 }
 
-.fixtures-row-penalties:last-child {
-    // border-bottom: 1px solid $color-fixture-border-bottom;
-    border-bottom: 1px solid lightgray;
+.fixtures-row-penalties-commentary {
+    font-size: $font-size-penalties;
+    color: $color-penalties;
+
+    &:not(.is-penalties), &.is-penalties:not(.show-goals), &.is-penalties.route-to-this-stage.show-goals {
+        border-bottom: 1px solid $color-fixture-row-goal-times-bottom-border;
+    }
+
+    &.is-penalties.in-play, &.is-penalties.fixtures-and-results.show-goals {
+        border-bottom: none;
+        margin-bottom: 1vh;
+    }
+    
+    .extraTimeOrPenaltiesSummary {
+        width: 100%;
+        font-size: 115%;
+        text-align: center;
+        margin-bottom: 0.5vh;
+    }
+}
+
+.fixtures-row-penalties {
+    .penalty.homeTeam { text-align: right; }
+
+    &:last-child {
+        // border-bottom: 1px solid $color-fixture-border-bottom;
+        border-bottom: 1px solid lightgray;
+    }
 }
 
 .penaltiesInfo, .penalty.number {
@@ -36,4 +63,24 @@
 .teamScorePenalties.homeTeam, .teamScorePenalties.awayTeam {
     font-size: $font-size-penalties-team-score;
     color: $color-penalties-team-score;
+}
+
+.teamScorePenalties.homeTeam span, .teamScorePenalties.awayTeam span { color: darkgray; font-size: 80%; }
+.teamScorePenalties.homeTeam span { margin-right: 1.5vw; }
+.teamScorePenalties.awayTeam span { margin-left: 1.5vw; }
+
+.penalty.homeTeam span, .penalty.awayTeam span {
+    display: block;
+    height: 2vh;
+    width: 100%;
+    text-align: right;
+
+    img { height: 100%; }
+}
+
+.penalty.homeTeam span { text-align: right; }
+.penalty.awayTeam span { text-align: left; }
+
+.teamScorePenalties.homeTeam.fixtures-and-results, .teamScorePenalties.awayTeam.fixtures-and-results, .penalty.homeTeam.fixtures-and-results, .penalty.awayTeam.fixtures-and-results {
+    width: 40%;
 }

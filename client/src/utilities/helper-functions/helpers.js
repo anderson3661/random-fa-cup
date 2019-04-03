@@ -1,5 +1,5 @@
 import { COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES, COMPETITION_ROUNDS_HEADINGS, COMPETITION_ROUNDS_HEADINGS_ABBREVIATED, COMPETITION_ROUNDS_FOR_CSS,
-         PREMIER_LEAGUE, DIVISIONS, DIVISIONS_ABBREVIATIONS, IS_FIXTURES, IS_REPLAYS, FINAL } from '../constants';
+         PREMIER_LEAGUE, DIVISIONS, DIVISIONS_ABBREVIATIONS, IS_FIXTURES, IS_REPLAYS, FINAL, SEMI_FINALS } from '../constants';
 
 
 export const goToTopOfPage = () => {
@@ -60,9 +60,10 @@ export const haveAllFixturesInSetFinished = (fixturesArray) => {
 }
 
 export const getWinningTeamFromFixture = (fixture, division) => {
-    return fixture.homeTeamsScore > fixture.awayTeamsScore ? ('homeTeam' + (division ? 'Division' : '')) :
+    return !fixture ? '' : 
+           (fixture.homeTeamsScore > fixture.awayTeamsScore ? ('homeTeam' + (division ? 'Division' : '')) :
            (fixture.awayTeamsScore > fixture.homeTeamsScore ? ('awayTeam' + (division ? 'Division' : '')) :
-           (fixture.homeTeamsScorePenalties > fixture.awayTeamsScorePenalties ? ('homeTeam' + (division ? 'Division' : '')) : ('awayTeam' + (division ? 'Division' : ''))));
+           (fixture.homeTeamsScorePenalties > fixture.awayTeamsScorePenalties ? ('homeTeam' + (division ? 'Division' : '')) : ('awayTeam' + (division ? 'Division' : '')))));
 }
 
 export const getWinningTeamsNameFromFixture = (fixture) => {
@@ -74,7 +75,7 @@ export const getWinningTeamsDivisionFromFixture = (fixture) => {
 }
 
 export const getWinningTeamInFinal = (fixtures) => {
-    return fixtures[0][getWinningTeamFromFixture(fixtures[0])];
+    return fixtures.length === 0 ? '' : fixtures[0][getWinningTeamFromFixture(fixtures[0])];
 }
 
 export const getCompetitionRoundIndex = (competitionRound) => {
@@ -133,6 +134,14 @@ export const getDivisionTheTeamPlaysIn = (teamsRemainingInCompetition, teamName)
     return teamInArray === -1 ? null : teamsRemainingInCompetition[teamInArray].division;
 }
 
+export const getResultsLabel = (competitionRound) => {
+    return ' Result' + (competitionRound === FINAL ? '' : 's');
+}
+
+export const getFixturesLabel = (competitionRound) => {
+    return competitionRound === SEMI_FINALS || competitionRound === FINAL ? '' : ' Fixtures';
+}
+
 export const getDivisionAbbreviation = (division) => {
     return DIVISIONS_ABBREVIATIONS[DIVISIONS.indexOf(division)];
 }
@@ -167,6 +176,25 @@ const getSummaryResultFromFixture = (fixture, key) => {
     return homeTeamsScore > awayTeamsScore ? `${homeTeamsScore}-${awayTeamsScore}` : `${awayTeamsScore}-${homeTeamsScore}`;
 }
 
+export const whichTeamIsTakingPenaltiesFirst = () => {
+    return Math.floor(Math.random() * 2) === 0;
+}
+
+export const havePenaltiesForFixtureFinished = (numberOfPenaltiesTaken, penalties, homeTeamsScorePenalties, awayTeamsScorePenalties, isHomeTeamTakingPenaltiesFirst) => {
+    const homeTeamsPenaltiesTaken = penalties.filter(penalty => penalty.hasHomeTeamTakenPenalty).length;
+    const awayTeamsPenaltiesTaken = penalties.filter(penalty => penalty.hasAwayTeamTakenPenalty).length;
+
+    if ((numberOfPenaltiesTaken >= 10 && (homeTeamsPenaltiesTaken === awayTeamsPenaltiesTaken) && ((homeTeamsScorePenalties - awayTeamsScorePenalties) !== 0)) ||
+    (numberOfPenaltiesTaken === 9 && awayTeamsScorePenalties === (homeTeamsScorePenalties - 1) && !isHomeTeamTakingPenaltiesFirst) ||
+    (numberOfPenaltiesTaken === 9 && homeTeamsScorePenalties === (awayTeamsScorePenalties - 1) && isHomeTeamTakingPenaltiesFirst) ||
+    ((numberOfPenaltiesTaken === 9 || numberOfPenaltiesTaken === 8) && Math.abs(homeTeamsScorePenalties - awayTeamsScorePenalties) > 1) ||
+    (numberOfPenaltiesTaken === 7 && awayTeamsScorePenalties === (homeTeamsScorePenalties - 2) && !isHomeTeamTakingPenaltiesFirst) ||
+    (numberOfPenaltiesTaken === 7 && homeTeamsScorePenalties === (awayTeamsScorePenalties - 2) && isHomeTeamTakingPenaltiesFirst) ||
+    ((numberOfPenaltiesTaken === 7 || numberOfPenaltiesTaken === 6) && Math.abs(homeTeamsScorePenalties - awayTeamsScorePenalties) > 2)) {
+        return true;
+    }
+    return false;
+}
 
 export const updateCompetitionRoundForNextDraw = (competitionRound) => {
     return COMPETITION_ROUNDS[getCompetitionRoundIndex(competitionRound) + 1];
@@ -264,8 +292,8 @@ export const isACupUpset = (teamsForCompetition, fixture) => {
     const awayTeamDivisionIndex = DIVISIONS.indexOf(fixture.awayTeamDivision);
     const homeTeamIsInThePremierLeague = fixture.homeTeamDivision === PREMIER_LEAGUE;
     const awayTeamIsInThePremierLeague = fixture.awayTeamDivision === PREMIER_LEAGUE;
-    const isHomeTeamWinning = fixture.homeTeamsScore > fixture.awayTeamsScore;
-    const isAwayTeamWinning = fixture.awayTeamsScore > fixture.homeTeamsScore;
+    const isHomeTeamWinning = fixture.homeTeamsScore > fixture.awayTeamsScore || fixture.homeTeamsScorePenalties > fixture.awayTeamsScorePenalties;
+    const isAwayTeamWinning = fixture.awayTeamsScore > fixture.homeTeamsScore || fixture.awayTeamsScorePenalties > fixture.homeTeamsScorePenalties;
     const isHomeTeamBeatingAHigherDivisionTeam = isHomeTeamWinning && homeTeamDivisionIndex > awayTeamDivisionIndex;
     const isAwayTeamBeatingAHigherDivisionTeam = isAwayTeamWinning && awayTeamDivisionIndex > homeTeamDivisionIndex;
     const homeTeamIndex = getPositionInArrayOfObjects(premierLeagueTeams, 'teamName', fixture.homeTeam);

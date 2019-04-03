@@ -1,0 +1,73 @@
+@import '../../sass/mixins';
+@import '../../sass/_variables';
+
+.container-main-content-latest-fixtures {
+
+    &.show-goal-updates {
+        width: 90%;
+    }
+
+    .split-grid {
+
+        &.show-goal-updates {
+            grid-template-columns: 2.5fr minmax(400px, 2fr) 2.5fr;
+            grid-column-gap: 5vw;
+
+            .fixtures.in-play-updates {
+                overflow: auto;
+                height: 68vh;
+
+                h3 {
+                    margin-top: 0;
+                    text-align: center;
+                }
+            
+                p {
+                    color: black; 
+                    font-family: "Courier";
+                    line-height: 1.2;
+                    font-size: 75%;
+                    margin: 0.75vh 0 0 0;
+                    white-space: nowrap;
+                    overflow: initial;
+                    width: 100%;
+                    animation: typing 4s steps(40, end), blink-caret .75s step-end infinite;
+            
+                    .minsBlank {
+                        display: inline-block;
+                        width: 3.5vw;
+                        background-color: $background-color-half-time-score;
+                        margin-right: 0.5vw;
+                        text-align: center;
+                    }
+
+                    span.mins {
+                        font-weight: 600;
+                    }
+
+                    span { font-weight: normal; }
+                    span.team.home { margin-right: 1vw; }
+                    span.team.goal { font-weight: 700; color: blue; }
+
+                  }
+                  
+                  @keyframes typing { 
+                    from { width: 0; }
+                    to { width: 100% }
+                  }
+
+                  @keyframes blink-caret {                      /* The typewriter cursor effect */
+                    from, to { border-color: transparent }
+                    50% { border-color: orange; }
+                  }
+            }
+        }
+    }
+}
+
+.container-main-content-latest-fixtures.show-goal-updates {
+    width: 90%;
+    .split-grid {
+        grid-column-gap: 2vw;
+    }
+}

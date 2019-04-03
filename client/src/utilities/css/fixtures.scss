@@ -3,8 +3,9 @@
 
 
 .outer-container-fixtures {
+    min-height: 94vh;
 
-    .container-main-content-fixtures {
+    .container-main-content-fixtures-and-results {
         width: 75%;
         margin: 14vh auto 10vh auto;
 
@@ -62,5 +63,5 @@
 //     border-collapse: separate;
 // }
 
-@media screen and (min-width: 1024px) { .outer-container-fixtures { .container-main-content-fixtures { width: 65%; } } };
-@media screen and (max-width: 1024px) { .outer-container-fixtures { .container-main-content-fixtures { width: 90%; } } };
+// @media screen and (min-width: 1024px) { .outer-container-fixtures { .container-main-content-fixtures { width: 65%; } } };
+// @media screen and (max-width: 1024px) { .outer-container-fixtures { .container-main-content-fixtures { width: 90%; } } };

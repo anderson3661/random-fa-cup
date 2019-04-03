@@ -1,7 +1,9 @@
 import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
+
+import * as helpers from '../../utilities/helper-functions/helpers';
+import { areThereAnyChangesToMyWatchlistTeamValues } from './settings-helpers';
 
 
 class SettingsMyWatchlistTeams extends Component {
@@ -18,9 +20,14 @@ class SettingsMyWatchlistTeams extends Component {
         this.props.onMyWatchlistTeamsDeleteTeam(teamIndex);
     }
 
-    render() {
+    shouldComponentUpdate(nextProps) {
+        return helpers.hasObjectValueChanged(this.props, nextProps, 'authenticated') ||
+               helpers.hasObjectValueChanged(this.props, nextProps, 'hasCompetitionFinished') ||
+               areThereAnyChangesToMyWatchlistTeamValues(this.props.myWatchlistTeams, nextProps.myWatchlistTeams)
+    }
 
-        const { hasCompetitionFinished, teamsForCompetitionFlattened, authenticated, myWatchlistTeams } = this.props;
+    render() {
+        const { authenticated, hasCompetitionFinished, teamsForCompetitionSelectOptions, myWatchlistTeams } = this.props;
 
         return (
             
@@ -50,8 +57,9 @@ class SettingsMyWatchlistTeams extends Component {
                                             value={team.teamName}
                                             disabled={hasCompetitionFinished}
                                             onChange={this.handleMyWatchlistChangeTeam.bind(this, teamIndex)}
+                                            native={true}
                                             >
-                                            {teamsForCompetitionFlattened.map(team => (<MenuItem key={team.teamName} value={team.teamName}>{team.teamName}</MenuItem>))}
+                                            {teamsForCompetitionSelectOptions}
                                         </Select>
                                     </td>
 

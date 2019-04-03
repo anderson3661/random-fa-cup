@@ -17,8 +17,8 @@ app.use(bodyParser.json());
 
 //Db config
 const db = process.env.MONGO_URI;                                       // CHANGE FOR PRODUCTION
-// const db = require('./config/keys').mongoURI;                           // CHANGE FOR TESTING WITH MONGO_DB ON SERVER
-// const db = require('./config/keys').mongoURILocal;                         // CHANGE FOR TESTING WITH MONGO_DB ON local
+const db = require('./config/keys').mongoURI;                           // CHANGE FOR TESTING WITH MONGO_DB ON SERVER
+const db = require('./config/keys').mongoURILocal;                         // CHANGE FOR TESTING WITH MONGO_DB ON local
 
 mongoose.connect(db, { useNewUrlParser: true })
     .then(() => console.log('MongoDb connected ...'))

@@ -2,8 +2,9 @@ import React, { Component, Fragment } from "react";
 import { connect } from 'react-redux';
 import { Prompt } from 'react-router';
 
-import { MAIN_BACKGROUND_IMAGE, GOALS_PER_MINUTE_FACTOR, DIVISIONS } from '../../utilities/constants';
+import { MAIN_BACKGROUND_IMAGE, GOALS_PER_MINUTE_FACTOR, DIVISIONS, RESET_APP_KEEP_CURRENT_SETTINGS, RESET_APP_USE_SYSTEM_DEFAULTS } from '../../utilities/constants';
 import * as helpers from '../../utilities/helper-functions/helpers';
+import CompetitionFinishedOrWrongStage from '../common/competition-finished-or-wrong-stage';
 import SettingsHeader from './settings-header';
 import SettingsFactors from './settings-factors';
 import SettingsTeams from './settings-teams';
@@ -15,10 +16,10 @@ import { getSettingsFactors, areThereSettingsFactorsValidationErrors, areThereTe
          getNewTeamsArray, getNewMyWatchlistTeamsArray, deleteTeamFromMyWatchlistTeamsArray, validateSettingsFactors, validateTeams,
          getTeamsValidationError, blankTeamsValidationError } from './settings-helpers';
 
-import { settingsSaveChanges, settingsResetApp } from '../../redux/actions/settingsActions';
+import { settingsSaveChanges, settingsResetApp, settingsResetAppKeepCurrentSettings } from '../../redux/actions/settingsActions';
 
 import ConfirmationDialog from '../dialogs/confirmationDialog';
-import ConfirmationYesNo from '../dialogs/confirmYesNo';
+import ConfirmationResetApp from '../dialogs/confirmResetApp';
 
 import Loading from '../loading/loading';
 
@@ -29,7 +30,7 @@ const LOCAL_STATE = {
     dialogSaveChangesIsActive: false,
     dialogSaveChangesIsOpen: false,
     dialogResetAppIsActive: false,
-    dialogResetAppYesNoIsOpen: false,
+    dialogResetAppChoiceIsOpen: false,
     dialogResetAppYesSelected: false,
     dialogResetAppConfirmIsOpen: false,
     dialogLoadingBackendErrorConfirmIsOpen: false,
@@ -40,7 +41,7 @@ class Settings extends Component {
 
     input;
     data;
-    teamsForCompetitionFlattened;
+    teamsForCompetitionSelectOptions;
 
     constructor(props) {
         super(props);
@@ -56,7 +57,13 @@ class Settings extends Component {
 
         this.updateOriginalValues('props', props.settingsFactors);
 
-        this.teamsForCompetitionFlattened = helpers.getTeamsForCompetitionFlattened(props.teamsForCompetition);
+        // Create the list of Select Option used in the My Watchlist Teams dropdown
+        // Can't use Material UI's MenuItem because options flash after opening
+        // const teamsForCompetitionFlattenedMapped = teamsForCompetitionFlattened.map(team => (<MenuItem key={team.teamName} value={team.teamName}>{team.teamName}</MenuItem>));
+        this.teamsForCompetitionSelectOptions = [];
+        this.teamsForCompetitionSelectOptions.push(<option key="ZZZ" value=""></option>);          // Add an empty option (will be at the start of the list of options)
+        const teamsForCompetitionFlattened = helpers.getTeamsForCompetitionFlattened(props.teamsForCompetition);
+        teamsForCompetitionFlattened.forEach(team => this.teamsForCompetitionSelectOptions.push(<option key={team.teamName} value={team.teamName}>{team.teamName}</option>));
     }
 
     createSettingsFactorsValidationErrorsArray = (props) => {
@@ -115,7 +122,7 @@ class Settings extends Component {
             this.setState({ dialogLoadingBackendErrorConfirmIsOpen: true });     // If an error was encountered on the backend, then open the backend error dialog
         } else {
             if (this.state[localStateActionIsActive]) {
-                if (resetAppIsActive) this.setState({ dialogResetAppYesNoIsOpen: false });                  // Reset App has finished so set the flag which will close the Yes/No dialog
+                if (resetAppIsActive) this.setState({ dialogResetAppChoiceIsOpen: false });            // Reset App has finished so set the flag which will close the dialog
                 this.setState({ [localStateFieldToUpdate]: true });
                 if (saveChangesIsActive || resetAppIsActive) {
                     this.setState({ haveChangesBeenMade: false });          // Set the flag which tracks whether any changes has been made back to false
@@ -208,8 +215,6 @@ class Settings extends Component {
 
         e.preventDefault();
 
-        debugger;
-        
         const settingsFactorsValidationErrors = validateSettingsFactors(this.state);
         if (areThereSettingsFactorsValidationErrors(settingsFactorsValidationErrors)) {
             this.setState({ settingsFactorsValidationErrors: settingsFactorsValidationErrors });
@@ -248,16 +253,19 @@ class Settings extends Component {
         ));
     }
 
-    handleResetApp = () => this.setState({ dialogResetAppYesNoIsOpen: true });
+    handleResetApp = () => this.setState({ dialogResetAppChoiceIsOpen: true });
 
-    handleDialogYesNoCloseResetApp = (value) => {
-        // this.setState({ dialogResetAppYesSelected: value, dialogResetAppYesNoIsOpen: false }, () => {
-        this.setState({ dialogResetAppYesSelected: value }, () => {
+    handleDialogResetAppClose = (value) => {
+        this.setState({ dialogResetAppYesSelected: value === RESET_APP_KEEP_CURRENT_SETTINGS || value === RESET_APP_USE_SYSTEM_DEFAULTS }, () => {
             if (this.state.dialogResetAppYesSelected) {
                 this.setState({ dialogResetAppIsActive: true });
-                this.props.dispatch(settingsResetApp());              // Delete the stored app data in the database and create new documents from the default values
+                if (value === RESET_APP_KEEP_CURRENT_SETTINGS) {
+                    this.props.dispatch(settingsResetAppKeepCurrentSettings());              // Delete the stored app data in the database BUT keep the current settings
+                } else if (value === RESET_APP_USE_SYSTEM_DEFAULTS) {
+                    this.props.dispatch(settingsResetApp());              // Delete the stored app data in the database and create new documents from the default values
+                }
             } else {
-                this.setState({ dialogResetAppYesNoIsOpen: false });
+                this.setState({ dialogResetAppChoiceIsOpen: false });
             }
         });
     }
@@ -275,11 +283,24 @@ class Settings extends Component {
         return (
             <Fragment>
                 <div className="outer-container-settings">
+
                     <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
+
                     { loadingSettings ? <Loading /> : null }
+
                     <Prompt when={haveChangesBeenMade} message={`Are you sure you want to abandon these unsaved changes'} ?`} />
+
                     <div className="container-main-content-settings">
 
+                        {!authenticated &&
+                            <CompetitionFinishedOrWrongStage
+                            authenticated={authenticated}
+                            hasCompetitionFinished={false}
+                            displayHeader="Log in"
+                            isSettingsNav={true}
+                            />
+                        }
+                        
                         <SettingsHeader
                             authenticated={authenticated}
                             haveChangesBeenMade={haveChangesBeenMade}
@@ -324,9 +345,9 @@ class Settings extends Component {
 
                             <div className="container-settings-my-watchlist-teams">
                                 <SettingsMyWatchlistTeams
-                                    hasCompetitionFinished={hasCompetitionFinished}
-                                    teamsForCompetitionFlattened={this.teamsForCompetitionFlattened}
                                     authenticated={authenticated}
+                                    hasCompetitionFinished={hasCompetitionFinished}
+                                    teamsForCompetitionSelectOptions={this.teamsForCompetitionSelectOptions}
                                     myWatchlistTeams={myWatchlistTeams}
                                     onMyWatchlistTeamsAddTeam={this.handleMyWatchlistTeamsAddTeam.bind(this)}
                                     onMyWatchlistTeamsChangeTeam={this.handleMyWatchlistTeamsChangeTeam.bind(this)}
@@ -350,7 +371,7 @@ class Settings extends Component {
                         />
 
                         <ConfirmationDialog message="Changes saved" open={this.state.dialogSaveChangesIsOpen} onClose={() => this.setState({ dialogSaveChangesIsActive: false, dialogSaveChangesIsOpen: false })} />
-                        <ConfirmationYesNo message="Are you sure you want to reset the app ?" dialogYesNoSelectedIsYes={this.state.dialogResetAppYesSelected} open={this.state.dialogResetAppYesNoIsOpen} onClose={this.handleDialogYesNoCloseResetApp} />
+                        <ConfirmationResetApp message="Are you sure you want to reset the app ?" open={this.state.dialogResetAppChoiceIsOpen} onClose={this.handleDialogResetAppClose} />
                         <ConfirmationDialog message="App has been reset" open={this.state.dialogResetAppConfirmIsOpen} onClose={() => this.setState({ dialogResetAppIsActive: false, dialogResetAppConfirmIsOpen: false })} />
                         <ConfirmationDialog message="An error has been encountered connecting to the backend ... please retry" open={this.state.dialogLoadingBackendErrorConfirmIsOpen} onClose={() => this.setState({ dialogLoadingBackendErrorConfirmIsOpen: false })} />
                         <ConfirmationDialog message="Changes saved" open={this.state.dialogSaveChangesIsOpen} onClose={() => this.setState({ dialogSaveChangesIsActive: false, dialogSaveChangesIsOpen: false })} />
@@ -362,8 +383,7 @@ class Settings extends Component {
     }
 }
 
-const mapStateToProps = (state, ownProps) => {
-    debugger;
+const mapStateToProps = (state) => {
     return {
         user: state.default.user,
         teamsForCompetition: state.default.teamsForCompetition,

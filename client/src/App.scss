@@ -42,6 +42,10 @@ body {
     overflow-x: hidden;
 }
 
+.loading-filler {
+    min-height: 92vh;       // Used on the initial load screen to put the footer at the bottom of the screen
+}
+
 .container-card {
     font-family: $font-family-main;
     // font-size: 0.9rem;
@@ -75,6 +79,21 @@ body {
         margin-top: 7vh;
         
         p { text-align: center; }
+    }
+
+    &.not-at-this-stage {
+        background-color: rgba(253, 229, 92, 0.9);
+        
+        &.home-nav {
+            position: absolute;
+            width: 25%;
+            top: 19vh;
+        }
+
+        &.settings-nav {
+            margin-top: 0;
+            margin-bottom: 3vh;
+        }
     }
 
     .main-header {

@@ -17,11 +17,11 @@ class FixturesAndResultsFixtureSet extends Component {
 
     render() {
 
-        const { fixtures, teamsForCompetition, hasCompetitionStarted, displayFixtures, displayResults, displayHeader } = this.props;
+        const { fixtures, teamsForCompetition, hasCompetitionStarted, competitionRound, displayResults, displayHeader } = this.props;
 
         return (
 
-            <div className="container-card fixtures-card">
+            <div className={`container-card fixtures-card ${competitionRound}`} id={competitionRound}>
 
                 <div className={`main-header ${displayResults ? "displayResults" : ""} ${hasCompetitionStarted ? "" : "seasonsFixturesHaveNotBeenCreated"}`}>
                 
@@ -63,8 +63,7 @@ class FixturesAndResultsFixtureSet extends Component {
                                     <FixtureRow
                                         key={i}
                                         fixture={fixture}
-                                        displayResults = {displayResults}
-                                        displayFixtures = {displayFixtures}
+                                        showForFixturesAndResults = {true}
                                         showGoals={this.state.showGoals}
                                         homeTeamDivision={helpers.getDivisionTheTeamPlaysIn(teamsForCompetition, fixture.homeTeam)}
                                     />

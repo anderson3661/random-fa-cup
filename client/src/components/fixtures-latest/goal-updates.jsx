@@ -1,6 +1,7 @@
 import React from "react";
 
 // import Typing from 'react-typing-animation';
+import './goal-updates.scss';
 
 
 const GoalUpdates = ({ fixtureUpdates }) => (
@@ -15,10 +16,11 @@ const GoalUpdates = ({ fixtureUpdates }) => (
                 return (
                 <p key={i}>
                     {/* <Typing> */}
-                        <span className="mins">{update.mins}</span>
-                        <span className={`team ${update.scoringTeam === "Home" ? "goal" : ""}`}>{update.homeTeam} {update.homeTeamsScore}</span>
-                        &nbsp;&nbsp;
-                        <span className={`team ${update.scoringTeam === "Away" ? "goal" : ""}`}>{update.awayTeam} {update.awayTeamsScore}</span>
+                        <div className="minsBlank">
+                            <span className="mins">{update.mins}</span>
+                        </div>
+                        <span className={`team ${update.scoringTeam === "Home" ? "goal" : ""} home`}>{update.homeTeam} {update.homeTeamsScore}</span>
+                        <span className={`team ${update.scoringTeam === "Away" ? "goal" : ""} away`}>{update.awayTeam} {update.awayTeamsScore}</span>
                     {/* </Typing> */}
                 </p>
                 )

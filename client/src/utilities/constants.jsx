@@ -1,10 +1,13 @@
 export const TESTING_MODE = false;
+export const TESTING_EMAIL_ADDRESS = 'm@m.com';                             // Used in userReducer
+export const TESTING_USER_ID_KEY = '_id';                                   // Used in userReducer              
+export const TESTING_USER_ID = '5c7a2fb8f6f0801140ae065f';                  // Used in userReducer     
 
 export const INCLUDE_MONGODB_OPTION = true;
 export const INCLUDE_FIREBASE_OPTION = false;
 
-export const HOSTING_SITE = "https://console.firebase.google.com/u/0/project/football-b1017/hosting/main";
-export const APP_TITLE = "Football - Premier League";
+export const HOSTING_SITE = "https://dashboard.heroku.com/apps/football-fa-cup-mern/deploy/github";
+export const APP_TITLE = "Football - Random FA Cup - MERN";
 export const MAIL_TO = "martin.anderson3661@gmail.com";
 export const COPYRIGHT = "Martin Anderson 2019";
 
@@ -17,6 +20,7 @@ export const FA_CUP_SMALL_IMAGE = require('../assets/images/fa-cup-small.png');
 export const SCARF_HELP = require('../assets/images/scarf-help.png');
 export const SCARF_CONTACT = require('../assets/images/scarf-contact.png');
 export const SCARF_ABOUT = require('../assets/images/scarf-about.png');
+export const RED_CROSS = require('../assets/images/red-cross.png');
 
 export const TEAMS_DEFAULT = [
     { premierLeague: [
@@ -162,7 +166,7 @@ export const TEAMS_DEFAULT = [
 export const DEFAULT_VALUE_SEASON = "2018/19";
 export const DEFAULT_VALUE_COMPETITION_START_DATE = "8 Dec 2018";
 export const DEFAULT_VALUE_COMPETITION_START_TIME = "15:00";
-export const DEFAULT_VALUE_FIXTURE_UPDATE_INTERVAL = 0.1;
+export const DEFAULT_VALUE_FIXTURE_UPDATE_INTERVAL = 1;
 export const DEFAULT_VALUE_BASE_FOR_RANDOM_MULTIPLIER = 90;
 export const DEFAULT_VALUE_AWAY_TEAM_FACTOR = 1.25;
 export const DEFAULT_VALUE_DIVISION_FACTOR = 1.25;
@@ -180,6 +184,7 @@ export const IS_NOT_A_TOP_TEAM_FACTOR = 'isNotATopTeam';
 export const DIVISION_FACTOR = 'divisionFactor';
 export const GOALS_PER_MINUTE_FACTOR = 'likelihoodOfAGoalDuringASetPeriod';
 export const IS_IT_A_GOAL_FACTOR = 'isItAGoal';
+export const IS_IT_A_GOAL_PENALTY_FACTOR = 'isItAGoalFromAPenalty';
 export const HAVE_SEASONS_FIXTURES_BEEN_CREATED = 'haveSeasonsFixturesBeenCreated';
 
 export const API_ENDPOINT_USERS = '/api/users';
@@ -201,6 +206,11 @@ export const API_ENDPOINTS_TO_DELETE_ALL_DATA = [
     API_ENDPOINT_MISCELLANEOUS,
     API_ENDPOINT_SETTINGS_FACTORS,
     API_ENDPOINT_TEAMS,
+    API_ENDPOINT_FIXTURES, 
+]
+
+export const API_ENDPOINTS_TO_DELETE_KEEP_CURRENT_SETTINGS = [
+    API_ENDPOINT_MISCELLANEOUS,
     API_ENDPOINT_FIXTURES, 
 ]
 
@@ -236,6 +246,35 @@ export const FINAL = 'final';
 
 export const IS_FIXTURES = false;
 export const IS_REPLAYS = true;
+
+export const EXTRA_MINUTES_FIRST_HALF = 5;
+export const EXTRA_MINUTES_SECOND_HALF = 9;
+export const EXTRA_MINUTES_EXTRA_TIME_FIRST_HALF = 2;
+export const EXTRA_MINUTES_EXTRA_TIME_SECOND_HALF = 3;
+
+export const START_FIXTURES = "Start Fixtures";
+export const START_SECOND_HALF = "Start Second Half";
+export const PAUSE_FIXTURES = "Pause Fixtures";
+export const CONTINUE_FIXTURES = "Continue Fixtures";
+export const START_EXTRA_TIME = "Start Extra Time";
+export const START_EXTRA_TIME_SECOND_HALF = "Start ET Second Half";
+export const PAUSE_EXTRA_TIME = "Pause Extra Time";
+export const CONTINUE_EXTRA_TIME = "Continue Extra Time";
+export const START_PENALTIES = "Start Penalties";
+export const PAUSE_PENALTIES = "Pause Penalties";
+export const CONTINUE_PENALTIES = "Continue Penalties";
+export const FIXTURES_FINISHED = "Fixtures Finished";
+
+export const HALF_TIME = "Half-Time";
+export const HALF_TIME_IN_EXTRA_TIME = "Half-Time (ET)";
+export const FULL_TIME = "Full-Time";
+export const FULL_TIME_AFTER_90_MINUTES = "Full-Time (90)";
+export const FULL_TIME_AFTER_EXTRA_TIME = "Full-Time (AET)";
+export const FULL_TIME_AFTER_PENALTIES = "Full-Time (pens)";
+
+export const RESET_APP_CONFIRM_NO = 'No';
+export const RESET_APP_KEEP_CURRENT_SETTINGS = 'Keep Current Settings';
+export const RESET_APP_USE_SYSTEM_DEFAULTS = 'Use System Defaults';
 
 export const REDIRECT_TO_HOME = '/home';
 export const REDIRECT_TO_SETTINGS = '/settings';

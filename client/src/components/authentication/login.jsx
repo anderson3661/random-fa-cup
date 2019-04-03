@@ -9,7 +9,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import { userLogin } from '../../redux/actions/userActions';
 
-import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, REDIRECT_TO_HOME } from '../../utilities/constants';
+import { TESTING_MODE, MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, REDIRECT_TO_HOME } from '../../utilities/constants';
 
 import "./login.scss";
 
@@ -29,10 +29,8 @@ class Login extends Component {
 
         this.state = {
             formFields: {
-                // userEmailAddress: 'm@m.com',
-                // userPassword: 'Password123',
-                userEmailAddress: '',
-                userPassword: '',
+                userEmailAddress: TESTING_MODE ? 'm@m.com' : '',
+                userPassword: TESTING_MODE ? 'Password123' : '',
             },
             formErrors: {
                 userEmailAddress: '',
@@ -106,7 +104,7 @@ class Login extends Component {
     }
 
     componentWillReceiveProps(nextProps, prevState) {
-        if (nextProps.user.authenticated && !this.props.user.authenticated) {
+        if ((nextProps.user.authenticated && !this.props.user.authenticated) || (TESTING_MODE && nextProps.user.authenticated && this.props.user.authenticated)) {
             // Re-route to the Settings page
             this.props.history.push(REDIRECT_TO_HOME);
         } else if (this.state.submitAttempted && nextProps.user.authenticationAttempted) {
@@ -207,7 +205,7 @@ class Login extends Component {
     };
 };
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     debugger;
     return { 
         user: state.default.user,

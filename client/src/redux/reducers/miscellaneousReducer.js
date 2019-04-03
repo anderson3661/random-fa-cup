@@ -1,4 +1,4 @@
-import { LOADING_APP, LOAD_FROM_MISCELLANEOUS_DB, LOAD_FROM_ALL_DBS_STARTED, LOAD_FROM_ALL_DBS_FINISHED, CREATE_DOCUMENTS_IN_DBS_FOR_FIRST_TIME, UPDATE_MISCELLANEOUS_PROPERTY, LOADING_BACKEND_UPDATE } from '../actions/types';
+import { LOADING_APP, LOAD_FROM_MISCELLANEOUS_DB, LOAD_FROM_ALL_DBS_STARTED, LOAD_FROM_ALL_DBS_FINISHED, CREATE_DOCUMENTS_IN_DBS_FOR_FIRST_TIME, UPDATE_MISCELLANEOUS_PROPERTY, REFRESH_LATEST_FIXTURES, LOADING_BACKEND_UPDATE } from '../actions/types';
 import { FIRST_ROUND } from '../../utilities/constants';
 
 const initialState = {
@@ -13,6 +13,9 @@ const initialState = {
     loadingSettings: false,
     loadingDraw: false,
     loadingLatestFixtures: false,
+    loadingRefreshLatestFixtures: false,
+    loadingRefreshHeaderAfterLatestFixtures: false,
+    loadingAfterEachPenalty: false,
     loadingBackendError: false,
 }
 

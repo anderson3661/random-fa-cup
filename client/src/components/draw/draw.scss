@@ -4,7 +4,6 @@
 
 .outer-container-draw {
     min-height: 94vh;
-    // min-height: 100%;
 
     .container-main-content-draw {
         width: 90%;
@@ -222,5 +221,28 @@
     }
 }
 
-// @media screen and (min-width: 1024px) { .outer-container-draw { .container-main-content-draw { width: 90%; } } };
-// @media screen and (max-width: 1024px) { .outer-container-draw { .container-main-content-draw { width: 90%; } } };
+@media screen and (max-width: 650px) {
+    .outer-container-draw {
+        .container-main-content-draw {
+            width: 100%;
+            .draw-header, .draw {
+                width: 90%;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+                margin-bottom: 3vh;
+            }
+            &.drawInProgress {
+                .secondary-information {
+                    margin-left: 0;
+                    .my-watchlist, .premier-league-teams, .teams-to-be-drawn { width: 90%; overflow: hidden; padding-bottom: 1vh; margin-bottom: 2vh; }
+                    .my-watchlist { max-height: unset; }
+                }
+            }
+            &.first-round, &.second-round, &.third-round { &.drawInProgress { .secondary-information { position: initial; width: 100%; margin: 0 auto; } } }
+            &.first-round, &.second-round, &.third-round { &.drawInProgress { .secondary-information { .premier-league-teams { max-height: unset; } } } }
+            &.first-round, &.second-round, &.third-round { &.drawInProgress { .secondary-information { .teams-to-be-drawn { max-height: unset; } } } }
+            &.first-round, &.second-round { .filler-for-scroll { width: 100%; } }
+        }
+    }
+};

@@ -20,7 +20,6 @@ class SettingsHeader extends Component {
     }
 
     render() {
-
         const { authenticated, haveChangesBeenMade } = this.props;
 
         return (
@@ -34,9 +33,7 @@ class SettingsHeader extends Component {
                     <div className="heading-and-buttons">
                         {/* {!authenticated && <p>Please log in or sign up in order to use the app</p>} */}
                         <span className="heading">Settings</span>
-                        &nbsp; &nbsp;
                         <Button variant="contained" color="primary" id="saveChanges" disabled={!authenticated || !haveChangesBeenMade} onClick={this.handleSaveChanges}>Save Changes</Button>
-                        &nbsp; &nbsp;
                         <Button variant="contained" color="secondary" id="resetApp" disabled={!authenticated} onClick={this.handleResetApp}>Reset App</Button>
                     </div>
 

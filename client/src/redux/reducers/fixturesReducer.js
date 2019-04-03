@@ -10,14 +10,12 @@ export default function fixturesReducer(state = initialState, action) {
     switch (action.type) {
 
         case LOAD_FROM_FIXTURES_DB :
-            debugger;
             if (action.data.length > 0) {
                 return [...action.data];
             }
             return state;
 
         case UPDATE_FIXTURES_IN_STORE :
-            debugger;
             const isReplays = action.data.fixtures[0].isReplay;           // At the start of the competition this will be undefined, but doesn't matter as next line caters for that
             const arrayToUpdate = isReplays ? 'Replays' : 'Fixtures';
             const indexFixtures = Math.max(0, COMPETITION_ROUNDS.indexOf(action.data.fixtures[0].competitionRound));   // At the start of the competition this will be -1 as competition round is undefined

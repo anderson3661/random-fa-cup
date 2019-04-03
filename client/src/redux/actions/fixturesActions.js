@@ -4,7 +4,7 @@ import { API_ENDPOINT_FIXTURES } from '../../utilities/constants';
 
 // ACTION CREATORS
 
-export const updateDbsAndStoreAfterLatestResults = (latestFixtures, replays, replayUpdatesInFixturesDb, replayUpdatesInStore, finalFixture, miscellaneousUpdates) => async (dispatch, getState) => {
+export const updateDbsAndStoreAfterLatestResults = (latestFixtures, replays, replayUpdatesInFixturesDb, replayUpdatesInStore, finalFixture, miscellaneousUpdates, replaysJustFinished) => async (dispatch, getState) => {
     try {
 
         dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingLatestFixtures: true }});
@@ -38,6 +38,10 @@ export const updateDbsAndStoreAfterLatestResults = (latestFixtures, replays, rep
         await updateMiscellaneousDocumentInDb(getState().default.miscellaneous._id, miscellaneousUpdates);
         dispatch({ type: UPDATE_MISCELLANEOUS_PROPERTY, data: miscellaneousUpdates });
 
+        if (replaysJustFinished) {
+            dispatch(refreshHeaderAfterLatestFixtures());
+        }
+
         dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingLatestFixtures: false }});
     } catch(error) {
         console.log('Error from updateDbsAndStoreAfterLatestResults', error);
@@ -53,4 +57,40 @@ export const updateDbsAndStoreAfterCompetitionHasFinished = () => async (dispatc
     } catch(error) {
         console.log('Error from updateDbsAndStoreAfterCompetitionHasFinished', error);
     }
+}
+
+export const refreshLatestFixtures = () => async (dispatch) => {
+
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshLatestFixtures: true }});
+
+    // If replays have finished then fixtures for the next round will be played next.  In order to re-render the latest fixtures component need to set state so that the option appears
+    // Need to add a timeout so that the store is updated
+    // Otherwise the loadingSettings: false is batched at the same time as loadingSettings: true, and therefore loadingSettings: true never happens
+    await setTimeout(() => {}, 500);
+
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshLatestFixtures: false }});
+}
+
+export const refreshHeaderAfterLatestFixtures = () => async (dispatch) => {
+
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshHeaderAfterLatestFixtures: true }});
+
+    // If replays have finished then fixtures for the next round will be played next.  In order to re-render the header component need to set state so that the option appears
+    // Need to add a timeout so that the store is updated
+    // Otherwise the loadingSettings: false is batched at the same time as loadingSettings: true, and therefore loadingSettings: true never happens
+    await setTimeout(() => {}, 500);
+
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshHeaderAfterLatestFixtures: false }});
+}
+
+export const refreshAfterEachPenalty = () => async (dispatch) => {
+
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingAfterEachPenalty: true }});
+
+    // If replays have finished then fixtures for the next round will be played next.  In order to re-render the header component need to set state so that the option appears
+    // Need to add a timeout so that the store is updated
+    // Otherwise the loadingSettings: false is batched at the same time as loadingSettings: true, and therefore loadingSettings: true never happens
+    await setTimeout(() => {}, 500);
+
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingAfterEachPenalty: false }});
 }

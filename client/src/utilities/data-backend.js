@@ -1,4 +1,4 @@
-import { TEAMS_DEFAULT, FIXTURES_DEFAULT, COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES, API_ENDPOINT_USERS, API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_SETTINGS_FACTORS, API_ENDPOINT_TEAMS, API_ENDPOINT_MY_WATCHLIST_TEAMS, API_ENDPOINT_FIXTURES, API_ENDPOINTS_TO_DELETE_ALL_DATA, HAVE_SEASONS_FIXTURES_BEEN_CREATED, DIVISIONS, NUMBER_OF_TEAMS } from './constants';
+import { TEAMS_DEFAULT, FIXTURES_DEFAULT, COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES, API_ENDPOINT_USERS, API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_SETTINGS_FACTORS, API_ENDPOINT_TEAMS, API_ENDPOINT_MY_WATCHLIST_TEAMS, API_ENDPOINT_FIXTURES, API_ENDPOINTS_TO_DELETE_ALL_DATA, API_ENDPOINTS_TO_DELETE_KEEP_CURRENT_SETTINGS, HAVE_SEASONS_FIXTURES_BEEN_CREATED, DIVISIONS, NUMBER_OF_TEAMS } from './constants';
 
 // const APP_DATA_LOCAL_STORAGE = "football_AppInfo";
 
@@ -67,6 +67,7 @@ export async function fetchDataFromAllDbs(documentIdInUsersDb) {
         res = await fetch(API_ENDPOINT_FIXTURES + "/" + documentIdInUsersDb);
         if (!res.ok) throw Error(res.statusText);
         dataFromFixturesDb = await res.json();
+        console.log('dataFromFixturesDb', dataFromFixturesDb);
         // Now format the individual fixtures into sets of fixtures
         let setsOfFixtures = await formatFixtures(dataFromFixturesDb);
 
@@ -168,6 +169,29 @@ export const deleteAllDocumentsInDbs = (documentIdInUsersDb) => {
     } catch(error) {
         console.log(error);
         throw new Error('Error in deleteAllDocumentsInAllDbs');
+    }
+}
+
+export const deleteAllDocumentsInDbsKeepCurrentSettings = (documentIdInUsersDb) => {
+
+    try {
+
+        // Maps each URL into a fetch() Promise
+        const requests = API_ENDPOINTS_TO_DELETE_KEEP_CURRENT_SETTINGS.map(url => {
+            return fetch(url + "/" + documentIdInUsersDb, { method: 'DELETE' })
+                   .then(response => response.json())
+        });
+
+        // Resolve all the promises - return the Promise to the calling function
+        return Promise.all(requests)
+            // .then(results => console.log(JSON.stringify(results, null, 2)))
+            .catch(error => {
+                throw Error("There is an error attempting to delete all of the documents in some of the databases (Keep Current Settings) ..." + error);       // Throw an error so that the promise returns rejected
+        });
+       
+    } catch(error) {
+        console.log(error);
+        throw new Error('Error in deleteAllDocumentsInDbsKeepCurrentSettings');
     }
 }
 

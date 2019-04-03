@@ -20,6 +20,7 @@ const Routes = () => {
             <Route exact path="/home" render={ () => <Header isHomeNav={true}><Home /></Header> } />
             <Route exact path="/draw" render={ () => <Header isDrawNav={true}><Draw /></Header> } />
             <Route exact path="/fixtures-latest" render={ () => <Header isFixturesLatestNav={true}><FixturesLatest /></Header> } />
+            <Route path="/fixtures-and-results/:competitionRoundToTop" render={ (props) => <Header isFixturesAndResultsNav={true}><FixturesAndResults {...props} /></Header> } />   {/* This is required by the links on the Home page */}
             <Route exact path="/fixtures-and-results" render={ () => <Header isFixturesAndResultsNav={true}><FixturesAndResults /></Header> } />
             <Route exact path="/settings" render={ () => <Header isSettingsNav={true}><Settings /></Header> } />
             <Route exact path="/help" render={ () => <Header><Help /></Header> } />

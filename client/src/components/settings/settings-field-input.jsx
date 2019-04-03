@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 
 import FieldInput from './settings-crud-field-input';
+import { TESTING_MODE } from '../../utilities/constants';
 
 
 class SettingsFieldInput extends Component {
@@ -27,12 +28,12 @@ class SettingsFieldInput extends Component {
         this.props.onChangeInputFieldValue(inputFieldValue);
     };
 
-    // componentWillReceiveProps(nextProps) {
-    //     // This needed for when Populate Course is clicked, so that the values set on the parent are passed down to this child ??
-    //     if (nextProps.value !== this.state.inputFieldValue) {
-    //         this.setState({inputFieldValue: nextProps.value});
-    //     }
-    // }
+    componentWillReceiveProps(nextProps) {
+        // This needed for when Reset App is clicked, so that the values set on the parent are passed down to this child
+        if (nextProps.value !== this.state.inputFieldValue) {
+            this.setState({inputFieldValue: nextProps.value});
+        }
+    }
 
     shouldComponentUpdate(nextProps, nextState, nextContext) {
         // Because the state values in this child component are updating the parent which will then re-render this child, there is no need to re-render this child in those circumstances
@@ -40,6 +41,7 @@ class SettingsFieldInput extends Component {
     }
 
     render() {
+        if (TESTING_MODE) console.log('render settings-field-input');
 
         return(
             <FieldInput

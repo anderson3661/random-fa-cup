@@ -24,18 +24,21 @@ const About = () => {
                     <p>The way it works is that for each minute of each tie a random number is generated and if that number is within a certain tolerance then a goal is scored.</p>
                     <p>You start by entering teams and various factors on the <span>Settings</span> page.</p>
                     <p>Once teams and factors have been entered (or the defaults used) then click on the <span>1st Round Draw</span> to create the ties for the 1st round.</p>
-                    <p>Then click on the <span>Latest Fixtures</span> page to start the 1st Round.</p>
-                    <p>Once each round has been completed the <span>Results</span> page will be updated, and the draw for the succeeding round will become available.</p>
+                    <p>Then click on the link to play the <span>1st Round fixtures</span>.</p>
+                    <p>Once each round has been completed the <span>Fixtures and Results</span> page will be updated, and the draw for the succeeding round will become available.</p>
+                    <p>For each round of the competition (excluding the semi-finals and final), if the scores are level after 90 minutes, then a fixture will go to a replay.</p>
+                    <p>For replays and the semi-finals and final, if the scores are level after 90 minutes, then extra time and, if necessary, penalties will be played.</p>
                     <p>&nbsp;</p>
                     <p>You can specify:</p>
                     <ul>
-                        <li>which teams from each league make up the competition</li>
-                        <li>the top teams, and whether they have a slight advantage</li>
-                        <li>whether the home teams have a slight advantage</li>
-                        <li>the periods during a match which are more likely to produce goals</li>
+                        <li>which <span>teams</span> from each league make up the competition</li>
+                        <li><span>My Watchlist Teams</span>, i.e. teams to more easily monitor during the competition</li>
+                        <li>the <span>top teams</span>, and whether they have a slight advantage</li>
+                        <li>whether the <span>home teams</span> have a slight advantage</li>
+                        <li>the <span>periods</span> during a match which are more likely to produce goals</li>
+                        <li>the advantage that teams from a <span>higher division</span> have over teams from lower divisions</li>
                         <li>whether you want high-scoring or low-scoring matches</li>
-                        <li>the advantage that teams from a higher division have over teams from lower divisions</li>
-                        <li>the speed at which the fixtures are updated</li>
+                        <li>the <span>speed</span> at which the fixtures are updated</li>
                     </ul>
                 </div>
 
@@ -44,14 +47,13 @@ const About = () => {
                     <div className="container-card">
                         <h2>Technologies Used</h2>
                         <ul>
+                            <li>Node.js, Mongo Db, Express, Mongoose for persisting data</li>
                             <li>React</li>
                             <li>React Router</li>
                             <li>Redux (including combined reducers)</li>
-                            <li>ApexCharts.js</li>
                             <li>SCSS (CSS preprocessor)</li>
                             <li>HTML5</li>
                             <li>CSS3 Flexbox and Grid</li>
-                            <li>Node.js, Mongo Db, Express, Mongoose for persisting data</li>
                         </ul>
                     </div>
 

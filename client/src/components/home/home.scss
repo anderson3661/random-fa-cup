@@ -17,7 +17,7 @@
         border-radius: 50%;
         box-shadow: 0px 0px 10vw 10vw rgba(248, 248, 248, 0.3);
 
-        img { height: 100%; }
+        img { height: 100%; width: 100%; }
     }
 
     .competition-round {
@@ -102,3 +102,18 @@
     }
 
 }
+
+@media screen and (min-width: 1024px) {
+    .container-home {
+        .fa-cup-image { width: 23vw; height: 50vh; }
+        .competition-round { height: 15vh; width: 15vh; }
+    }
+};
+
+@media screen and (max-width: 800px) {
+    .container-home {
+        .fa-cup-image { top: 25vh; width: 30vw; height: 40vh; }
+        .competition-round { height: 12vh; width: 12vh; .competition-round-label, .fixtures-and-results, .play { font-size: 85%; } }
+        .teams-left-by-division { width: 20vw; }
+    }
+};

@@ -17,6 +17,7 @@ const SettingsFactorsSchema = new Schema({
             factor: Number,
         }],
         isItAGoal: Number,
+        isItAGoalFromAPenalty: Number,
         fixtureUpdateInterval: Number
     }
 });

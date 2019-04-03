@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
+import CompetitionFinishedOrWrongStage from '../common/competition-finished-or-wrong-stage';
 import CompetitionRound from './competition-round';
 import TeamsLeftByDivision from './teams-left-by-division';
 import * as helpers from '../../utilities/helper-functions/helpers';
@@ -18,11 +19,21 @@ const Home = (props) => {
     return (
 
         <div className="container-home">
+
             <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
 
             <div className="fa-cup-image">
                 <img src={FA_CUP_IMAGE} alt=""></img>
             </div>
+
+            {!authenticated &&
+                <CompetitionFinishedOrWrongStage
+                    authenticated={authenticated}
+                    hasCompetitionFinished={false}
+                    displayHeader="Log in"
+                    isHomeNav={true}
+                />
+            }
 
             {COMPETITION_ROUNDS.map((competitionRound, competitionRoundOfFootballIndex) => {
 
@@ -57,7 +68,7 @@ const Home = (props) => {
                 }
 
                 const isCompetitionRoundActive = displayDrawLabel || displayPlay || displayFixturesOrResults;
-                const linkTo = displayDrawLabel ? '/draw' : (displayPlay ? '/fixtures-latest' : (displayFixturesOrResults ? '/fixtures-and-results' : ""));
+                const linkTo = displayDrawLabel ? '/draw' : (displayPlay ? '/fixtures-latest' : (displayFixturesOrResults ? `/fixtures-and-results/${competitionRound}` : ""));
                 
                 if (competitionRoundOfFootballIndex === 5) {
                     debugger;
@@ -97,6 +108,7 @@ const mapStateToProps = (state) => {
     const { authenticated } = state.default.user;
     const { hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw, haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays } = state.default.miscellaneous;
     const { teamsForCompetition, fixturesForCompetition, settingsFactors } = state.default;
+    debugger;
 
     return {
         authenticated,

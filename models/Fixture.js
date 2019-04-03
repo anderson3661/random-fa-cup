@@ -29,6 +29,7 @@ const FixtureSchema = new Schema({
     isReplay: Boolean,
     isExtraTime: Boolean,
     isPenalties: Boolean,
+    isHomeTeamTakingPenaltiesFirst: Boolean,
     penalties: Array,
     goalFactors: Array,
     dateOfFixture: String,

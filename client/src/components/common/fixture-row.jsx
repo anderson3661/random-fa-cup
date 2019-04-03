@@ -9,33 +9,20 @@ import "./fixture-row.scss";
 
 const FixtureRow = (props) => {
     const { homeTeam, awayTeam, homeTeamDivision, awayTeamDivision, homeTeamsScore, awayTeamsScore, homeTeamsGoals, awayTeamsGoals, minutesPlayed, minutesInfo,
-            hasFixtureFinished, dateOfFixture, isExtraTime, isPenalties, penalties, homeTeamsScorePenalties, awayTeamsScorePenalties } = props.fixture;
+            hasFixtureFinished, isExtraTime, isPenalties, penalties, homeTeamsScorePenalties, awayTeamsScorePenalties, isHomeTeamTakingPenaltiesFirst } = props.fixture;
     
     const haveLatestFixturesStarted = (props.haveLatestFixturesStarted === undefined ? false : props.haveLatestFixturesStarted);
     const showForLatestFixtures = (props.showForLatestFixtures === undefined ? false : props.showForLatestFixtures);
-    const showForTeamStats = (props.showForTeamStats === undefined ? false : props.showForTeamStats);
+    const showForFixturesAndResults = (props.showForFixturesAndResults === undefined ? false : props.showForFixturesAndResults);
     const showRouteToThisStage = (props.showRouteToThisStage === undefined ? false : props.showRouteToThisStage);
     const showGoals = (props.showGoals === undefined ? false : props.showGoals);
-    const winDrawLoss = (props.winDrawLoss === undefined ? '' : props.winDrawLoss);
     const top3TeamsBeforeFixtures = (props.top3TeamsBeforeFixtures === undefined ? ["", "", ""] : props.top3TeamsBeforeFixtures);
-    const showVersus = (props.showVersus === undefined ? false : true);
     
     return (
 
         <Fragment>
 
-            <div className=
-                {`fixtures-row 
-                ${showForTeamStats ? 'team-stats':''} 
-                ${showRouteToThisStage ? 'route-to-this-stage':''} 
-                ${showForLatestFixtures ? 'in-play':''} 
-                ${showGoals && hasFixtureFinished ? 'show-goals-hide-border-bottom':''}
-                ${isExtraTime && hasFixtureFinished ? 'extra-time-hide-border-bottom':''}
-                `}>             
-
-                {showForTeamStats &&
-                    <div className="fixtureDate">{ dateOfFixture }</div>
-                }
+            <div className={`fixtures-row ${showRouteToThisStage ? 'route-to-this-stage' : ''} ${showForLatestFixtures ? 'in-play' : ''} ${showForFixturesAndResults ? 'fixtures-and-results' : ''} ${showGoals && hasFixtureFinished ? 'show-goals-hide-border-bottom' : ''} ${isExtraTime && hasFixtureFinished ? 'extra-time-hide-border-bottom' : ''}`}>
 
                 {showRouteToThisStage &&
                     <div className="competitionRound">{ props.competitionRound }</div>
@@ -51,13 +38,16 @@ const FixtureRow = (props) => {
                 </div>
 
                 <div className=
+                    // ${((showForLatestFixtures && !haveLatestFixturesStarted) || (!showForLatestFixtures && !hasFixtureFinished)) && !showForFixturesAndResults ? 'timeOnly': ''} 
                     {`timeOrScore 
-                    ${(showForLatestFixtures && !haveLatestFixturesStarted) || (!showForLatestFixtures && !hasFixtureFinished) ? 'timeOnly': ''} 
-                    ${(showForLatestFixtures && haveLatestFixturesStarted) || (!showForLatestFixtures && hasFixtureFinished) ? 'scoresOnly':''}
+                        ${showForFixturesAndResults || (showForLatestFixtures && haveLatestFixturesStarted) || (!showForLatestFixtures && hasFixtureFinished) ? 'scoresOnly':''}
                     `}>
 
-                    {((showForLatestFixtures && !haveLatestFixturesStarted) || (!showForLatestFixtures && !hasFixtureFinished)) &&
+                    {/* {(showForFixturesAndResults || (showForLatestFixtures && !haveLatestFixturesStarted) || (!showForLatestFixtures && !hasFixtureFinished)) &&
                         <span className="timeOfFixture">{ showVersus ? 'v' : '15:00' }</span>
+                    } */}
+                    {((showForLatestFixtures && !haveLatestFixturesStarted) || (!showForLatestFixtures && !hasFixtureFinished)) &&
+                        <span className="timeOfFixture">v</span>
                     }
 
                     {!showForLatestFixtures && hasFixtureFinished && (
@@ -106,35 +96,30 @@ const FixtureRow = (props) => {
                     }
                 </div>
 
-                {showForTeamStats && (
-                    <div className="winDrawLoss">
-                        <span className={`result ${ winDrawLoss }`}>{ hasFixtureFinished ? winDrawLoss : '' }</span>
-                    </div>
-                )}
-
             </div>
 
-            {(showForLatestFixtures || (showGoals && hasFixtureFinished)) &&
-                <div className={`fixtures-row-goal-times ${showForTeamStats ? 'team-stats':''}`}>
-                    {showForTeamStats && <div className="fixtureDate">&nbsp;</div>}
+            {((showForFixturesAndResults && showGoals && hasFixtureFinished) || showForLatestFixtures || showRouteToThisStage) &&
+                <div className={`fixtures-row-goal-times ${hasFixtureFinished ? 'fixture-finished' : ''} ${isExtraTime ? 'is-extra-time' : ''} ${isPenalties ? 'is-penalties' : ''} ${showForLatestFixtures ? 'in-play' : ''} ${showForFixturesAndResults ? 'fixtures-and-results' : ''} ${showRouteToThisStage ? 'route-to-this-stage' : ''}`}>
+                    {showRouteToThisStage && <div className="competitionRound"></div>}
                     <div className="teamsGoalTimes home">&nbsp;{ homeTeamsGoals }</div>
                     <div className="minutesPlayed">{ (showForLatestFixtures && minutesPlayed !== 0) ? minutesInfo : ' '}</div>
                     <div className="teamsGoalTimes away">&nbsp;&nbsp;{ awayTeamsGoals }</div>
-                    {showForTeamStats && <div className="winDrawLoss">&nbsp;</div>}
                 </div>
             }
 
-            {!showForLatestFixtures && (isExtraTime || isPenalties) > 0 &&
-                <div className="fixtures-row-penalties-summary">
+            {((showForLatestFixtures && hasFixtureFinished) || showForFixturesAndResults || showRouteToThisStage) && (isExtraTime || isPenalties) &&
+                <div className={`fixtures-row-penalties-commentary ${isPenalties ? 'is-penalties' : ''} ${showForLatestFixtures ? 'in-play' : ''} ${showForFixturesAndResults ? 'fixtures-and-results' : ''} ${showRouteToThisStage ? 'route-to-this-stage' : ''} ${showGoals ? 'show-goals' : ''}`}>
                     <div className="extraTimeOrPenaltiesSummary">&nbsp;{ helpers.getExtraTimeOrPenaltiesSummary(props.fixture) }</div>
                 </div>
             }
 
-            {showForLatestFixtures && isPenalties && penalties && penalties.length > 0 &&
+            {((showForFixturesAndResults && showGoals) || showForLatestFixtures) && isPenalties && penalties.length > 0 &&
                 <FixtureRowPenalties
                     penalties={penalties}
                     homeTeamsScorePenalties={homeTeamsScorePenalties}
                     awayTeamsScorePenalties={awayTeamsScorePenalties}
+                    fixturesAndResults={showForFixturesAndResults}
+                    isHomeTeamTakingPenaltiesFirst={isHomeTeamTakingPenaltiesFirst}
                 />
             }
     
