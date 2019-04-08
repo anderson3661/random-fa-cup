@@ -3,9 +3,7 @@
 
 
 .fixtures-row-penalties-summary, .fixtures-row-penalties {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    @include flex($justify-content: space-between, $align-items: null);
     text-align: center;
     font-size: $font-size-penalties;
     color: $color-penalties;

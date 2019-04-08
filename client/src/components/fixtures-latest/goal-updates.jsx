@@ -14,7 +14,7 @@ const GoalUpdates = ({ fixtureUpdates }) => (
 
             {fixtureUpdates.map((update, i) => {
                 return (
-                <p key={i}>
+                <div key={i} className="goal-update">
                     {/* <Typing> */}
                         <div className="minsBlank">
                             <span className="mins">{update.mins}</span>
@@ -22,7 +22,7 @@ const GoalUpdates = ({ fixtureUpdates }) => (
                         <span className={`team ${update.scoringTeam === "Home" ? "goal" : ""} home`}>{update.homeTeam} {update.homeTeamsScore}</span>
                         <span className={`team ${update.scoringTeam === "Away" ? "goal" : ""} away`}>{update.awayTeam} {update.awayTeamsScore}</span>
                     {/* </Typing> */}
-                </p>
+                </div>
                 )
             })}
 

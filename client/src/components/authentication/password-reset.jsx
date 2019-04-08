@@ -3,15 +3,10 @@ import React, { Component } from 'react';
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 
-import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE } from '../../utilities/constants';
+import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, USER_DEFAULT_REQUIRED, USER_EMAIL_ADDRESS_REQUIRED, USER_EMAIL_ADDRESS_INVALID, EMAIL_REGEX } from '../../utilities/constants';
 
-import "./password-reset.scss";
+import "./authentication.scss";
 
-const USER_DEFAULT_REQUIRED = 'Minimum 1 character required';
-const USER_EMAIL_ADDRESS_REQUIRED = 'Minimum 1 character required';
-const USER_EMAIL_ADDRESS_INVALID = 'Invalid Email address';
-
-const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 class PasswordReset extends Component {
 
@@ -93,8 +88,8 @@ class PasswordReset extends Component {
         const {formFields: {userEmailAddress}, formErrors, submitAttempted} = this.state;
 
         return (
-            <div className="outer-container-password-reset">
-                <div className="container-main-content-password-reset">
+            <div className="outer-container-authentication">
+                <div className="container-main-content-authentication password-reset">
                     <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
                     <div className="container-card">
                         <header>

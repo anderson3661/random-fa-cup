@@ -1,4 +1,4 @@
-export const TESTING_MODE = false;
+export const TESTING_MODE = true;
 export const TESTING_EMAIL_ADDRESS = 'm@m.com';                             // Used in userReducer
 export const TESTING_USER_ID_KEY = '_id';                                   // Used in userReducer              
 export const TESTING_USER_ID = '5c7a2fb8f6f0801140ae065f';                  // Used in userReducer     
@@ -188,6 +188,10 @@ export const IS_IT_A_GOAL_PENALTY_FACTOR = 'isItAGoalFromAPenalty';
 export const HAVE_SEASONS_FIXTURES_BEEN_CREATED = 'haveSeasonsFixturesBeenCreated';
 
 export const API_ENDPOINT_USERS = '/api/users';
+export const API_ENDPOINT_USER_SIGN_UP = '/api/user/sign-up';
+export const API_ENDPOINT_USER_LOGIN = '/api/user/login';
+export const API_ENDPOINT_USER_VERIFY = '/api/user/verify';
+export const API_ENDPOINT_USER_LOGOUT = '/api/user/logout';
 export const API_ENDPOINT_MISCELLANEOUS = '/api/miscellaneous';
 export const API_ENDPOINT_SETTINGS_FACTORS = '/api/settings-factors';
 export const API_ENDPOINT_TEAMS = '/api/teams';
@@ -278,3 +282,15 @@ export const RESET_APP_USE_SYSTEM_DEFAULTS = 'Use System Defaults';
 
 export const REDIRECT_TO_HOME = '/home';
 export const REDIRECT_TO_SETTINGS = '/settings';
+
+export const USER_DEFAULT_REQUIRED = 'Minimum 1 character required';
+export const USER_EMAIL_ADDRESS_REQUIRED = 'Minimum 1 character required';
+export const USER_EMAIL_ADDRESS_INVALID = 'Invalid Email address';
+export const USER_PASSWORD_REQUIRED = 'Minimum 8 characters required';
+export const USER_PASSWORD_INVALID = 'Minimum eight characters, at least one uppercase letter, one lowercase letter and one number';
+export const USER_CONFIRM_PASSWORD_REQUIRED = 'Minimum 8 characters required';
+export const USER_CONFIRM_PASSWORD_INVALID = 'Must match password';
+
+export const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+// export const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+export const PASSWORD_REGEX = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/;

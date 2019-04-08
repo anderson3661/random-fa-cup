@@ -64,6 +64,11 @@ body {
         font-weight: 700;
     }
 
+    header, .main-header {
+        @include flex($justify-content: space-between);
+        img {width: 3vw; min-width: 40px;}
+    }
+
     &.header {
         width: 25%;
         text-align: center;

@@ -58,6 +58,7 @@ const About = () => {
                     </div>
 
                     <div className="container-inner">
+
                         <div className="container-card">
                             <h2>Hosting</h2>
                             <p>It is hosted on Heroku:</p>
@@ -74,31 +75,24 @@ const About = () => {
                             </ul>
                         </div>
 
-                    {/* <div className="container-card">
-                        <h2>Authentication</h2>
-                        <p>
-                            Users need to authenticate in order to use features within the
-                            system:
-                        </p>
-                        <ul>
-                            <li>
-                            The action buttons on the Administration and Latest Fixtures
-                            pages
-                            </li>
-                        </ul>
+                        <div className="container-card">
+                            <h2>Authentication</h2>
+                            <p>
+                                Users need to <span>Sign Up</span> and <span>Log In</span> in order to use features within the system
+                            </p>
                         </div>
 
-                        <div className="container-card">
-                        <h2>Administrator Access</h2>
-                        <p>Users with the administration role (set in Firebase) can:</p>
-                        <ul>
-                            <li>
-                            Use Firebase to persist the application data (i.e. instead of
-                            using the browser's local storage)
-                            </li>
-                        </ul>
+                        {/* <div className="container-card">
+                            <h2>Administrator Access</h2>
+                            <p>Users with the administration role (set in Firebase) can:</p>
+                            <ul>
+                                <li>
+                                Use Firebase to persist the application data (i.e. instead of
+                                using the browser's local storage)
+                                </li>
+                            </ul>
                         </div> */}
-                    
+                        
                     </div>
                 </div>
             </div>

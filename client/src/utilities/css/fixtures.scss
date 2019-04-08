@@ -14,22 +14,16 @@
             padding-bottom: 3vh;
 
             .main-header {
-                // @include flex();
-                @include flex($justify-content: space-between);
-                // line-height: 0;
                 padding-bottom: 2vh;
 
                 .image-left, .image-right { flex-basis: 20%; }
                 .image-right { text-align: right; }
-                img { width: 3vw; }
 
                 &.displayResults {
                     .showGoals {
                         flex-basis: 20%;
                         text-align: right;
                     }
-                    // @include flex($justify-content: space-between);
-                    // h1 { flex-basis: 54%; text-align: right;}
 
                     &.seasonsFixturesHaveNotBeenCreated {
                         h1 { flex-basis: 100%; text-align: center;}
@@ -50,18 +44,6 @@
 
     }
 }
-
-// .fixtures-date {
-//     font-family: $font-family-date-of-fixtures;
-//     font-size: $font-size-date-of-fixtures;
-//     // background-color: $background-color-date-of-fixtures; 
-//     background-color: lightgray; 
-//     text-align: left;
-//     text-transform: uppercase;
-//     margin-bottom: 1vh;
-//     padding: 1vh 1vw;
-//     border-collapse: separate;
-// }
 
 // @media screen and (min-width: 1024px) { .outer-container-fixtures { .container-main-content-fixtures { width: 65%; } } };
 // @media screen and (max-width: 1024px) { .outer-container-fixtures { .container-main-content-fixtures { width: 90%; } } };

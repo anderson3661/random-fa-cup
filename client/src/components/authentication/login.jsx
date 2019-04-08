@@ -9,18 +9,12 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import { userLogin } from '../../redux/actions/userActions';
 
-import { TESTING_MODE, MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, REDIRECT_TO_HOME } from '../../utilities/constants';
+import { TESTING_MODE, MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, REDIRECT_TO_HOME,
+         USER_EMAIL_ADDRESS_INVALID, USER_PASSWORD_INVALID,
+         EMAIL_REGEX, PASSWORD_REGEX} from '../../utilities/constants';
 
-import "./login.scss";
+import "./authentication.scss";
 
-const USER_DEFAULT_REQUIRED = 'Minimum 1 character required';
-const USER_EMAIL_ADDRESS_REQUIRED = 'Minimum 1 character required';
-const USER_EMAIL_ADDRESS_INVALID = 'Invalid Email address';
-const USER_PASSWORD_REQUIRED = 'Minimum 8 characters required';
-const USER_PASSWORD_INVALID = 'Minimum eight characters, at least one uppercase letter, one lowercase letter and one number';
-
-const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
 
 class Login extends Component {
 
@@ -38,31 +32,36 @@ class Login extends Component {
             },
             submitAttempted: false,
             rememberMe: false,
-            authenticationFailed: false,
+            loginInvalidMessage: '',
         }
 
     }
 
     handleChange = e => {
-        const {name, value} = e.target;
-        const {formFields, formErrors} = this.state;
+        const { name, value } = e.target;
+        const { formFields, formErrors } = this.state;
+
+        this.getValidationErrors(e.target);
+
+        this.setState({ loginInvalidMessage: '' });
+        this.setState({ formFields: Object.assign(formFields, {[name]: value })});
+        this.setState({ formErrors });
+        // this.setState({ formErrors }, () => console.log(this.state));
+    }
+
+    getValidationErrors = ({ name, value }) => {
+        const { formErrors } = this.state;
 
         switch (name) {
             case "userEmailAddress":
-                // formErrors.userEmailAddress = value.length < 1 ? USER_EMAIL_ADDRESS_REQUIRED : "";
-                formErrors.userEmailAddress = value.length > 0 && !EMAIL_REGEX.test(value) ? USER_EMAIL_ADDRESS_INVALID : formErrors.userEmailAddress
+                formErrors.userEmailAddress = !EMAIL_REGEX.test(value) ? USER_EMAIL_ADDRESS_INVALID : "";
                 break;
             case "userPassword":
-                formErrors.userPassword = value.length < 1 ? USER_PASSWORD_REQUIRED : "";
-                formErrors.userPassword = value.length > 0 && !PASSWORD_REGEX.test(value) ? USER_PASSWORD_INVALID : formErrors.userPassword
+                formErrors.userPassword = !PASSWORD_REGEX.test(value) ? USER_PASSWORD_INVALID : "";
                 break;
             default:
                 break;
         }
-
-        this.setState({ submitAttempted: false, authenticationFailed: false });
-        this.setState({ formFields: Object.assign(formFields, {[name]: value })});
-        this.setState({ formErrors }, () => console.log(this.state));
     }
 
     handleSubmit = (e) => {
@@ -71,12 +70,13 @@ class Login extends Component {
 
         const {formFields, formErrors} = this.state;
 
-        this.setState({ submitAttempted: true, authenticationFailed: false });
+        this.setState({ submitAttempted: true, loginInvalidMessage: '' });
 
+        // Validate the fields and update state if errors are different
         Object.keys(formFields).forEach(key => {
-            if (formFields[key].trim() === '') {
-                this.setState({ formErrors: Object.assign(formErrors, {[key]: USER_DEFAULT_REQUIRED})})
-            }
+            const previousValidationError = formErrors[key];
+            this.getValidationErrors({ name: key, value: formFields[key] });
+            if (previousValidationError !== formErrors[key]) this.setState({ formErrors: Object.assign(formErrors) });
         });
 
         if (this.formValid()) {
@@ -84,41 +84,41 @@ class Login extends Component {
             // Do something with the details
             this.props.dispatch(userLogin({ emailAddress: formFields.userEmailAddress, password: formFields.userPassword }));
 
-            console.log(`
-                -- SUBMITTING --
-                Email Address: ${formFields.userEmailAddress}
-                `);
-            // Password: ${formFields.userPassword}
+            // console.log(`
+            //     -- SUBMITTING --
+            //     Email Address: ${formFields.userEmailAddress}
+            //     Password: ${formFields.userPassword}
+            //     `);
 
-        } else {
-            console.log("FORM INVALID");
+        // } else {
+        //     console.log("FORM INVALID");
         }
     }
 
     formValid = () => {
-            let isValid = true;
-            const {formFields, formErrors} = this.state;            
-            Object.values(formErrors).forEach(val => { val.length > 0 && (isValid = false) });          // Validate form errors being empty            
-            Object.values(formFields).forEach(val => { val.trim() === '' && (isValid = false) });       // Validate the form fields contained values
+        let isValid = true;
+        const {formFields, formErrors} = this.state;            
+        Object.values(formErrors).forEach(val => { val.length > 0 && (isValid = false) });          // Validate form errors being empty            
+        Object.values(formFields).forEach(val => { val.trim() === '' && (isValid = false) });       // Validate the form fields contained values
         return isValid;
     }
 
     componentWillReceiveProps(nextProps, prevState) {
         if ((nextProps.user.authenticated && !this.props.user.authenticated) || (TESTING_MODE && nextProps.user.authenticated && this.props.user.authenticated)) {
-            // Re-route to the Settings page
+            // Re-route to the Home page
             this.props.history.push(REDIRECT_TO_HOME);
-        } else if (this.state.submitAttempted && nextProps.user.authenticationAttempted) {
-            this.setState({ authenticationFailed: true });
+        } else if (this.state.submitAttempted && nextProps.user.loginInvalidMessage) {
+            this.setState({ loginInvalidMessage: nextProps.user.loginInvalidMessage });
         }
     }
 
     render() {
 
-        const {formFields: {userEmailAddress, userPassword}, formErrors, submitAttempted, authenticationFailed} = this.state;
+        const {formFields: {userEmailAddress, userPassword}, formErrors, submitAttempted, loginInvalidMessage } = this.state;
 
         return (
-            <div className="outer-container-login">
-                <div className="container-main-content-login">
+            <div className="outer-container-authentication">
+                <div className="container-main-content-authentication">
                     <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
                     <div className="container-card">
                         <header>
@@ -188,9 +188,9 @@ class Login extends Component {
                                     </div>
                                 }
 
-                                { authenticationFailed &&
+                                { loginInvalidMessage &&
                                     <div className="invalid-form-message">
-                                        <p>Invalid details entered ... please retry</p>
+                                        <p>{loginInvalidMessage}</p>
                                     </div>
                                 }
 
@@ -206,9 +206,9 @@ class Login extends Component {
 };
 
 const mapStateToProps = (state) => {
-    debugger;
     return { 
         user: state.default.user,
+        loginInvalidMessage: state.default.user.loginInvalidMessage,
     }
 }
 

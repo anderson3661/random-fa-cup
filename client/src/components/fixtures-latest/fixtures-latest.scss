@@ -53,11 +53,10 @@
         }
 
         .watchlists {
-            display: flex;
+            @include flex($justify-content: null, $align-items: null);
             flex-direction: column;
         }
 
-        // .container-card.fixtures, .container-card.in-play-updates, .container-card.my-watchlist, .container-card.cup-upsets, .container-card.premier-league-teams, .container-card.route-to-this-stage, .container-card.draw { width: 100%; }
         .container-card.fixtures, .container-card.in-play-updates, .container-card.my-watchlist, .container-card.cup-upsets, .container-card.premier-league-teams, .container-card.route-to-this-stage, .container-card.draw { margin: unset; }
         .container-card.premier-league-teams-repeat { display: none; }
 
@@ -67,10 +66,7 @@
 
                 .fixtures-row.timeOrScore { flex-basis: 7vmax; }
                 .teamsGoalTimes { font-size: 90% }
-                // .minutesPlayed { font-size: 90%; flex-basis: 7vmax; }
                 .minutesPlayed { font-size: 90%; min-width: 75px; }
-                // .fixtures-row-goal-times.teamsGoalTimes.home { padding-right: 0; }
-                // .fixtures-row-goal-times.teamsGoalTimes.away { padding-left: 0; }
             }
         }
 

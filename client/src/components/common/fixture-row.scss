@@ -3,17 +3,13 @@
 
 .fixtures-row {
 
-    display: flex;
-    align-items: center;
+    @include flex($justify-content: null);
     font-weight: bold;
 
     border-bottom: 1px solid $color-fixture-row-goal-times-bottom-border;
 
     %teamName {
         flex-basis: $width-fixture-row-team-name;
-        // padding-top: 1.1vh;
-        // padding-bottom: 0.8vh;
-        // @include flex($justify-content: null);
     }
     .homeTeamsName { @extend %teamName; text-align: right; padding-right: 0.75vw; justify-content: flex-end; }
     .awayTeamsName { @extend %teamName; text-align: left;  padding-left: 0.75vw; justify-content: flex-start; }
@@ -22,10 +18,6 @@
     .homeTeamsScore { @extend %teamScore; padding-right: 0; }
     .awayTeamsScore { @extend %teamScore; padding-left: 0; }
 
-    // .homeTeamsName span.divisionAbbreviation, .awayTeamsName span.divisionAbbreviation { color: lightgray; font-size: 80%; }
-
-    // .homeTeamsName span.teamName.premierLeague, .awayTeamsName span.teamName.premierLeague { color: blue; }
-    
     .homeTeamsName, .awayTeamsName {
         span {
             font-weight: 700;
@@ -37,7 +29,6 @@
 
     .timeOrScore {
         @include flex($align-items: null);
-        // flex-basis: $width-fixture-time-or-score;
         text-align: center;
         padding-top: 0.7vh;
         padding-bottom: 0.7vh;
@@ -79,7 +70,7 @@
 }
 
 .fixtures-row-goal-times {
-    display: flex;
+    @include flex($justify-content: null, $align-items: null);
     
     font-size: $font-size-fixture-row-goal-times;
     color: $color-fixture-row-goal-times;
@@ -92,13 +83,10 @@
         padding-bottom: 0.25vh;
     }
     
-    // .teamsGoalTimes.home { text-align: right; padding-right: 0.25vw; }
     .teamsGoalTimes.home { text-align: right; }
-    // .teamsGoalTimes.away { text-align: left; padding-left: 0.25vw; }
     .teamsGoalTimes.away { text-align: left;  }
     
     .minutesPlayed {
-        // flex-basis: $width-fixture-row-goal-times-minutes-played;
         text-align: center;
         padding: 0 0.5vw;
         min-width: 75px;
@@ -123,8 +111,3 @@
     color: #a67c00;
     padding-left: 0.5vw; padding-right: 1vw;
 }
-
-.iconTop3 { top: 0; left: 0; }
-.iconTop3BeforeText, .iconTop3AfterText { position: relative; }
-.iconTop3BeforeText:before, .iconTop3AfterText:after { color: #a67c00; padding-left: 0.5vw; padding-right: 1vw; }
-.iconTop3Home2nd:before, .iconTop3Away2nd:after { content: "looks_two"; }

@@ -8,4 +8,4 @@ const MyWatchlistTeamSchema = new Schema({
     teamName: { type: String, required: true },
 });
 
-module.exports = MyWatchlistTeam = mongoose.model('my-watchlist-teams', MyWatchlistTeamSchema);
+module.exports = MyWatchlistTeam = mongoose.model('my-watchlist-team', MyWatchlistTeamSchema);

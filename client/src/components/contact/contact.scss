@@ -15,11 +15,6 @@
             width: 100%;
             padding: 1vh 2vw 11vh 2vw;
 
-            header {
-                @include flex($justify-content: space-between);
-                img {width: 3vw;}
-            }
-
             .help-text { text-align: center; }
 
             .contact {

@@ -3,8 +3,7 @@
 
 .draw-row {
 
-    display: flex;
-    align-items: center;
+    @include flex($justify-content: null);
     font-weight: bold;
 
     border-bottom: 1px solid $color-fixture-row-goal-times-bottom-border;

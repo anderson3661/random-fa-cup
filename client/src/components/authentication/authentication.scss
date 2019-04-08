@@ -2,23 +2,20 @@
 @import '../../sass/_variables';
 
 
-.outer-container-login {
+.outer-container-authentication {
     min-height: 94vh;
 
-    .container-main-content-login {
+    .container-main-content-authentication {
         width: 70%;
         margin: 22vh auto 9vh auto;
         @include flex($justify-content: null, $align-items: null);                           // Flex needs to be here, otherwise the Login table shows with no white/gray background
+
+        &.password-reset { margin-top: 25vh }
 
         //The main container-card css is in App.scss
         .container-card {
             width: 100%;
             padding: 1vh 2vw 11vh 2vw;
-
-            header {
-                @include flex($justify-content: space-between);
-                img {width: 3vw;}
-            }
 
             .help-text { text-align: center; }
 
@@ -78,7 +75,7 @@
 
 
 @media screen and (max-width: 1280px) {
-    .container-main-content-login {
+    .container-main-content-authentication {
         mat-form-field {
             font-size: 0.8em;
             line-height: 0.8em;
@@ -91,5 +88,5 @@
 }
 
 @media screen and (max-width: 768px) {
-    .container-main-content-login { width: 90%; }
+    .container-main-content-authentication { width: 90%; }
 }

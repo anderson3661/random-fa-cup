@@ -118,13 +118,14 @@ class FixturesLatest extends Component {
                     this.fixtures.push(new Fixture(setOfFixturesForCompetitionRound[i], teamsForCompetition));
                     this.fixtures[i].setUpFixture(goalFactors);
                 }
+
+                helpers.sortFixturesByHomeTeam(this.fixtures);
             }
         }
 
         this.displayHeader = (hasCompetitionFinished ? 'Competition Finished' : helpers.getCompetitionRoundHeader(this.competitionRound) +
                              (this.fixtures.length > 0 && this.fixtures[0].isReplay ? ' Replays' : helpers.getFixturesLabel(this.competitionRound)));
         
-        debugger;
         if (callSetState) {
             this.setState(this.constructorState());
         }
@@ -194,6 +195,7 @@ class FixturesLatest extends Component {
     checkFixturesProgress = () => {
         let fixtureMinuteUpdate;
         let hasAFixtureGoneToPenalties;
+        let haveBothTeamsScoredInTheSameMinute;
         let maxMinutesPlayedForFixture = 0;
 
         const { counterMinutes } = this.state;
@@ -201,16 +203,29 @@ class FixturesLatest extends Component {
 
         if (this.haveAllFixturesInThisSetFinished) return;      //Break out of the loop if fixtures have gone to penalties and the games have finished
         
-        debugger;
-
         this.fixtures.forEach((fixture, i) => {
             if (!fixture.hasFixtureFinished) {
                 hasAFixtureGoneToPenalties = fixture.isPenalties;
                 fixtureMinuteUpdate = fixture.updateFixture(this.flattenedTeams, goalFactors, this.competitionRound);
                 maxMinutesPlayedForFixture = Math.max(fixture.minutesPlayed, maxMinutesPlayedForFixture);
+
+                // Update the 'Show Goals Scored' array
                 if (!fixture.isPenalties && (fixtureMinuteUpdate.homeTeamUpdate || fixtureMinuteUpdate.awayTeamUpdate)) {
-                    if (fixtureMinuteUpdate.homeTeamUpdate) this.updateWithLatestGoal(counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Home");
-                    if (fixtureMinuteUpdate.awayTeamUpdate) this.updateWithLatestGoal(counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Away");
+                    // Have both teams scored in the same minute
+                    haveBothTeamsScoredInTheSameMinute = false;
+                    if (fixtureMinuteUpdate.homeTeamUpdate && fixtureMinuteUpdate.awayTeamUpdate) {
+                        haveBothTeamsScoredInTheSameMinute = true;
+                        if (fixture.homeTeamsGoals.trim().charAt(fixture.homeTeamsGoals.trim().length - 1) === "*") {                            // Home team scored first
+                            this.updateWithLatestGoal(counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Home", haveBothTeamsScoredInTheSameMinute, true);
+                            this.updateWithLatestGoal(counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Away");
+                        } else if (fixture.awayTeamsGoals.trim().charAt(fixture.awayTeamsGoals.trim().length - 1) === "*") {                     // Away team scored first
+                            this.updateWithLatestGoal(counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Away", haveBothTeamsScoredInTheSameMinute, false);
+                            this.updateWithLatestGoal(counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Home");
+                        }
+                    } else {
+                        if (fixtureMinuteUpdate.homeTeamUpdate) this.updateWithLatestGoal(counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Home");
+                        if (fixtureMinuteUpdate.awayTeamUpdate) this.updateWithLatestGoal(counterMinutes, fixture, fixtureMinuteUpdate.isFirstHalfBeforeUpdate, "Away");
+                    }
                 }
             }
         });
@@ -230,7 +245,6 @@ class FixturesLatest extends Component {
                 helperFixtureUpdates.createUpdatesAfterFixturesHaveFinished(dispatch, fixturesForCompetition, this.fixtures, this.competitionRound, this.props.competitionRoundForPlay);
                 this.setState({ areFixturesInPlay: false });
             } else {
-                debugger;
                 if (!this.havePenaltiesStarted) {
                     let fixturesButtonText = START_SECOND_HALF;
                     if (maxMinutesPlayedForFixture >= 90 && maxMinutesPlayedForFixture < 105) fixturesButtonText = START_EXTRA_TIME;
@@ -243,7 +257,7 @@ class FixturesLatest extends Component {
     
     }
 
-    updateWithLatestGoal(mins, fixture, isFirstHalfBeforeUpdate, scoringTeam) {
+    updateWithLatestGoal(mins, fixture, isFirstHalfBeforeUpdate, scoringTeam, haveBothTeamsScoredInTheSameMinute=false, hasHomeTeamScoredFirst=false) {
         let minsString;
         if (fixture.isExtraTime) {
             if (isFirstHalfBeforeUpdate) {
@@ -263,10 +277,10 @@ class FixturesLatest extends Component {
             {
                 mins: minsString,
                 homeTeam: fixture.homeTeam,
-                homeTeamsScore: fixture.homeTeamsScore,
+                homeTeamsScore: fixture.homeTeamsScore - (haveBothTeamsScoredInTheSameMinute && !hasHomeTeamScoredFirst ? 1 : 0),
                 homeTeamsScorePenalties: fixture.homeTeamsScorePenalties,
                 awayTeam: fixture.awayTeam,
-                awayTeamsScore: fixture.awayTeamsScore,
+                awayTeamsScore: fixture.awayTeamsScore - (haveBothTeamsScoredInTheSameMinute && hasHomeTeamScoredFirst ? 1 : 0),
                 awayTeamsScorePenalties: fixture.awayTeamsScorePenalties,
                 scoringTeam: scoringTeam
             }

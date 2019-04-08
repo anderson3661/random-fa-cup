@@ -23,11 +23,11 @@ class DrawHeader extends Component {
 
             <Fragment>
 
-                <div className="main-header">
-                    <div className="image-left"><img src={FOOTBALL_IMAGE} alt="" /></div>
+                <header>
+                    <img src={FOOTBALL_IMAGE} alt="" />
                     <h1>{displayHeader}</h1>
-                    <div className="image-right"><img src={FOOTBALL_IMAGE} alt="" /></div>
-                </div>
+                    <img src={FOOTBALL_IMAGE} alt="" />                        
+                </header>
 
                 {!isDrawCompleted &&
                     <div className="draw-control-section">

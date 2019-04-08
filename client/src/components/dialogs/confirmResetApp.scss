@@ -1,3 +1,6 @@
+@import '../../sass/mixins';
+@import '../../sass/_variables';
+
 .dialog-title {
     font-size: 24px;
 }
@@ -8,7 +11,7 @@
 }
 
 .dialog-buttons {
-    display: flex;
+    @include flex($justify-content: null, $align-items: null);
     flex-direction: column;
     margin-bottom: 2vh;
 

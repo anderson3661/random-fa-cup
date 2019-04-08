@@ -39,15 +39,13 @@
                 background: rgba(255, 255, 255, 0.7);
 
                 header {
-                    display: flex;
+                    @include flex($justify-content: null, $align-items: null);
                     
-                    img {width: 3vw;}
+                    // img {width: 3vw;}
                     
                     .heading-and-buttons {
                         flex-basis: 75%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
+                        @include flex();
 
                         span.heading { font-size: 150%; margin-right: 1vw; }
                         > button { margin-right: 1vw; }
@@ -100,7 +98,7 @@
         .container-settings {
 
             .container-settings-factors {
-                display: flex;
+                @include flex($justify-content: null, $align-items: null);
                 margin: 0 0 0 0;
                 
                 > div { flex-basis: 70%; margin-bottom: 3vh; margin-left: 5vw; }
@@ -115,7 +113,7 @@
             }
 
             .container-settings-teams, .container-settings-my-watchlist-teams {
-                display: flex;
+                @include flex($justify-content: null, $align-items: null);
                 flex-wrap: wrap;
                 > div { width: 40%; margin-bottom: 3vh; }
             }
@@ -193,7 +191,6 @@
             }
         }
     }
-
 }
 
 @media all and (max-width: 1024px) {
@@ -211,7 +208,7 @@
 @media all and (max-width: 800px) {
     .outer-container-settings {
         .container-main-content-settings {
-            .container-card.header { width: 90%; header img { display: none; } header { padding: 0.5vh 0; }}
+            .container-card.header { width: 90%; header { padding: 0.5vh 0; }}
             .container-settings {
                 display: initial;
                 > div { width: 100%; margin: 0 auto; }

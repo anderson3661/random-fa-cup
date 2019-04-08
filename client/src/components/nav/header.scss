@@ -7,9 +7,10 @@ nav {
     position: fixed;
     top: 0;
     height: 8vh;
+    min-height: 64px;
     width: 100vw;
     z-index: 1;
-    display: flex;
+    @include flex($justify-content: null, $align-items: null);
 
     &.displayNavBackground {
         background-color: rgba(0, 0, 0, 0.9);
@@ -26,7 +27,7 @@ nav {
 
     .app-header {
         flex-basis: 12%;
-        width: 5vw;
+        max-width: 200px;
         margin-right: 5vw;
         background-color: rgba(255, 255, 255, 0.3);
         @include flex($justify-content: null);
@@ -57,33 +58,39 @@ nav {
 
     .links {
         flex-basis: 60%;
-        display: flex;
-    }    
+        @include flex($justify-content: null, $align-items: null);
 
-    .football {
-        height: 8vh;
-        width: 8vh;
-        margin-right: 2vw;
-        background-image: url('../../assets/images/white-football-small.png');
-        background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center;
-        @include flex();
-        flex-direction: column;
+        a.nav-link {
+            height: 8vh;
+            min-height: 64px;
+            min-width: 64px;
+            width: 8vh;
+            margin-right: 1vw;
+    
+            &.active-link .football {span { color: blue; } }
 
-        span {
-            color: blue;
-            font-size: 100%;
-            font-weight: 700;
-            text-align: center;
-            width: 7vh;
+            .football {
+                height: 100%;
+                width: 100%;
+                min-height: 64px;
+                min-width: 64px;
+                background-image: url('../../assets/images/white-football-small.png');
+                background-size: contain;
+                background-repeat: no-repeat;
+                background-position: center;
+                @include flex();
+                flex-direction: column;
+                text-align: center;         // Needed for when label goes over 2 lines (e.g. Fixtures/Results)
+        
+                span {
+                    color: blue;
+                    font-weight: 700;
+                }
+
+                &:hover { transform: scale(1.1); }
+            }
         }
-
-    }
-
-    a.nav-link .football { &:hover { transform: scale(1.1); } }
-
-    a.nav-link.active-link .football {span { color: blue; } }
+    }    
 
     .login-section {
 
@@ -92,12 +99,15 @@ nav {
             @include flex($justify-content: space-between);
 
             li {
-                display: inline-block;
+                display: inline-flex;
+                justify-content: center;
                 background-color: #3F51B5;
                 padding: 0.75vh 1vw;
                 margin: 0 0.5vw;
                 border-radius: 5%;
-
+                min-width: 70px;
+                width: 100%;
+                
                 &:hover {
                     background-color: #303F9F;
                 }
@@ -156,8 +166,8 @@ nav {
     transition: margin-left 0.5s;
 }
 
-@media screen and (max-width:1024px) {
-    .tables-full {display: none;}
+@media screen and (max-width:900px) {
+    nav .app-header p {display: none;}
 }
 
 @media screen and (max-width:650px) {

@@ -55,6 +55,10 @@ export const getFixturesArray = (fixturesArray, competitionRoundIndex, isReplays
     return fixturesArray[competitionRoundIndex][COMPETITION_ROUNDS_FIXTURES[competitionRoundIndex] + (isReplays ? 'Replays' : 'Fixtures')];
 }
 
+export const sortFixturesByHomeTeam = (fixtures) => {
+    fixtures.sort((a, b) => a.homeTeam > b.homeTeam ? 1 : -1);
+}
+
 export const haveAllFixturesInSetFinished = (fixturesArray) => {
     return fixturesArray.filter(fixture => fixture.hasFixtureFinished).length === fixturesArray.length;
 }
@@ -386,6 +390,7 @@ export const getTeamsRemainingInCompetitionByDivision = (teamsForCompetition, fi
     } else {
 
         if (competitionRoundIndex >= 0) {
+            debugger;
             const fixtures = getFixturesArray(fixturesForCompetition, competitionRoundIndex, IS_FIXTURES);
             for (i = 0; i < fixtures.length; i++) {
                 if (fixtures[i].hasFixtureFinished && !isResultADraw(fixtures[i])) {
@@ -413,8 +418,8 @@ export const getTeamsRemainingInCompetitionByDivision = (teamsForCompetition, fi
     return teamsByDivisionToReturn;
 }
 
-const isResultADraw = (fixtures) => {
-    return (fixtures.homeTeamsScore === fixtures.awayTeamsScore);
+const isResultADraw = (fixture) => {
+    return (fixture.isPenalties ? false : fixture.homeTeamsScore === fixture.awayTeamsScore);
 }
 
 const addTeamToArray = (team, division, teamsToReturn) => {

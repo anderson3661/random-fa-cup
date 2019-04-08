@@ -3,9 +3,9 @@ import React, { Fragment } from "react";
 import * as helpers from '../../utilities/helper-functions/helpers';
 import FixtureRowPenalties from '../fixtures-latest/fixtures-row-penalties';
 import DrawTeamLabels from '../draw/draw-team-labels';
-import Top3 from './top3';
 
 import "./fixture-row.scss";
+
 
 const FixtureRow = (props) => {
     const { homeTeam, awayTeam, homeTeamDivision, awayTeamDivision, homeTeamsScore, awayTeamsScore, homeTeamsGoals, awayTeamsGoals, minutesPlayed, minutesInfo,
@@ -16,7 +16,6 @@ const FixtureRow = (props) => {
     const showForFixturesAndResults = (props.showForFixturesAndResults === undefined ? false : props.showForFixturesAndResults);
     const showRouteToThisStage = (props.showRouteToThisStage === undefined ? false : props.showRouteToThisStage);
     const showGoals = (props.showGoals === undefined ? false : props.showGoals);
-    const top3TeamsBeforeFixtures = (props.top3TeamsBeforeFixtures === undefined ? ["", "", ""] : props.top3TeamsBeforeFixtures);
     
     return (
 
@@ -29,23 +28,14 @@ const FixtureRow = (props) => {
                 }
 
                 <div className="homeTeamsName">
-                    {showForLatestFixtures &&
-                        (top3TeamsBeforeFixtures[0] === homeTeam) ? <Top3 position="1" /> :
-                        (top3TeamsBeforeFixtures[1] === homeTeam) ? <Top3 position="2" /> :
-                        (top3TeamsBeforeFixtures[2] === homeTeam) ? <Top3 position="3" /> : null                        
-                    }
                     <DrawTeamLabels team={{teamName: homeTeam, division: homeTeamDivision}} positionAfter={false} /> 
                 </div>
 
                 <div className=
-                    // ${((showForLatestFixtures && !haveLatestFixturesStarted) || (!showForLatestFixtures && !hasFixtureFinished)) && !showForFixturesAndResults ? 'timeOnly': ''} 
                     {`timeOrScore 
                         ${showForFixturesAndResults || (showForLatestFixtures && haveLatestFixturesStarted) || (!showForLatestFixtures && hasFixtureFinished) ? 'scoresOnly':''}
                     `}>
 
-                    {/* {(showForFixturesAndResults || (showForLatestFixtures && !haveLatestFixturesStarted) || (!showForLatestFixtures && !hasFixtureFinished)) &&
-                        <span className="timeOfFixture">{ showVersus ? 'v' : '15:00' }</span>
-                    } */}
                     {((showForLatestFixtures && !haveLatestFixturesStarted) || (!showForLatestFixtures && !hasFixtureFinished)) &&
                         <span className="timeOfFixture">v</span>
                     }
@@ -86,14 +76,6 @@ const FixtureRow = (props) => {
 
                 <div className="awayTeamsName">
                     <DrawTeamLabels team={{teamName: awayTeam, division: awayTeamDivision}} positionAfter={true} /> 
-                    {/* <span className={`teamName ${awayTeamDivision}`}>{awayTeam}&nbsp;&nbsp;</span>
-                    <span className="divisionAbbreviation">{awayTeamDivisionAbbreviation ? awayTeamDivisionAbbreviation : ""}</span> */}
-
-                    {showForLatestFixtures &&
-                        (top3TeamsBeforeFixtures[0] === awayTeam) ? <Top3 position="1" /> :
-                        (top3TeamsBeforeFixtures[1] === awayTeam) ? <Top3 position="2" /> :
-                        (top3TeamsBeforeFixtures[2] === awayTeam) ? <Top3 position="3" /> : null                        
-                    }
                 </div>
 
             </div>

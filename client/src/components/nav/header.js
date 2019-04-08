@@ -2,9 +2,9 @@ import React, { Component, Fragment } from 'react';
 import { NavLink } from 'react-router-dom';
 import { connect } from 'react-redux';
 
-import { LOGOUT_AND_RESET_STATE_TO_DEFAULTS } from '../../redux/actions/types';
 import { INCLUDE_MONGODB_OPTION, FA_CUP_SMALL_IMAGE } from '../../utilities/constants';
 import { refreshLatestFixtures } from '../../redux/actions/fixturesActions';
+import { userLogout } from '../../redux/actions/userActions';
 import * as helpers from '../../utilities/helper-functions/helpers';
 
 import './header.scss';
@@ -30,7 +30,7 @@ class Header extends Component {
         }
     }
 
-    logout = () => this.props.dispatch({ type: LOGOUT_AND_RESET_STATE_TO_DEFAULTS });
+    logout = () => this.props.dispatch(userLogout());
         
     openSlideMenu = () => { this.refs.sideMenu.style.width = '250px'; };
     closeSlideMenu = () => { this.refs.sideMenu.style.width = '0'; };
@@ -125,7 +125,7 @@ class Header extends Component {
                         <div className="login-section">
                             <div className="login-buttons">
                                 <ul className="navbar-authentication">
-                                    {!authenticated && <li><NavLink to="/login" className="nav-link" onClick={this.props.closeSlideMenu}>Log in</NavLink></li>}
+                                    {!authenticated && <li><NavLink to="/login" className="nav-link-button" onClick={this.props.closeSlideMenu}>Log in</NavLink></li>}
                                     {!authenticated && <li><NavLink to="/sign-up" className="nav-link-button" onClick={this.props.closeSlideMenu}>Sign up</NavLink></li>}
                                     {authenticated && <li><NavLink to="/login" className="nav-link-button" onClick={this.logout}>Log out</NavLink></li>}
                                 </ul>

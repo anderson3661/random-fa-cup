@@ -8,20 +8,9 @@ import Checkbox from '@material-ui/core/Checkbox';
 
 import { userSignup } from '../../redux/actions/userActions';
 
-import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, REDIRECT_TO_SETTINGS } from '../../utilities/constants';
+import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, REDIRECT_TO_SETTINGS, USER_EMAIL_ADDRESS_INVALID, USER_PASSWORD_INVALID, USER_CONFIRM_PASSWORD_INVALID, EMAIL_REGEX, PASSWORD_REGEX} from '../../utilities/constants';
 
-import "./sign-up.scss";
-
-const USER_DEFAULT_REQUIRED = 'Minimum 1 character required';
-const USER_EMAIL_ADDRESS_REQUIRED = 'Minimum 1 character required';
-const USER_EMAIL_ADDRESS_INVALID = 'Invalid Email address';
-const USER_PASSWORD_REQUIRED = 'Minimum 8 characters required';
-const USER_PASSWORD_INVALID = 'Minimum eight characters, at least one uppercase letter, one lowercase letter and one number';
-const USER_CONFIRM_PASSWORD_REQUIRED = 'Minimum 8 characters required';
-const USER_CONFIRM_PASSWORD_INVALID = 'Must match password';
-
-const EMAIL_REGEX = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@(([[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
+import "./authentication.scss";
 
 
 class SignUp extends Component {
@@ -42,36 +31,40 @@ class SignUp extends Component {
             },
             submitAttempted: false,
             rememberMe: false,
-            signUpFailed: false,
-            userAlreadyExists: false,
+            signUpInvalidMessage: '',
         }
 
     }
 
     handleChange = e => {
-        const {name, value} = e.target;
-        const {formFields, formErrors} = this.state;
+        const { name, value } = e.target;
+        const { formFields, formErrors } = this.state;
+
+        this.getValidationErrors(e.target);
+
+        this.setState({ signUpInvalidMessage: '' });
+        this.setState({ formFields: Object.assign(formFields, {[name]: value })});
+        this.setState({ formErrors });
+        // this.setState({ formErrors }, () => console.log(this.state));
+    }
+
+    getValidationErrors = ({ name, value }) => {
+        const { formFields, formErrors } = this.state;
 
         switch (name) {
             case "userEmailAddress":
-                formErrors.userEmailAddress = value.length < 1 ? USER_EMAIL_ADDRESS_REQUIRED : "";
-                formErrors.userEmailAddress = value.length > 0 && !EMAIL_REGEX.test(value) ? USER_EMAIL_ADDRESS_INVALID : formErrors.userEmailAddress
+                formErrors.userEmailAddress = !EMAIL_REGEX.test(value) ? USER_EMAIL_ADDRESS_INVALID : "";
                 break;
             case "userPassword":
-                formErrors.userPassword = value.length < 1 ? USER_PASSWORD_REQUIRED : "";
-                // formErrors.userPassword = value.length > 0 && !PASSWORD_REGEX.test(value) ? USER_PASSWORD_INVALID : formErrors.userPassword
+                formErrors.userPassword = !PASSWORD_REGEX.test(value) ? USER_PASSWORD_INVALID : "";
+                formErrors.userConfirmPassword = (!formFields.userConfirmPassword || formFields.userConfirmPassword !== value) ? USER_CONFIRM_PASSWORD_INVALID : "";
                 break;
             case "userConfirmPassword":
-                formErrors.userConfirmPassword = value.length < 1 ? USER_CONFIRM_PASSWORD_REQUIRED : "";
-                // formErrors.userConfirmPassword = value !== formFields.userPassword ? USER_CONFIRM_PASSWORD_INVALID : "";
+                formErrors.userConfirmPassword = (!value || value !== formFields.userPassword) ? USER_CONFIRM_PASSWORD_INVALID : "";
                 break;
             default:
                 break;
         }
-
-        this.setState({ submitAttempted: false, signUpFailed: false, userAlreadyExists: false });
-        this.setState({ formFields: Object.assign(formFields, {[name]: value })});
-        this.setState({ formErrors }, () => console.log(this.state));
     }
 
     handleSubmit = (e) => {
@@ -80,12 +73,13 @@ class SignUp extends Component {
 
         const {formFields, formErrors} = this.state;
 
-        this.setState({ submitAttempted: true, signUpFailed: false, userAlreadyExists: false  });
+        this.setState({ submitAttempted: true, signUpInvalidMessage: '' });
 
+        // Validate the fields and update state if errors are different
         Object.keys(formFields).forEach(key => {
-            if (formFields[key].trim() === '') {
-                this.setState({ formErrors: Object.assign(formErrors, {[key]: USER_DEFAULT_REQUIRED})})
-            }
+            const previousValidationError = formErrors[key];
+            this.getValidationErrors({ name: key, value: formFields[key] });
+            if (previousValidationError !== formErrors[key]) this.setState({ formErrors: Object.assign(formErrors) });
         });
 
         if (this.formValid()) {
@@ -93,46 +87,42 @@ class SignUp extends Component {
             // Do something with the details
             this.props.dispatch(userSignup({ emailAddress: formFields.userEmailAddress, password: formFields.userPassword }));
 
-            console.log(`
-                -- SUBMITTING --
-                Email Address: ${formFields.userEmailAddress}
-                // Password: ${formFields.userPassword}
-                // Confirm Password: ${formFields.userConfirmPassword}
-            `);
+            // console.log(`
+            //     -- SUBMITTING --
+            //     Email Address: ${formFields.userEmailAddress}
+            //     // Password: ${formFields.userPassword}
+            //     // Confirm Password: ${formFields.userConfirmPassword}
+            // `);
 
-        } else {
-            console.log("FORM INVALID");
+        // } else {
+        //     console.log("FORM INVALID");
         }
     }
 
     formValid = () => {
-            let isValid = true;
-            const {formFields, formErrors} = this.state;            
-            Object.values(formErrors).forEach(val => { val.length > 0 && (isValid = false) });          // Validate form errors being empty            
-            Object.values(formFields).forEach(val => { val.trim() === '' && (isValid = false) });       // Validate the form fields contained values
+        let isValid = true;
+        const {formFields, formErrors} = this.state;            
+        Object.values(formErrors).forEach(val => { val.length > 0 && (isValid = false) });          // Validate form errors being empty            
+        Object.values(formFields).forEach(val => { val.trim() === '' && (isValid = false) });       // Validate the form fields contained values
         return isValid;
     }
 
     componentWillReceiveProps(nextProps, prevState) {
-        // console.log(this.state);
-        debugger;
         if (nextProps.user.authenticated && !this.props.user.authenticated) {
             // Re-route to the Settings page
             this.props.history.push(REDIRECT_TO_SETTINGS);
-        } else if (this.state.submitAttempted && nextProps.user.signUpUserAlreadyExists) {
-            this.setState({ userAlreadyExists: true });
-        } else if (this.state.submitAttempted && nextProps.user.signUpAttempted) {
-            this.setState({ signUpFailed: true });
+        } else if (this.state.submitAttempted && nextProps.user.signUpInvalidMessage) {
+            this.setState({ signUpInvalidMessage: nextProps.user.signUpInvalidMessage });
         }
     }
 
     render() {
 
-        const { formFields: { userEmailAddress, userPassword, userConfirmPassword }, formErrors, submitAttempted, signUpFailed, userAlreadyExists } = this.state;
+        const { formFields: { userEmailAddress, userPassword, userConfirmPassword }, formErrors, submitAttempted, signUpInvalidMessage } = this.state;
 
         return (
-            <div className="outer-container-sign-up">
-                <div className="container-main-content-sign-up">
+            <div className="outer-container-authentication">
+                <div className="container-main-content-authentication">
                     <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
                     <div className="container-card">
                         <header>
@@ -217,18 +207,12 @@ class SignUp extends Component {
                                     </div>
                                 }
 
-                                { signUpFailed &&
+                                { signUpInvalidMessage &&
                                     <div className="invalid-form-message">
-                                        <p>Invalid details entered ... please retry</p>
+                                        <p>{signUpInvalidMessage}</p>
                                     </div>
                                 }
 
-                                { userAlreadyExists &&
-                                    <div className="invalid-form-message">
-                                        <p>User already exists ... please retry</p>
-                                    </div>
-                                }
-                                
                             </div>
                         </div>
                     </div>
@@ -239,9 +223,10 @@ class SignUp extends Component {
 };
 
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
     return { 
         user: state.default.user,
+        signUpInvalidMessage: state.default.user.signUpInvalidMessage,
     }
 }
 

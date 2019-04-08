@@ -49,6 +49,7 @@ export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForComp
                 }
             }
             if (replays.length > 0) {
+                helpers.sortFixturesByHomeTeam(replays);
                 miscellaneousUpdates = { okToProceedWithDraw: true, haveFixturesForCompetitionRoundBeenPlayed: true, haveFixturesProducedReplays: true };
             } else {
                 miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay,

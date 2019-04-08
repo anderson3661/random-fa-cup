@@ -1,3 +1,6 @@
+@import '../../sass/mixins';
+@import '../../sass/_variables';
+
 .dialog-winners {
 
     > div > div {
@@ -12,9 +15,7 @@
         position: absolute;
         top: 8vh;
         width: 100%;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        @include flex($justify-content: space-between);
         height: 5vh;
 
         img {width: 3vw;}

@@ -199,7 +199,6 @@ export const createDocumentInASingleDocumentDb = (obj, apiEndpoint, dbDescriptio
     // This function is called when the app is reset, or the app is loaded for the first time after the user has registered.
     // The Miscellaneous document in the database is a single document which stores various values required by the app.
     // The SettingsFactors document in the database is a single document which stores the values entered (excluding teams) on the Settings screen.
-
     try {
         if (documentIdInUsersDb) obj.userDocumentId = documentIdInUsersDb;
         return sendDataToAPIEndpoint(apiEndpoint, dbDescription, 'POST', obj);

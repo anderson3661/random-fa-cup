@@ -186,7 +186,7 @@ class Draw extends Component {
         // console.log('window.screen.height', window.screen.height);
         // console.log('window.screenX', window.screenX);
         const counter = this.counter === 0 ? 0 : Math.round((this.counter + 1) / 2, 0);
-        const divDraw = document.getElementById("draw");
+        // const divDraw = document.getElementById("draw");
         const div = document.querySelectorAll("div.draw-row")[[counter]];
 
         // console.log(window.pageXOffset);
