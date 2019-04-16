@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import Button from "@material-ui/core/Button";
 import Select from '@material-ui/core/Select';
+import PropTypes from 'prop-types';
 
 import * as helpers from '../../utilities/helper-functions/helpers';
 import { areThereAnyChangesToMyWatchlistTeamValues } from './settings-helpers';
@@ -77,5 +78,15 @@ class SettingsMyWatchlistTeams extends Component {
     }
 }
 
+
+SettingsMyWatchlistTeams.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    hasCompetitionFinished: PropTypes.bool.isRequired,
+    teamsForCompetitionSelectOptions: PropTypes.array.isRequired,
+    myWatchlistTeams: PropTypes.array.isRequired,
+    onMyWatchlistTeamsAddTeam: PropTypes.func.isRequired,
+    onMyWatchlistTeamsChangeTeam: PropTypes.func.isRequired,
+    onMyWatchlistTeamsDeleteTeam: PropTypes.func.isRequired,
+}
 
 export default SettingsMyWatchlistTeams;

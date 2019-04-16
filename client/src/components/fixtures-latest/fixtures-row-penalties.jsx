@@ -1,4 +1,5 @@
 import React, { Fragment } from "react";
+import PropTypes from 'prop-types';
 
 import './fixtures-row-penalties.scss';
 import { FOOTBALL_IMAGE, RED_CROSS } from "../../utilities/constants";
@@ -35,5 +36,13 @@ const FixtureRowPenalties = ({ penalties, homeTeamsScorePenalties, awayTeamsScor
     </Fragment>
 )
     
+
+FixtureRowPenalties.propTypes = {
+    penalties: PropTypes.array.isRequired,
+    homeTeamsScorePenalties: PropTypes.number.isRequired,
+    awayTeamsScorePenalties: PropTypes.number.isRequired,
+    fixturesAndResults: PropTypes.bool.isRequired,
+    isHomeTeamTakingPenaltiesFirst: PropTypes.bool.isRequired,
+}
 
 export default FixtureRowPenalties;

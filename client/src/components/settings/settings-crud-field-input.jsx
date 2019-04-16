@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
+import PropTypes from 'prop-types';
 
 const styles = theme => ({
   bootstrapRoot: {
@@ -49,7 +49,6 @@ class FieldInput extends Component {
 
     constructor(props) {
         super(props);
-
         this.handleChangeField = this.handleChangeField.bind(this);
     }
 
@@ -59,18 +58,20 @@ class FieldInput extends Component {
 
     render() {
 
+        const { name, value, disabled, label, fullWidth, multiline, blockType } = this.props;
+
         return (
             <TextField
-                className={`${this.props.name}-input-field`}
-                value={this.props.value}
-                disabled={this.props.disabled}
-                label={this.props.label}
-                fullWidth={this.props.fullWidth}
-                multiline={this.props.multiline}
+                className={`${name}-input-field`}
+                value={value}
+                disabled={disabled}
+                label={label}
+                fullWidth={fullWidth}
+                multiline={multiline}
                 rows="5"
-                id={this.props.name}
+                id={name}
                 onChange={this.handleChangeField}
-                InputProps={this.props.blockType ? {                // blockType set to true will display the standard field type, false will set it to the Material UI type
+                InputProps={blockType ? {                // blockType set to true will display the standard field type, false will set it to the Material UI type
                     disableUnderline: true,
                     classes: {
                         root: this.classes.bootstrapRoot,
@@ -82,14 +83,29 @@ class FieldInput extends Component {
     }
 }
 
-
-FieldInput.propTypes = {
-  classes: PropTypes.object.isRequired,
-};
-
 // InputLabelProps={{
-//     shrink: true,
+    //     shrink: true,
 //     className: this.classes.bootstrapFormLabel,
 // }}
+
+
+FieldInput.defaultProps = {
+    disabled: false,
+    fullWidth: false,
+    multiline: false,
+    blockType: false,
+}
+
+FieldInput.propTypes = {
+    classes: PropTypes.object.isRequired,
+    name: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    disabled: PropTypes.bool.isRequired,
+    label: PropTypes.string.isRequired,
+    fullWidth: PropTypes.bool.isRequired,
+    multiline: PropTypes.bool.isRequired,
+    blockType: PropTypes.bool.isRequired,
+    updateField: PropTypes.func.isRequired,
+};
 
 export default withStyles(styles)(FieldInput);

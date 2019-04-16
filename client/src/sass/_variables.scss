@@ -1,25 +1,98 @@
 // ***************** General ****************
 $font-family-main: Arial, Helvetica, sans-serif;
-$background-color-main-body: white;
+$background-color-main-body: black;
 $line-height-main-body: 1.0;
 
 
+// ************ Outer Container *************
+$min-height-outer-container: 94vh;
+
+
+// ************* Container Card *************
+$color-container-card: black;
+$background-color-container-card: rgba(255, 255, 255, 0.95);
+// $background-color-container-card: radial-gradient(ellipse at center, rgb(255, 255, 255) 0%, rgba(210, 210, 210, 0.95) 100%);
+$background-color-container-card-not-at-this-stage: rgba(253, 229, 92, 0.9);
+$box-shadow-color-container-card: rgba(0, 0, 0, 0.5);
+
+
+// ***************** Links ******************
+$color-link: blue;
+
+
+// ***************** Header *****************
+$font-size-nav-app-header: 130%;
+$font-size-nav-header-main-links: 88%;
+$color-nav-app-header: white;
+$color-nav-header-main-links: blue;
+$background-color-nav-header: rgba(0, 0, 0, 0.9);
+$background-color-nav-app-header: rgba(255, 255, 255, 0.3);
+$background-image-nav-header-main-links: url('../../assets/images/white-football-small.png');
+$background-color-nav-header-on-scroll: rgba(0, 0, 0, 0.9);
+$background-color-nav-header-authentication-buttons: #3F51B5;
+$background-color-nav-header-authentication-buttons-hover: #303F9F;
+$letter-spacing-nav-header-authentication-buttons: 0.5px;
+
+
 // ***************** Footer *****************
-$background-color-main-footer: #4C4C4C;
 $color-main-footer: white;
+$background-color-main-footer: #4C4C4C;
+
+
+// ************* Authentication *************
+$color-authentication-forgotten-password-links: blue;
+$color-authentication-remember-me: gray;
+$color-authentication-errors: red;
+
+
+// ****************** Home ******************
+$font-size-home-links: 110%;
+$font-size-home-display-winners-heading: 120%;
+$font-size-home-display-winners-name: 150%;
+$color-home-teams-remaining: white;
+$color-home-links: blue;
+$color-home-links-inactive: gray;
+$color-home-display-winners: darkred;
+$background-color-home-cup-image: rgba(248, 248, 248, 0.3);
+$background-image-home-links: url('../../assets/images/white-football.png');
+$background-color-home-display-winners: rgba(255, 255, 255, 0.7);
+$background-color-home-teams-remaining: rgba(255, 255, 255, 0.4);
+$box-shadow-home-display-winners: 0px 0px 10vw 10vw rgba(245, 216, 216, 0.3);
+$box-shadow-home-cup-image: 0px 0px 10vw 10vw rgba(248, 248, 248, 0.3);
 
 
 // **************** Fixtures ****************
+$font-family-goal-updates: "Courier";
+
+$font-size-date-of-fixtures: 85%;
+$font-size-fixture-row-goal-times: 90%;
+$font-size-fixture-row-goals: 0.8em;
+$font-size-penalties-team-score: 1.5em;
+$font-size-penalties: 0.8em;
+$font-size-team-score-penalties: 80%;
+$font-size-extra-time-or-penalties-summary: 115%;
+$font-size-goal-updates: 75%;
+
+$color-active-score: white;
+$color-half-time-score: black;
+$color-final-score: black;
+$color-fixture-row-goal-times: #888;
+$color-penalties-team-score: blue;
+$color-penalties: #888;
+$color-team-score-penalties: darkgray;
+$color-goal-updates: black;
+$color-goal-updates-scoring-team: purple;
+
 $background-color-time-of-fixture: #e7e5e5;
 $background-color-date-of-fixtures: #F7F7F5;
 $background-color-active-score: #1f2fe4;
 $background-color-half-time-score: #c5caf0;
 $background-color-final-score: #FFDF43;
-$color-active-score: white;
-$color-half-time-score: black;
-$color-final-score: black;
-$color-fixture-row-goal-times: #888;
-$color-fixture-row-goal-times-bottom-border: #E0E0E0;
+$background-color-goal-updates-minutes: #ead3f1;
+
+$border-top-fixture-row-goal-times: 1px solid #E0E0E0;
+$border-bottom-fixture-row-goal-times: 1px solid #E0E0E0;
+$border-bottom-penalties: 1px solid lightgray;
 
 $width-fixture-row-team-name: 50%;
 $width-fixture-row-goal-times: 50%;
@@ -27,51 +100,66 @@ $width-fixture-time-or-score: 20%;
 $width-fixture-row-goal-times-minutes-played: 20%;
 $width-fixture-row-team-score: 30%;
 
-$width-fixture-row-team-stats-fixture-date: 20%;
-$width-fixture-row-team-stats-team-name: 38%;
-$width-fixture-row-team-stats-win-draw-loss: 4%;
 
-$font-size-date-of-fixtures: 85%;
-$font-size-fixture-row-goal-times: 90%;
-
-$color-penalties-team-score: blue;
-$color-penalties: #888;
-
-$font-size-fixture-row-goals: 0.8em;
-$font-size-penalties-team-score: 1.5em;
-$font-size-penalties: 0.8em;
-
+// *********** Fixtures And Results ************
+$background-color-fixtures-and-results-main-header: white;
+$background-color-fixtures-and-results-filler-for-scroll: black;
+$color-fixtures-and-results-competition-round-title: rgb(70, 70, 70);
+$color-fixtures-and-results-select-labels: rgb(70, 70, 70);
 
 // ************** Fixtures / Draw **************
-$color-premier-league-teams: blue;
-$color-division-abbreviation: gray;
 $font-size-division-abbreviation: 80%;
+$color-premier-league-team: blue;
+$color-division-abbreviation: gray;
 $background-color-secondary-information-panels: rgba(250, 250, 240, 0.9);
 
 
 // ******************* Draw ********************
-$background-color-team-number-ball: darkred;
-$color-team-number-ball: white;
+$font-size-draw-versus: 80%;
+$font-size-draw-secondary-information-header: 120%;
+$font-size-draw-secondary-information-team-name: 85%;
+$font-size-draw-secondary-information-versus: 80%;
+$font-size-draw-secondary-information-division-abbreviation: 70%;
+$font-size-draw-team-number-in-draw: 70%;
+$color-team-draw-number-ball: white;
+$background-color-draw-team-number-ball: darkred;
+$background-color-draw-filler-for-scroll: black;
+$background-color-draw-header-early-rounds: white;
+
+
+// ************ Route To This Stage ************
+$color-route-to-this-stage-competition-round: darkgray;
 
 
 // ***************** Settings ******************
+$font-size-settings-header-title: 150%;
+$font-size-settings-team-name: 95%;
+$font-size-settings-team-number: 80%;
+$font-size-settings-teams-header: 90%;
+$color-settings-validation-errors: red;
+$color-settings-display-validation-errors-message: white;
+$color-settings-team-input: #495057;
 $background-color-settings-teams-header: #d5d7da;
+$background-color-settings-display-validation-errors-message: darkred;
+$background-color-settings-header: rgba(255, 255, 255, 0.7);
+$border-settings-team-input: 1px solid lightgray;
+$border-bottom-settings-teams: 1px solid lightgray;
 
 
 // ********************** Help ***********************
-$background-help-form: radial-gradient(ellipse at center, rgb(255, 255, 255) 0%, rgb(203, 203, 204) 100%);
 $color-help-form: black;
-$background-color-accordian: white;
-$border-accordian: 1px solid darkgray;                  // or 1px solid #e0e0e0;
-$background-color-accordian-title: #296e75;             // or #00b3b4;
 $color-accordian-title: white;
-$border-accordian-title: 1px solid #2b7981;             // or 1px solid #379AA4;
-$box-shadow-accordian-title: 0 1px 0 rgba(255,255,255,0.5) inset, 0 -1px 0 rgba(255,255,255,0.1) inset, 0 4px 0 #276c74, 0 4px 2px rgba(0,0,0,0.5);      // or #338A94 instead of #276c74
+$background-help-form: radial-gradient(ellipse at center, rgb(255, 255, 255) 0%, rgb(203, 203, 204) 100%);
+$background-color-accordian: white;
+$background-color-accordian-title: #296e75;             // or #00b3b4;
 $background-color-accordian-title-hover: #338A94;       // or #0bbfc0;
+$border-accordian-title: 1px solid #2b7981;             // or 1px solid #379AA4;
+$border-accordian: 1px solid darkgray;                  // or 1px solid #e0e0e0;
 $border-accordian-title-arrow:  2px solid white;
+$box-shadow-accordian-title: 0 1px 0 rgba(255,255,255,0.5) inset, 0 -1px 0 rgba(255,255,255,0.1) inset, 0 4px 0 #276c74, 0 4px 2px rgba(0,0,0,0.5);      // or #338A94 instead of #276c74
 
 
 // ********************* Contact *********************
-$background-contact-form: radial-gradient(ellipse at center, rgb(255, 255, 255) 0%, rgb(203, 203, 204) 100%);
 $color-contact-form: black;
 $color-contact-form-invalid-message: red;
+$background-contact-form: radial-gradient(ellipse at center, rgb(255, 255, 255) 0%, rgb(203, 203, 204) 100%);

@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import { connect } from 'react-redux';
 import { Prompt } from 'react-router';
+import PropTypes from 'prop-types';
 
 import { MAIN_BACKGROUND_IMAGE, GOALS_PER_MINUTE_FACTOR, DIVISIONS, RESET_APP_KEEP_CURRENT_SETTINGS, RESET_APP_USE_SYSTEM_DEFAULTS } from '../../utilities/constants';
 import * as helpers from '../../utilities/helper-functions/helpers';
@@ -9,6 +10,7 @@ import SettingsHeader from './settings-header';
 import SettingsFactors from './settings-factors';
 import SettingsTeams from './settings-teams';
 import SettingsMyWatchlistTeams from './settings-my-watchlist-teams';
+import Loading from '../loading/loading';
 
 import { getSettingsFactors, areThereSettingsFactorsValidationErrors, areThereTeamsValidationErrors, areThereAnyChangesToTeamValues, areThereAnyChangesToMyWatchlistTeamValues,
          areThereAnyChangesToSettingsFactorsValues, getUpdatesToTeamsToSendToDb, getNewMyWatchlistTeamsToSendToDb,
@@ -21,7 +23,6 @@ import { settingsSaveChanges, settingsResetApp, settingsResetAppKeepCurrentSetti
 import ConfirmationDialog from '../dialogs/confirmationDialog';
 import ConfirmationResetApp from '../dialogs/confirmResetApp';
 
-import Loading from '../loading/loading';
 
 import "./settings.scss";
 
@@ -33,6 +34,7 @@ const LOCAL_STATE = {
     dialogResetAppChoiceIsOpen: false,
     dialogResetAppYesSelected: false,
     dialogResetAppConfirmIsOpen: false,
+    dialogAddWatchlistTeamsPromptIsOpen: false,
     dialogLoadingBackendErrorConfirmIsOpen: false,
     haveChangesBeenMade: false,
 }
@@ -93,15 +95,25 @@ class Settings extends Component {
 
     componentWillReceiveProps(nextProps, prevState) {
         // The following is required in order to display the correct dialog message (i.e. it has either worked, or there has been a backend error)
-        // console.log('nextProps loadingSettings', nextProps.miscellaneous.loadingSettings);
-        // console.log('nextProps error loadingSettings', nextProps.miscellaneous.loadingBackendError);
-        // console.log('this.props loadingSettings', this.props.miscellaneous.loadingSettings);
+        // console.log('nextProps loading', nextProps.loading);
+        // console.log('nextProps error loading', nextProps.loadingBackendError);
+        // console.log('this.props loading', this.props.loading);
 
-        if (!nextProps.miscellaneous.loadingSettings && this.props.miscellaneous.loadingSettings) {
+        if (nextProps.loading && !this.props.loading) {
+            if (this.state.dialogResetAppChoiceIsOpen) this.setState({ dialogResetAppChoiceIsOpen: false });         // Reset App is in progress so set the flag which will close the dialog, and the loading indicator will then display
+        }
+        
+        if (!nextProps.loading && this.props.loading) {
             this.checkForBackEndChanges(nextProps, 'dialogSaveChangesIsActive', 'dialogSaveChangesIsOpen');
             this.checkForBackEndChanges(nextProps, 'dialogResetAppIsActive', 'dialogResetAppConfirmIsOpen');
         }
         
+        if (nextProps.signingUpUser && !this.props.signingUpUser) {
+            //  After a user has signed up and everything has loaded, open the dialog to advise the user to add 'My Watchlist Teams'
+            debugger;
+            this.setState({ dialogAddWatchlistTeamsPromptIsOpen: true });
+        }
+
         let nextPropsSettingsFactors = getSettingsFactors(nextProps.settingsFactors, true, true, 'string');      // Flatten the array to make it easier to compare
         let thisPropsSettingsFactors = getSettingsFactors(this.props.settingsFactors, true, true, 'string');      // Flatten the array to make it easier to compare
 
@@ -113,16 +125,16 @@ class Settings extends Component {
     }
 
     checkForBackEndChanges = (nextProps, localStateActionIsActive, localStateFieldToUpdate) => {
-        // If the new value of loadingSettings is false and the old value is true then the appropriate update (i.e. to Save Changes or Reset App) has completed.
+        // If the new value of loading is false and the old value is true then the appropriate update (i.e. to Save Changes or Reset App) has completed.
         // If that has returned an error then display the error dialog, otherwise display the appropriate dialog to say that the process has completed.
         let saveChangesIsActive = (localStateActionIsActive === 'dialogSaveChangesIsActive');
         let resetAppIsActive = (localStateActionIsActive === 'dialogResetAppIsActive');
 
-        if (nextProps.miscellaneous.loadingBackendError) {
+        if (nextProps.loadingBackendError) {
             this.setState({ dialogLoadingBackendErrorConfirmIsOpen: true });     // If an error was encountered on the backend, then open the backend error dialog
         } else {
             if (this.state[localStateActionIsActive]) {
-                if (resetAppIsActive) this.setState({ dialogResetAppChoiceIsOpen: false });            // Reset App has finished so set the flag which will close the dialog
+                // if (resetAppIsActive) this.setState({ dialogResetAppChoiceIsOpen: false });            // Reset App has finished so set the flag which will close the dialog
                 this.setState({ [localStateFieldToUpdate]: true });
                 if (saveChangesIsActive || resetAppIsActive) {
                     this.setState({ haveChangesBeenMade: false });          // Set the flag which tracks whether any changes has been made back to false
@@ -216,16 +228,18 @@ class Settings extends Component {
         e.preventDefault();
 
         const settingsFactorsValidationErrors = validateSettingsFactors(this.state);
-        if (areThereSettingsFactorsValidationErrors(settingsFactorsValidationErrors)) {
+        const isSettingsFactorsValidationErrors = areThereSettingsFactorsValidationErrors(settingsFactorsValidationErrors);
+        if (isSettingsFactorsValidationErrors) {
             this.setState({ settingsFactorsValidationErrors: settingsFactorsValidationErrors });
-            return;
         }
         
         const teamsValidationErrors = validateTeams(this.state);
-        if (areThereTeamsValidationErrors(teamsValidationErrors)) {
+        const isTeamsValidationErrors = areThereTeamsValidationErrors(teamsValidationErrors);
+        if (isTeamsValidationErrors) {
             this.setState({ teamsValidationErrors });
-            return;
         }
+
+        if (isSettingsFactorsValidationErrors || isTeamsValidationErrors) return;
         
         updatedTeams = getUpdatesToTeamsToSendToDb(this.originalValuesTeams, this.state.teams);
 
@@ -248,21 +262,22 @@ class Settings extends Component {
 
         this.setState({ dialogSaveChangesIsActive: true });
 
-        this.props.dispatch(settingsSaveChanges(updatedTeams, newMyWatchlistTeams, updatedMyWatchlistTeams, deletedMyWatchlistTeams, updatedSettingsFactors,
-            { teams: this.state.teams, myWatchlistTeams: this.state.myWatchlistTeams, settingsFactors: settingsFactors }
-        ));
+        this.props.settingsSaveChanges(updatedTeams, newMyWatchlistTeams, updatedMyWatchlistTeams, deletedMyWatchlistTeams, updatedSettingsFactors,
+                                       { teams: this.state.teams, myWatchlistTeams: this.state.myWatchlistTeams, settingsFactors: settingsFactors }
+        );
     }
 
     handleResetApp = () => this.setState({ dialogResetAppChoiceIsOpen: true });
 
     handleDialogResetAppClose = (value) => {
+        debugger;
         this.setState({ dialogResetAppYesSelected: value === RESET_APP_KEEP_CURRENT_SETTINGS || value === RESET_APP_USE_SYSTEM_DEFAULTS }, () => {
             if (this.state.dialogResetAppYesSelected) {
                 this.setState({ dialogResetAppIsActive: true });
                 if (value === RESET_APP_KEEP_CURRENT_SETTINGS) {
-                    this.props.dispatch(settingsResetAppKeepCurrentSettings());              // Delete the stored app data in the database BUT keep the current settings
+                    this.props.settingsResetAppKeepCurrentSettings();              // Delete the stored app data in the database BUT keep the current settings
                 } else if (value === RESET_APP_USE_SYSTEM_DEFAULTS) {
-                    this.props.dispatch(settingsResetApp());              // Delete the stored app data in the database and create new documents from the default values
+                    this.props.settingsResetApp();                                 // Delete the stored app data in the database and create new documents from the default values
                 }
             } else {
                 this.setState({ dialogResetAppChoiceIsOpen: false });
@@ -277,8 +292,7 @@ class Settings extends Component {
 
     render() {
         const { haveChangesBeenMade, teams, myWatchlistTeams, settingsFactorsValidationErrors, teamsValidationErrors } = this.state;
-        const { authenticated } = this.props.user;
-        const { loadingSettings, hasCompetitionStarted, hasCompetitionFinished } = this.props.miscellaneous;
+        const { authenticated, loading, hasCompetitionStarted, hasCompetitionFinished } = this.props;
         
         return (
             <Fragment>
@@ -286,7 +300,7 @@ class Settings extends Component {
 
                     <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
 
-                    { loadingSettings ? <Loading /> : null }
+                    { loading && <Loading /> }
 
                     <Prompt when={haveChangesBeenMade} message={`Are you sure you want to abandon these unsaved changes'} ?`} />
 
@@ -375,6 +389,7 @@ class Settings extends Component {
                         <ConfirmationDialog message="App has been reset" open={this.state.dialogResetAppConfirmIsOpen} onClose={() => this.setState({ dialogResetAppIsActive: false, dialogResetAppConfirmIsOpen: false })} />
                         <ConfirmationDialog message="An error has been encountered connecting to the backend ... please retry" open={this.state.dialogLoadingBackendErrorConfirmIsOpen} onClose={() => this.setState({ dialogLoadingBackendErrorConfirmIsOpen: false })} />
                         <ConfirmationDialog message="Changes saved" open={this.state.dialogSaveChangesIsOpen} onClose={() => this.setState({ dialogSaveChangesIsActive: false, dialogSaveChangesIsOpen: false })} />
+                        <ConfirmationDialog title="Sign up complete" message="Please add 'My Watchlist Teams' at the bottom of this Settings page" open={this.state.dialogAddWatchlistTeamsPromptIsOpen} onClose={() => this.setState({ dialogAddWatchlistTeamsPromptIsOpen: false })} />
 
                     </div>
                 </div>
@@ -384,14 +399,40 @@ class Settings extends Component {
 }
 
 const mapStateToProps = (state) => {
+    const { authenticated } = state.default.user;
+    const { hasCompetitionStarted, hasCompetitionFinished, signingUpUser, loading, loadingBackendError } = state.default.miscellaneous;
+    const { teamsForCompetition, myWatchlistTeams, settingsFactors } = state.default;
+
     return {
-        user: state.default.user,
-        teamsForCompetition: state.default.teamsForCompetition,
-        myWatchlistTeams: state.default.myWatchlistTeams,
-        settingsFactors: state.default.settingsFactors,
-        miscellaneous: state.default.miscellaneous,
+        authenticated,
+        hasCompetitionStarted, hasCompetitionFinished, signingUpUser, loading, loadingBackendError,
+        teamsForCompetition, myWatchlistTeams, settingsFactors,
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        settingsSaveChanges: (updatedTeams, newMyWatchlistTeams, updatedMyWatchlistTeams, deletedMyWatchlistTeams, updatedSettingsFactors, data) =>
+                             dispatch(settingsSaveChanges(updatedTeams, newMyWatchlistTeams, updatedMyWatchlistTeams, deletedMyWatchlistTeams, updatedSettingsFactors, data)),
+        settingsResetAppKeepCurrentSettings: () => dispatch(settingsResetAppKeepCurrentSettings()),
+        settingsResetApp: () => dispatch(settingsResetApp()),
     }
 }
 
 
-export default connect(mapStateToProps, null)(Settings);
+Settings.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    hasCompetitionStarted: PropTypes.bool.isRequired,
+    hasCompetitionFinished: PropTypes.bool.isRequired,
+    signingUpUser: PropTypes.bool.isRequired,
+    loading: PropTypes.bool.isRequired,
+    loadingBackendError: PropTypes.bool.isRequired,
+    teamsForCompetition: PropTypes.array.isRequired,
+    myWatchlistTeams: PropTypes.array.isRequired,
+    settingsFactors: PropTypes.object.isRequired,
+    settingsSaveChanges: PropTypes.func.isRequired,
+    settingsResetAppKeepCurrentSettings: PropTypes.func.isRequired,
+    settingsResetApp: PropTypes.func.isRequired,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

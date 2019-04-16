@@ -3,50 +3,22 @@ const router = express.Router();
 
 const MODEL_NAME = 'miscellaneous';
 
-//Miscellaneous Model
 const Miscellaneous = require('../../models/Miscellaneous');
+const { getByUser, findOneAndUpdateByUser, postSave, deleteOneByUser } = require('./api-helpers');
 
 
 // ***************** GET *******************
-// @route GET api/miscellaneous
-// @desc  Get all Miscellaneous documents (should only be 1)
-// @access Public
-router.get('/:userDocumentId', (req, res) => {
-    Miscellaneous.find({ userDocumentId: req.params.userDocumentId })
-        .then(results => res.json(results))
-});
-
-
-// ***************** GET (NOT USED) *******************
-// @route GET api/miscellaneous
-// @desc  Get all Miscellaneous documents (should only be 1)
-// @access Public
-// router.get('/', (req, res) => {
-//     Miscellaneous.find()
-//         // .sort({ date: -1 })
-//         .then(miscellaneous => res.json(miscellaneous))
-// });
+// GET api/miscellaneous                            Get all Miscellaneous documents (should only be 1)
+router.get('/:userDocumentId', (req, res) => { getByUser(Miscellaneous, req, res); });
 
 
 // ***************** PUT *******************
-// @route PUT (or POST/PATCH) api/miscellaneous/:id
-// @desc  Update the Miscellaneous document
-// @access Public
-router.put('/:id', (req, res) => {
-
-    Miscellaneous.findOneAndUpdate({ _id: req.params.id}, req.body)
-        .then(results => {
-            const response = res.json(results);
-            console.log(`${MODEL_NAME.toUpperCase()} - updated - response - statusCode: ${response.statusCode}, statusMessage: ${response.statusMessage}`);
-        })
-        .catch(err => console.error(err))
-});
+// PUT (or POST/PATCH) api/miscellaneous/:id        Update the Miscellaneous document
+router.put('/:id', (req, res) => { findOneAndUpdateByUser(MODEL_NAME, Miscellaneous, req, res); });
 
 
-// ***************** POST *******************
-// @route POST api/miscellaneous
-// @desc  Create a Miscellaneous document
-// @access Public
+// ***************** POST ******************
+// POST api/miscellaneous                           Create a Miscellaneous document
 router.post('/', (req, res) => {
     const newMiscellaneous = new Miscellaneous({
         userDocumentId: req.body.userDocumentId,
@@ -58,26 +30,18 @@ router.post('/', (req, res) => {
         haveFixturesForCompetitionRoundBeenPlayed: req.body.haveFixturesForCompetitionRoundBeenPlayed,
         haveFixturesProducedReplays: req.body.haveFixturesProducedReplays,
     });
-
-    newMiscellaneous.save()
-        .then(results => {
-            const response = res.json(results);
-            console.log(`${MODEL_NAME.toUpperCase()} - inserted - response - statusCode: ${response.statusCode}, statusMessage: ${response.statusMessage}`);
-        })
-        .catch(err => console.error(err))
+    postSave(MODEL_NAME, newMiscellaneous, res);
 });
 
 
-// ***************** DELETE BY USER *******************
-// @route DELETE api/miscellaneous/:id
-// @desc  Delete an Miscellaneous document
-// @access Public
-router.delete('/:userDocumentId', (req, res) => {
-    Miscellaneous.findOneAndDelete({ userDocumentId: req.params.userDocumentId })
-        // .then(miscellaneous => miscellaneous.remove().then(() => res.json({success: true})))
-        .then(() => res.json({success: true}))
-        .catch(err => res.status(404).json({success: false}))
-});
+// ************ DELETE BY USER **************
+// DELETE api/miscellaneous/:id                     Delete an Miscellaneous document
+router.delete('/:userDocumentId', (req, res) => { deleteOneByUser(Miscellaneous, req, res); });
+
+
+// *********** GET (NOT USED) **************
+// GET api/miscellaneous                            Get all Miscellaneous documents (should only be 1)
+// router.get('/', (req, res) => { Miscellaneous.find().sort({ date: -1 }).then(miscellaneous => res.json(miscellaneous))});
 
 
 module.exports = router;

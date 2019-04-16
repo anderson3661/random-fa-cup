@@ -1,0 +1,86 @@
+@import '../../sass/_variables';
+@import '../../sass/mixins';
+
+
+.outer-container-fixtures {
+    min-height: $min-height-outer-container;
+
+    .container-main-content-fixtures-and-results {
+        width: 75%;
+        margin: 14vh auto 10vh auto;
+
+        .container-card.fixtures-card, .container-card.fixtures-card-main-header {
+            margin-bottom: 5vh;
+            padding-bottom: 3vh;
+
+            .main-header {
+                padding-bottom: 1vh;
+
+                .image-left, .image-right { flex-basis: 20%; }
+                .image-right { text-align: right; }
+
+                .showGoals {
+                    flex-basis: 20%;
+                    text-align: right;
+                }
+
+                &.displayResults {
+                    .showGoals {
+                        flex-basis: 20%;
+                        text-align: right;
+                    }
+
+                    &.seasonsFixturesHaveNotBeenCreated {
+                        h1 { flex-basis: 100%; text-align: center;}
+                        .image-right { display: block; }
+                    }
+                }
+            }
+
+            .not-at-this-stage { text-align: center; }
+
+        }
+        
+        .fixtures {
+            width: 100%;
+            font-size: 85%;
+        }
+
+        > div:nth-child(3) { margin-top: 27vh; }
+
+        .container-card.fixtures-card-main-header {
+            position: fixed;
+            width: 80%;
+            top: 10vh;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            padding-bottom: 3vh;
+            background-color: $background-color-fixtures-and-results-main-header;
+        
+            .filler-for-scroll {
+                position: fixed;
+                height: 2vh;
+                width: 80%;
+                top: 8vh;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
+                background-color: $background-color-fixtures-and-results-filler-for-scroll;
+            }
+        
+            .select-options {
+                @include flex($justify-content: space-evenly, $align-items: null);
+        
+                .select-division span, .select-team span {
+                    margin-right: 20px;
+                    color: $color-fixtures-and-results-competition-round-title;
+                }
+            }
+        }
+        
+        .container-card.fixtures-card {
+            .main-header h1 { font-size: 110%; color: $color-fixtures-and-results-select-labels; text-align: center; width: 100%; }
+        }
+    }
+}

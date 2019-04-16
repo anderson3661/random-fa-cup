@@ -1,13 +1,13 @@
-export const TESTING_MODE = true;
-export const TESTING_EMAIL_ADDRESS = 'm@m.com';                             // Used in userReducer
-export const TESTING_USER_ID_KEY = '_id';                                   // Used in userReducer              
-export const TESTING_USER_ID = '5c7a2fb8f6f0801140ae065f';                  // Used in userReducer     
+export const TESTING_MODE = false;
+export const TESTING_EMAIL_ADDRESS = 'm@m.com';                             // Used in userReducer and Authentication
+export const TESTING_PASSWORD = 'Password123';                              // Used in userReducer and Authentication
 
 export const INCLUDE_MONGODB_OPTION = true;
 export const INCLUDE_FIREBASE_OPTION = false;
 
 export const HOSTING_SITE = "https://dashboard.heroku.com/apps/football-fa-cup-mern/deploy/github";
 export const APP_TITLE = "Football - Random FA Cup - MERN";
+export const APP_STORAGE_KEY = "RandomFACupMERN";
 export const MAIL_TO = "martin.anderson3661@gmail.com";
 export const COPYRIGHT = "Martin Anderson 2019";
 
@@ -187,16 +187,40 @@ export const IS_IT_A_GOAL_FACTOR = 'isItAGoal';
 export const IS_IT_A_GOAL_PENALTY_FACTOR = 'isItAGoalFromAPenalty';
 export const HAVE_SEASONS_FIXTURES_BEEN_CREATED = 'haveSeasonsFixturesBeenCreated';
 
+export const PATH_API = '/api';
+export const PATH_USER = PATH_API + '/user';
+export const PATH_USER_SIGN_UP = '/sign-up';
+export const PATH_USER_LOGIN = '/login';
+export const PATH_USER_VERIFY = '/verify';
+export const PATH_USER_LOGOUT = '/logout';
+export const PATH_USER_RESET_PASSWORD = '/reset-password';
+export const PATH_USER_CHANGE_PASSWORD = '/change-password';
+export const PATH_HOME = '/home';
+export const PATH_MISCELLANEOUS = '/miscellaneous';
+export const PATH_SETTINGS_FACTORS = '/settings-factors';
+export const PATH_TEAMS = '/teams';
+export const PATH_MY_WATCHLIST_TEAMS = '/my-watchlist-teams';
+export const PATH_FIXTURES = '/fixtures';
+export const PATH_DRAW = '/draw';
+export const PATH_FIXTURES_LATEST = '/fixtures-latest';
+export const PATH_FIXTURES_AND_RESULTS = '/fixtures-and-results';
+export const PATH_SETTINGS = '/settings';
+export const PATH_HELP = '/help';
+export const PATH_CONTACT = '/contact';
+export const PATH_ABOUT = '/about';
+
 export const API_ENDPOINT_USERS = '/api/users';
-export const API_ENDPOINT_USER_SIGN_UP = '/api/user/sign-up';
-export const API_ENDPOINT_USER_LOGIN = '/api/user/login';
-export const API_ENDPOINT_USER_VERIFY = '/api/user/verify';
-export const API_ENDPOINT_USER_LOGOUT = '/api/user/logout';
-export const API_ENDPOINT_MISCELLANEOUS = '/api/miscellaneous';
-export const API_ENDPOINT_SETTINGS_FACTORS = '/api/settings-factors';
-export const API_ENDPOINT_TEAMS = '/api/teams';
-export const API_ENDPOINT_MY_WATCHLIST_TEAMS = '/api/my-watchlist-teams';
-export const API_ENDPOINT_FIXTURES = '/api/fixtures';
+export const API_ENDPOINT_USER_SIGN_UP = PATH_USER + PATH_USER_SIGN_UP;
+export const API_ENDPOINT_USER_LOGIN = PATH_USER + PATH_USER_LOGIN;
+export const API_ENDPOINT_USER_VERIFY = PATH_USER + PATH_USER_VERIFY;
+export const API_ENDPOINT_USER_LOGOUT = PATH_USER + PATH_USER_LOGOUT;
+export const API_ENDPOINT_USER_RESET_PASSWORD = PATH_USER + PATH_USER_RESET_PASSWORD;
+export const API_ENDPOINT_USER_CHANGE_PASSWORD = PATH_USER + PATH_USER_CHANGE_PASSWORD;
+export const API_ENDPOINT_MISCELLANEOUS = PATH_API + PATH_MISCELLANEOUS;
+export const API_ENDPOINT_SETTINGS_FACTORS = PATH_API + PATH_SETTINGS_FACTORS;
+export const API_ENDPOINT_TEAMS = PATH_API + PATH_TEAMS;
+export const API_ENDPOINT_MY_WATCHLIST_TEAMS = PATH_API + PATH_MY_WATCHLIST_TEAMS;
+export const API_ENDPOINT_FIXTURES = PATH_API + PATH_FIXTURES;
 
 export const API_ENDPOINTS_TO_LOAD_ALL_DATA = [
     API_ENDPOINT_MISCELLANEOUS,

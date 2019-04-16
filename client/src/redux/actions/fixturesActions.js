@@ -1,51 +1,57 @@
 import { UPDATE_FIXTURES_IN_STORE, UPDATE_MISCELLANEOUS_PROPERTY, LOADING_BACKEND_UPDATE } from './types';
-import { updateDocumentsInDbAfterLatestResults, updateMiscellaneousDocumentInDb, createFixturesDocumentsInDb, mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray } from '../../utilities/data-backend';
+import { userValidateAndReturnUserDocId, updateDocumentsInDbAfterLatestResults, updateMiscellaneousDocumentInDb, createFixturesDocumentsInDb, mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray } from '../../utilities/data-backend';
 import { API_ENDPOINT_FIXTURES } from '../../utilities/constants';
 
 // ACTION CREATORS
 
-export const updateDbsAndStoreAfterLatestResults = (latestFixtures, replays, replayUpdatesInFixturesDb, replayUpdatesInStore, finalFixture, miscellaneousUpdates, replaysJustFinished) => async (dispatch, getState) => {
+export const updateDbsAndStoreAfterLatestResults = (latestFixtures, replays, replayUpdatesInFixturesDb, replayUpdatesInStore, finalFixture, miscellaneousUpdates, replaysJustFinished, semiFinalsJustFinished) => async (dispatch, getState) => {
     try {
+        const userId = await userValidateAndReturnUserDocId();
+        if (userId) {
+            dispatch({ type: LOADING_BACKEND_UPDATE, data: { loading: true }});
+            await updateDocumentsInDbAfterLatestResults(latestFixtures, API_ENDPOINT_FIXTURES, 'Fixtures');
+            dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: { fixtures: latestFixtures }});
 
-        dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingLatestFixtures: true }});
-        await updateDocumentsInDbAfterLatestResults(latestFixtures, API_ENDPOINT_FIXTURES, 'Fixtures');
-        dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: { fixtures: latestFixtures }});
+            if (replays.length > 0) {
+                const results = await createFixturesDocumentsInDb(replays, userId);
+                const updatedData = mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray(replays, results);
+                dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: {fixtures: updatedData }});
+            }
 
-        if (replays.length > 0) {
-            const results = await createFixturesDocumentsInDb(replays, getState().default.user._id);
-            const updatedData = mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray(replays, results);
-            dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: {fixtures: updatedData }});
+            if (replayUpdatesInFixturesDb.length > 0) {
+                await updateDocumentsInDbAfterLatestResults(replayUpdatesInFixturesDb, API_ENDPOINT_FIXTURES, 'Fixtures');
+                dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: { fixtures: replayUpdatesInStore }});
+            }
+
+            if (finalFixture.length > 0) {
+                const results = await createFixturesDocumentsInDb(finalFixture, userId);
+
+                const updatedData = mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray(finalFixture, results);
+                dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: {fixtures: updatedData }});
+            }
+
+            if (!getState().default.miscellaneous.hasCompetitionStarted) {
+                const miscellaneousPropertiesToUpdate = { hasCompetitionStarted: true };
+                await updateMiscellaneousDocumentInDb(getState().default.miscellaneous._id, miscellaneousPropertiesToUpdate);
+                dispatch({ type: UPDATE_MISCELLANEOUS_PROPERTY, data: { ...miscellaneousPropertiesToUpdate }});
+            }
+
+            await updateMiscellaneousDocumentInDb(getState().default.miscellaneous._id, miscellaneousUpdates);
+            dispatch({ type: UPDATE_MISCELLANEOUS_PROPERTY, data: miscellaneousUpdates });
+
+            if (replaysJustFinished) {
+                dispatch(refreshHeaderAfterReplays());
+            }
+
+            if (semiFinalsJustFinished) {
+                dispatch(refreshHeaderAfterSemiFinals());
+            }
+
+            dispatch({ type: LOADING_BACKEND_UPDATE, data: { loading: false }});
         }
-
-        if (replayUpdatesInFixturesDb.length > 0) {
-            await updateDocumentsInDbAfterLatestResults(replayUpdatesInFixturesDb, API_ENDPOINT_FIXTURES, 'Fixtures');
-            dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: { fixtures: replayUpdatesInStore }});
-        }
-
-        if (finalFixture.length > 0) {
-            const results = await createFixturesDocumentsInDb(finalFixture, getState().default.user._id);
-
-            const updatedData = mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray(finalFixture, results);
-            dispatch({ type: UPDATE_FIXTURES_IN_STORE, data: {fixtures: updatedData }});
-        }
-
-        if (!getState().default.miscellaneous.hasCompetitionStarted) {
-            const miscellaneousPropertiesToUpdate = { hasCompetitionStarted: true };
-            await updateMiscellaneousDocumentInDb(getState().default.miscellaneous._id, miscellaneousPropertiesToUpdate);
-            dispatch({ type: UPDATE_MISCELLANEOUS_PROPERTY, data: { ...miscellaneousPropertiesToUpdate }});
-        }
-
-        await updateMiscellaneousDocumentInDb(getState().default.miscellaneous._id, miscellaneousUpdates);
-        dispatch({ type: UPDATE_MISCELLANEOUS_PROPERTY, data: miscellaneousUpdates });
-
-        if (replaysJustFinished) {
-            dispatch(refreshHeaderAfterLatestFixtures());
-        }
-
-        dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingLatestFixtures: false }});
     } catch(error) {
         console.log('Error from updateDbsAndStoreAfterLatestResults', error);
-        dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingLatestFixtures: false, loadingBackendError: true }});
+        dispatch({ type: LOADING_BACKEND_UPDATE, data: { loading: false, loadingBackendError: true }});
     }
 }
 
@@ -60,37 +66,35 @@ export const updateDbsAndStoreAfterCompetitionHasFinished = () => async (dispatc
 }
 
 export const refreshLatestFixtures = () => async (dispatch) => {
-
-    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshLatestFixtures: true }});
-
     // If replays have finished then fixtures for the next round will be played next.  In order to re-render the latest fixtures component need to set state so that the option appears
-    // Need to add a timeout so that the store is updated
-    // Otherwise the loadingSettings: false is batched at the same time as loadingSettings: true, and therefore loadingSettings: true never happens
-    await setTimeout(() => {}, 500);
-
-    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshLatestFixtures: false }});
+    // Need to add a timeout so that the store is updated, otherwise the 'false' is batched at the same time as 'true', and therefore 'true' never happens
+    debugger;
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshLatestFixtures: true }});    
+    setTimeout(() => { dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshLatestFixtures: false }}); }, 500);
 }
 
-export const refreshHeaderAfterLatestFixtures = () => async (dispatch) => {
+export const refreshHeaderAfterReplays = () => async (dispatch) => {
+    // This is used in nav/header.js
+    // If replays have finished then fixtures for the next round will be played next.  In order to re-render the header component need to set state so that the option appears.
+    // Need to add a timeout so that the store is updated, otherwise the 'false' is batched at the same time as 'true', and therefore 'true' never happens
+    debugger;
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshHeaderAfterReplays: true }});
+    setTimeout(() => { dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshHeaderAfterReplays: false }}); }, 500);
+}
 
-    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshHeaderAfterLatestFixtures: true }});
-
-    // If replays have finished then fixtures for the next round will be played next.  In order to re-render the header component need to set state so that the option appears
-    // Need to add a timeout so that the store is updated
-    // Otherwise the loadingSettings: false is batched at the same time as loadingSettings: true, and therefore loadingSettings: true never happens
-    await setTimeout(() => {}, 500);
-
-    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshHeaderAfterLatestFixtures: false }});
+export const refreshHeaderAfterSemiFinals = () => async (dispatch) => {
+    // This is used in nav/header.js
+    // If semi finals have finished then the final will be played next.  In order to re-render the header component need to set state so that the option appears.
+    // Need to add a timeout so that the store is updated, otherwise the 'false' is batched at the same time as 'true', and therefore 'true' never happens
+    debugger;
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshHeaderAfterSemiFinals: true }});
+    setTimeout(() => { dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingRefreshHeaderAfterSemiFinals: false }}); }, 500);
 }
 
 export const refreshAfterEachPenalty = () => async (dispatch) => {
-
-    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingAfterEachPenalty: true }});
-
     // If replays have finished then fixtures for the next round will be played next.  In order to re-render the header component need to set state so that the option appears
-    // Need to add a timeout so that the store is updated
-    // Otherwise the loadingSettings: false is batched at the same time as loadingSettings: true, and therefore loadingSettings: true never happens
-    await setTimeout(() => {}, 500);
-
-    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingAfterEachPenalty: false }});
+    // Need to add a timeout so that the store is updated, otherwise the 'false' is batched at the same time as 'true', and therefore 'true' never happens
+    debugger;
+    dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingAfterEachPenalty: true }});
+    setTimeout(() => { dispatch({ type: LOADING_BACKEND_UPDATE, data: { loadingAfterEachPenalty: false }}); }, 500);
 }

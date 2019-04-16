@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from 'prop-types';
 
 import DrawTeam from "./draw-team";
 
@@ -31,6 +32,11 @@ class DrawPremierLeagueTeams extends Component {
             </div>
         );
     }
+}
+
+
+DrawPremierLeagueTeams.propTypes = {
+    premierLeagueTeams: PropTypes.array.isRequired,
 }
 
 export default DrawPremierLeagueTeams;

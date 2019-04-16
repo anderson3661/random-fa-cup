@@ -16,7 +16,6 @@ const RootReducer = (state, action) => {
     // If resetting the app but keeping current settings, we don't want to reset the users, or myWatchlistTeams, or teams, or settings
     // However, if the user logs out then we DO want to reset the users
     if (action.type === 'RESET_STATE_TO_DEFAULTS' || action.type === 'RESET_STATE_KEEP_CURRENT_SETTINGS' || action.type === "LOGOUT_AND_RESET_STATE_TO_DEFAULTS") {
-        debugger;
         if (action.type === 'RESET_STATE_TO_DEFAULTS') {
             user = state.default.user;
             myWatchlistTeams = state.default.myWatchlistTeams;

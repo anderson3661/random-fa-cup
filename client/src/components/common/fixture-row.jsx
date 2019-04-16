@@ -1,8 +1,9 @@
 import React, { Fragment } from "react";
+import PropTypes from 'prop-types';
 
 import * as helpers from '../../utilities/helper-functions/helpers';
 import FixtureRowPenalties from '../fixtures-latest/fixtures-row-penalties';
-import DrawTeamLabels from '../draw/draw-team-labels';
+import TeamLabels from './team-labels';
 
 import "./fixture-row.scss";
 
@@ -11,11 +12,7 @@ const FixtureRow = (props) => {
     const { homeTeam, awayTeam, homeTeamDivision, awayTeamDivision, homeTeamsScore, awayTeamsScore, homeTeamsGoals, awayTeamsGoals, minutesPlayed, minutesInfo,
             hasFixtureFinished, isExtraTime, isPenalties, penalties, homeTeamsScorePenalties, awayTeamsScorePenalties, isHomeTeamTakingPenaltiesFirst } = props.fixture;
     
-    const haveLatestFixturesStarted = (props.haveLatestFixturesStarted === undefined ? false : props.haveLatestFixturesStarted);
-    const showForLatestFixtures = (props.showForLatestFixtures === undefined ? false : props.showForLatestFixtures);
-    const showForFixturesAndResults = (props.showForFixturesAndResults === undefined ? false : props.showForFixturesAndResults);
-    const showRouteToThisStage = (props.showRouteToThisStage === undefined ? false : props.showRouteToThisStage);
-    const showGoals = (props.showGoals === undefined ? false : props.showGoals);
+    const { haveLatestFixturesStarted, showForLatestFixtures, showForFixturesAndResults, showRouteToThisStage, showGoals } = props;
     
     return (
 
@@ -28,7 +25,7 @@ const FixtureRow = (props) => {
                 }
 
                 <div className="homeTeamsName">
-                    <DrawTeamLabels team={{teamName: homeTeam, division: homeTeamDivision}} positionAfter={false} /> 
+                    <TeamLabels team={{teamName: homeTeam, division: homeTeamDivision}} positionAfter={false} /> 
                 </div>
 
                 <div className=
@@ -75,12 +72,12 @@ const FixtureRow = (props) => {
                 </div>
 
                 <div className="awayTeamsName">
-                    <DrawTeamLabels team={{teamName: awayTeam, division: awayTeamDivision}} positionAfter={true} /> 
+                    <TeamLabels team={{teamName: awayTeam, division: awayTeamDivision}} positionAfter={true} /> 
                 </div>
 
             </div>
 
-            {((showForFixturesAndResults && showGoals && hasFixtureFinished) || showForLatestFixtures || showRouteToThisStage) &&
+            {((showForFixturesAndResults && showGoals && hasFixtureFinished) || showForLatestFixtures || (showRouteToThisStage && showGoals)) &&
                 <div className={`fixtures-row-goal-times ${hasFixtureFinished ? 'fixture-finished' : ''} ${isExtraTime ? 'is-extra-time' : ''} ${isPenalties ? 'is-penalties' : ''} ${showForLatestFixtures ? 'in-play' : ''} ${showForFixturesAndResults ? 'fixtures-and-results' : ''} ${showRouteToThisStage ? 'route-to-this-stage' : ''}`}>
                     {showRouteToThisStage && <div className="competitionRound"></div>}
                     <div className="teamsGoalTimes home">&nbsp;{ homeTeamsGoals }</div>
@@ -108,6 +105,24 @@ const FixtureRow = (props) => {
         </Fragment>
 
     );
+}
+
+
+FixtureRow.defaultProps = {
+    haveLatestFixturesStarted: false,
+    showForLatestFixtures: false,
+    showForFixturesAndResults: false,
+    showRouteToThisStage: false,
+    showGoals: false,
+}
+
+FixtureRow.propTypes = {
+    fixture: PropTypes.object.isRequired,
+    haveLatestFixturesStarted: PropTypes.bool.isRequired,
+    showForLatestFixtures: PropTypes.bool.isRequired,
+    showForFixturesAndResults: PropTypes.bool.isRequired,
+    showRouteToThisStage: PropTypes.bool.isRequired,
+    showGoals: PropTypes.bool.isRequired,
 }
 
 export default FixtureRow;

@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 import FixtureRow from "../common/fixture-row";
 
@@ -21,7 +22,6 @@ const PremierLeagueTeams = ({ fixtures, haveLatestFixturesStarted }) => (
                             haveLatestFixturesStarted={haveLatestFixturesStarted}
                             showGoals={false}
                             showVersus={true}
-                            // top3TeamsBeforeFixtures={this.top3TeamsBeforeFixtures}
                         />
                     )
                 }
@@ -31,5 +31,11 @@ const PremierLeagueTeams = ({ fixtures, haveLatestFixturesStarted }) => (
     </div>
 
 )
+
+
+PremierLeagueTeams.propTypes = {
+    fixtures: PropTypes.array.isRequired,
+    haveLatestFixturesStarted: PropTypes.bool.isRequired,
+}
 
 export default PremierLeagueTeams;

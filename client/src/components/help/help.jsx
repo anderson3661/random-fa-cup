@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactHtmlParser from 'react-html-parser';
 
 import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE } from '../../utilities/constants';
@@ -119,39 +119,52 @@ const dataHelp = [
 
 ]
 
-const Help = () => {
+class Help extends Component {
 
-    return (
+    state = { itemDisplayed: -1 }
 
-        <div className="outer-container-help">
-            <div className="container-main-content-help">
-                <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
+    handleClick = (i) => {
+        this.setState({ itemDisplayed: this.state.itemDisplayed === i ? -1 : i });
+    }
 
-                <div className="container-card">
+    render() {
 
-                    <header>
-                        <img src={FOOTBALL_IMAGE} alt="" />
-                        <h1>Help</h1>
-                        <img src={FOOTBALL_IMAGE} alt="" />
-                    </header>
+        const { itemDisplayed } = this.state;
 
-                    {dataHelp.map((data, i) => {
-                        return (
-                            <div key={i} className="accordion">
-                                <div className="accordion__item">
-                                    <a href={`#tab${i+1}`} className="accordion__trigger accordion__title">{data.heading}</a>
-                                    <div id={`tab${i+1}`} className="accordion__content">
-                                        {data.details.map((para, j) => <p key={j}>{ReactHtmlParser(para)}</p>)}
+        return (
+
+            <div className="outer-container-help">
+                <div className="container-main-content-help">
+                    <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
+
+                    <div className="container-card">
+
+                        <header>
+                            <img src={FOOTBALL_IMAGE} alt="" />
+                            <h1>Help</h1>
+                            <img src={FOOTBALL_IMAGE} alt="" />
+                        </header>
+
+                        {dataHelp.map((data, i) => {
+                            return (
+                                <div key={i} className="accordion">
+                                    <div className="accordion__item">
+                                        {/* <a href={`#tab${i+1}`} className="accordion__trigger accordion__title">{data.heading}</a> */}
+                                        {/* <div id={`tab${i+1}`} className="accordion__content"> */}
+                                        <div onClick={this.handleClick.bind(this, i)} className="accordion__trigger accordion__title">{data.heading}</div>
+                                        <div className={`accordion__content ${itemDisplayed !== i ? 'hidden' : ''}`}>
+                                            {data.details.map((para, j) => <p key={j}>{ReactHtmlParser(para)}</p>)}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        )
-                    })}
+                            )
+                        })}
 
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
 }
  
 export default Help;

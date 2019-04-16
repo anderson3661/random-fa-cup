@@ -13,9 +13,9 @@
         width: 23vw;
         height: 50vh;
         margin: 0 auto;
-        background-color: rgba(248, 248, 248, 0.3);
+        background-color: $background-color-home-cup-image;
         border-radius: 50%;
-        box-shadow: 0px 0px 10vw 10vw rgba(248, 248, 248, 0.3);
+        box-shadow: $box-shadow-home-cup-image;
 
         img { height: 100%; width: 100%; }
     }
@@ -24,7 +24,7 @@
         position: absolute;
         height: 15vh;
         width: 15vh;
-        background-image: url('../../assets/images/white-football.png');
+        background-image: $background-image-home-links;
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center;
@@ -39,7 +39,7 @@
         &._2nd-round { top: 65vh; right: 15vw; }
         &._1st-round { top: 65vh; left: 15vw; }
 
-        .competition-round-label { width: 14vh; text-align: center; }
+        .competition-round-label { width: 14vh; text-align: center; line-height: 1.1; }
         .fixtures-and-results { width: 12vh; text-align: center; }
     }
 
@@ -47,8 +47,8 @@
         position: absolute;
         top: 78vh;
         left: 0.5vw;
-        color: white;
-        background-color: rgba(255, 255, 255, 0.4);
+        color: $color-home-teams-remaining;
+        background-color: $background-color-home-teams-remaining;
         padding: 0.5vh 0.5vw;
         width: 10vw;
 
@@ -63,40 +63,40 @@
     .container-card.display-winners {
         position: absolute;
         top: 26vh;
-        color: darkred;
-        background-color: rgba(255, 255, 255, 0.7);
+        color: $color-home-display-winners;
+        background-color: $background-color-home-display-winners;
         padding: 0.5vh 0.5vw;
         margin: 0 auto;
         width: 25vw;
         text-align: center;
         font-weight: 700;
-        box-shadow: 0px 0px 10vw 10vw rgba(245, 216, 216, 0.3);
+        box-shadow: $box-shadow-home-display-winners;
 
         p.heading {
             margin: 0.5vh 0;
-            font-size: 120%;
+            font-size: $font-size-home-display-winners-heading;
         }
 
         p.winners {
             margin: 2vh 0 1vh 0;
-            font-size: 150%;
+            font-size: $font-size-home-display-winners-name;
         }
     }
 
     a.nav-link {
         > div {
-            font-size: 125%;
+            font-size: $font-size-home-links;
             font-weight: 700;
             margin: 0 0 1vh 0;
         }
 
         .active {
-            > div { color: blue; }
+            > div { color: $color-home-links; }
             &:hover { transform: scale(1.1) };
         }
 
         .deactivated {
-            > div { color: gray; }
+            > div { color: $color-home-links-inactive; }
             &:hover { cursor: default; }
         }
     }

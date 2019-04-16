@@ -3,7 +3,7 @@
 
 
 .outer-container-draw {
-    min-height: 94vh;
+    min-height: $min-height-outer-container;
 
     .container-main-content-draw {
         width: 90%;
@@ -24,7 +24,7 @@
                 z-index: 1;
 
                 // &.draw-in-progress { background-color: white; }
-                background-color: white;
+                background-color: $background-color-draw-header-early-rounds;
             }
 
             .filler-for-scroll {
@@ -33,7 +33,7 @@
                 left: 2.5vw;
                 width: 49vw;
                 height: 2vh;
-                background-color: black;
+                background-color: $background-color-draw-filler-for-scroll;
                 z-index: 1;
             }
 
@@ -99,7 +99,7 @@
         .draw-header, .draw {
             .draw-row {
                 &.versus {
-                    font-size: 80%;
+                    font-size: $font-size-draw-versus;
                     padding-top: 0.25vh;
                     padding-bottom: 0.25vh;
                 }
@@ -110,7 +110,7 @@
                         display: inline-block;
                         height: 2.25vh;
                         width: 2.25vh;
-                        background-color: $background-color-team-number-ball;
+                        background-color: $background-color-draw-team-number-ball;
                         border-radius: 50%;
                         margin-right: 0.5vw;
                         @include flex();
@@ -118,8 +118,8 @@
 
                     .teamNumberInDraw {
                         position: absolute;
-                        color: $color-team-number-ball;
-                        font-size: 70%;
+                        color: $color-team-draw-number-ball;
+                        font-size: $font-size-draw-team-number-in-draw;
                         font-weight: normal;
                         @include flex();
                     }
@@ -152,17 +152,17 @@
 
                 .main-header {
                     @include flex($justify-content: space-between);
-                    h1, h2 { width: 100%; text-align: center; font-size: 120%; margin: 0.5vh 0 0 0; }
+                    h1, h2 { width: 100%; text-align: center; font-size: $font-size-draw-secondary-information-header; margin: 0.5vh 0 0 0; }
                 }
 
-                .draw-row.versus {
-                    font-size: 80%;
-                    padding-top: 0.25vh;
-                    padding-bottom: 0.25vh;
+                .draw-row .versus {
+                    font-size: $font-size-draw-secondary-information-versus;
+                    padding-top: 0.5vh;
+                    padding-bottom: 0.5vh;
                 }
 
                 span {
-                    font-size: 85%;
+                    font-size: $font-size-draw-secondary-information-team-name;
                     &.division { color: $color-division-abbreviation; font-size: $font-size-division-abbreviation;}
                 }
 
@@ -170,7 +170,7 @@
                     font-weight: normal;
                     
                     &.division { color: $color-division-abbreviation; font-size: $font-size-division-abbreviation;}
-                    &.premierLeague { color: $color-premier-league-teams; }
+                    &.premierLeague { color: $color-premier-league-team; }
                 }
 
                 .teams {
@@ -187,7 +187,7 @@
                             display: inline-block;
                             height: 2.25vh;
                             width: 2.25vh;
-                            background-color: $background-color-team-number-ball;
+                            background-color: $background-color-draw-team-number-ball;
                             border-radius: 50%;
                             margin-right: 0.5vw;
                             @include flex();
@@ -195,19 +195,19 @@
 
                         .teamNumberInDraw {
                             position: absolute;
-                            color: $color-team-number-ball;
-                            font-size: 70%;
+                            color: $color-team-draw-number-ball;
+                            font-size: $font-size-draw-team-number-in-draw;
                             font-weight: normal;
                             @include flex();
                         }
 
                         .teamAndDivision {
                             span {
-                                font-size: 85%;
+                                font-size: $font-size-draw-secondary-information-team-name;
                                 font-weight: normal;
                             
-                                &.division { color: $color-division-abbreviation; font-size: 70%;}
-                                &.premierLeague { color: $color-premier-league-teams; }
+                                &.division { color: $color-division-abbreviation; font-size: $font-size-draw-secondary-information-division-abbreviation;}
+                                &.premierLeague { color: $color-premier-league-team; }
                             }
                         }                        
 

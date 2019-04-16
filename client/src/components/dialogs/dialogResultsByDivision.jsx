@@ -4,16 +4,18 @@ import Button from "@material-ui/core/Button";
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
-import './confirmationDialog.scss';
+import ResultsByDivision from '../results-by-division/results-by-division';
 
-class ConfirmationDialog extends React.Component {
+import './dialogResultsByDivision.scss';
+
+class DialogResultsByDivision extends React.Component {
 
     handleClose = () => {
       this.props.onClose();
     };
        
     render() {
-      const { message, title, onClose, ...other } = this.props;
+      const { fixturesForCompetition, message, title, onClose, ...other } = this.props;
   
       return (
         <Dialog onClose={this.handleClose} aria-labelledby="simple-dialog-title" {...other}>
@@ -21,6 +23,7 @@ class ConfirmationDialog extends React.Component {
           <div className="dialog-para">
             <p>{message}</p>
           </div>
+          <ResultsByDivision fixturesForCompetition={fixturesForCompetition} />
           <div className="dialog-button">
             <Button variant="contained" color="primary" id="dialogConfirm" onClick={this.handleClose}>OK</Button>
           </div>
@@ -30,10 +33,10 @@ class ConfirmationDialog extends React.Component {
 }
 
 
-ConfirmationDialog.propTypes = {
+DialogResultsByDivision.propTypes = {
     message: PropTypes.string.isRequired,
     title: PropTypes.string,                        // Not required as could be blank
     onClose: PropTypes.func.isRequired,
 }
 
-export default ConfirmationDialog;
+export default DialogResultsByDivision;

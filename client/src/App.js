@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 // import Header from './components/nav/header';
 import Footer from './components/nav/footer';
@@ -17,7 +18,9 @@ class App extends Component {
 
     constructor(props) {
         super(props);
-        if (this.props.user.authenticated) this.props.dispatch({ type: LOADING_APP, data: { loading: true }});
+
+        props.startLoadingApp();
+
         this.state = {
             loadingError: false,
             dialogLoadingBackendErrorConfirmIsOpen: false,
@@ -25,23 +28,21 @@ class App extends Component {
     }
 
     componentDidMount() {
-        if (this.props.user.authenticated) this.props.dispatch(loadFromAllDbsStarted());
+        this.props.loadFromAllDbsStarted();
     }
 
     componentWillReceiveProps(nextProps, prevState) {
-        if (nextProps.miscellaneous.loadingBackendError) this.setState({ loadingError: true });     // If an error was encountered on the backend, then open the backend error dialog
+        if (nextProps.loadingBackendError) this.setState({ loadingError: true });     // If an error was encountered on the backend, then open the backend error dialog
     }
 
     render() {
         const { loadingError } = this.state;
-        // const { loading } = this.props.user;
-        const { loading } = this.props.miscellaneous;
+        const { loadingApp } = this.props;
         return (
             <Router>
                 <div className="outer-container">
-                    {loading && !loadingError && <div className="loading-filler"></div>}             {/* Used on the initial load screen to put the footer at the bottom of the screen */}
-                    {/* <Header authenticated={ this.props.user.authenticated } dispatch={ this.props.dispatch } /> */}
-                    { loadingError ? <LoadingError /> : (loading ? <Loading /> : <Routes />) }
+                    {loadingApp && !loadingError && <div className="loading-filler"></div>}             {/* Used on the initial load screen to put the footer at the bottom of the screen */}
+                    { loadingError ? <LoadingError /> : (loadingApp ? <Loading /> : <Routes />) }
                     <Footer />
                 </div>                   
             </Router>
@@ -49,15 +50,29 @@ class App extends Component {
     }
 }
 
-const mapStateToProps = (state, ownProps) => {
+const mapStateToProps = (state) => {
+    const { authenticated } = state.default.user;
+    const { loadingApp, loadingBackendError } = state.default.miscellaneous;
     return { 
-        user: state.default.user,
-        miscellaneous: state.default.miscellaneous,
+        authenticated,
+        loadingApp, loadingBackendError,
     }
 }
 
+const mapDispatchToProps = dispatch => {
+    return {
+        startLoadingApp: () => dispatch({ type: LOADING_APP, data: { loadingApp: true }}),
+        loadFromAllDbsStarted: () => dispatch(loadFromAllDbsStarted()),
+    }
+}
 
-//Call this function to connect to Redux and get a handle to dispatch (used above) ... need to have mapStateToProps to update the loading state when data has been received async from the db
-App = connect(mapStateToProps, null)(App)
+App.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    loadingApp: PropTypes.bool.isRequired,
+    loadingBackendError: PropTypes.bool.isRequired,
+    startLoadingApp: PropTypes.func.isRequired,
+    loadFromAllDbsStarted: PropTypes.func.isRequired,
+}
 
-export default App;
+//Call this function to connect to Redux and get a handle to dispatch (used above) ... need to have mapStateToProps to update the loadingApp state when data has been received async from the db
+export default connect(mapStateToProps, mapDispatchToProps)(App);

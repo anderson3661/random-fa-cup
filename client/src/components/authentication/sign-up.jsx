@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+// import FormControlLabel from '@material-ui/core/FormControlLabel';
+// import Checkbox from '@material-ui/core/Checkbox';
 
 import { userSignup } from '../../redux/actions/userActions';
 
@@ -31,7 +32,7 @@ class SignUp extends Component {
             },
             submitAttempted: false,
             rememberMe: false,
-            signUpInvalidMessage: '',
+            invalidMessageLocal: '',
         }
 
     }
@@ -42,7 +43,7 @@ class SignUp extends Component {
 
         this.getValidationErrors(e.target);
 
-        this.setState({ signUpInvalidMessage: '' });
+        this.setState({ invalidMessageLocal: '' });
         this.setState({ formFields: Object.assign(formFields, {[name]: value })});
         this.setState({ formErrors });
         // this.setState({ formErrors }, () => console.log(this.state));
@@ -73,7 +74,7 @@ class SignUp extends Component {
 
         const {formFields, formErrors} = this.state;
 
-        this.setState({ submitAttempted: true, signUpInvalidMessage: '' });
+        this.setState({ submitAttempted: true, invalidMessageLocal: '' });
 
         // Validate the fields and update state if errors are different
         Object.keys(formFields).forEach(key => {
@@ -84,8 +85,7 @@ class SignUp extends Component {
 
         if (this.formValid()) {
 
-            // Do something with the details
-            this.props.dispatch(userSignup({ emailAddress: formFields.userEmailAddress, password: formFields.userPassword }));
+            this.props.userSignup(formFields.userEmailAddress, formFields.userPassword);
 
             // console.log(`
             //     -- SUBMITTING --
@@ -108,17 +108,18 @@ class SignUp extends Component {
     }
 
     componentWillReceiveProps(nextProps, prevState) {
-        if (nextProps.user.authenticated && !this.props.user.authenticated) {
+        debugger;
+        if (nextProps.authenticated && !this.props.authenticated) {
             // Re-route to the Settings page
             this.props.history.push(REDIRECT_TO_SETTINGS);
-        } else if (this.state.submitAttempted && nextProps.user.signUpInvalidMessage) {
-            this.setState({ signUpInvalidMessage: nextProps.user.signUpInvalidMessage });
+        } else if (this.state.submitAttempted && nextProps.invalidMessage) {
+            this.setState({ invalidMessageLocal: nextProps.invalidMessage });
         }
     }
 
     render() {
 
-        const { formFields: { userEmailAddress, userPassword, userConfirmPassword }, formErrors, submitAttempted, signUpInvalidMessage } = this.state;
+        const { formFields: { userEmailAddress, userPassword, userConfirmPassword }, formErrors, submitAttempted, invalidMessageLocal } = this.state;
 
         return (
             <div className="outer-container-authentication">
@@ -207,9 +208,9 @@ class SignUp extends Component {
                                     </div>
                                 }
 
-                                { signUpInvalidMessage &&
+                                { invalidMessageLocal &&
                                     <div className="invalid-form-message">
-                                        <p>{signUpInvalidMessage}</p>
+                                        <p>{invalidMessageLocal}</p>
                                     </div>
                                 }
 
@@ -224,10 +225,24 @@ class SignUp extends Component {
 
 
 const mapStateToProps = (state) => {
-    return { 
-        user: state.default.user,
-        signUpInvalidMessage: state.default.user.signUpInvalidMessage,
+    const { authenticated, invalidMessage } = state.default.user;
+    debugger;
+    return {
+        authenticated,
+        invalidMessage,
     }
 }
 
-export default connect(mapStateToProps, null)(SignUp);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        userSignup: (emailAddress, password) => dispatch(userSignup({ emailAddress, password })),
+    }
+}
+
+SignUp.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    invalidMessage: PropTypes.string,
+    userSignup: PropTypes.func.isRequired,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(SignUp);

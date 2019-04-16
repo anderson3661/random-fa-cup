@@ -1,5 +1,5 @@
 import { COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES, COMPETITION_ROUNDS_HEADINGS, COMPETITION_ROUNDS_HEADINGS_ABBREVIATED, COMPETITION_ROUNDS_FOR_CSS,
-         PREMIER_LEAGUE, DIVISIONS, DIVISIONS_ABBREVIATIONS, IS_FIXTURES, IS_REPLAYS, FINAL, SEMI_FINALS } from '../constants';
+         PREMIER_LEAGUE, DIVISIONS, DIVISIONS_HEADINGS, DIVISIONS_ABBREVIATIONS, IS_FIXTURES, IS_REPLAYS, FINAL, SEMI_FINALS } from '../constants';
 
 
 export const goToTopOfPage = () => {
@@ -56,7 +56,7 @@ export const getFixturesArray = (fixturesArray, competitionRoundIndex, isReplays
 }
 
 export const sortFixturesByHomeTeam = (fixtures) => {
-    fixtures.sort((a, b) => a.homeTeam > b.homeTeam ? 1 : -1);
+    return fixtures.sort((a, b) => a.homeTeam > b.homeTeam ? 1 : -1);
 }
 
 export const haveAllFixturesInSetFinished = (fixturesArray) => {
@@ -80,6 +80,26 @@ export const getWinningTeamsDivisionFromFixture = (fixture) => {
 
 export const getWinningTeamInFinal = (fixtures) => {
     return fixtures.length === 0 ? '' : fixtures[0][getWinningTeamFromFixture(fixtures[0])];
+}
+
+export const filterFixturesByDivision = (fixtures, divisionHeading) => {
+    const division = DIVISIONS[DIVISIONS_HEADINGS.indexOf(divisionHeading)];
+    return division ? fixtures.filter(fixture => fixture.homeTeamDivision === division || fixture.awayTeamDivision === division) : fixtures;
+}
+
+export const filterFixturesByTeam = (fixtures, team) => {
+    return team ? fixtures.filter(fixture => fixture.homeTeam === team || fixture.awayTeam === team) : fixtures;
+}
+
+export const filterFixturesByMyWatchlistTeams = (fixtures, myWatchlistTeams) => {
+    let matchFound;
+    return fixtures.filter(fixture => {
+        matchFound = false;
+        myWatchlistTeams.forEach(myWatchlistTeam => {
+            if (!matchFound) matchFound = containsTeamName(fixture.homeTeam, myWatchlistTeam.teamName) || containsTeamName(fixture.awayTeam, myWatchlistTeam.teamName);
+        });
+        return matchFound;
+    });
 }
 
 export const getCompetitionRoundIndex = (competitionRound) => {
@@ -151,7 +171,7 @@ export const getDivisionAbbreviation = (division) => {
 }
 
 export const getDivisionAbbreviationForFixtureOrDrawRow = (division) => {
-        return division === 'premierLeague' ? null : DIVISIONS_ABBREVIATIONS[DIVISIONS.indexOf(division)];
+        return division === PREMIER_LEAGUE ? null : DIVISIONS_ABBREVIATIONS[DIVISIONS.indexOf(division)];
 }
 
 export const isCompetitionAtSemiFinalStage = (competitionRoundIndex) => {
@@ -290,6 +310,16 @@ const addToFixturesPlayedForTeam = (fixturesForCompetition, competitionRoundInde
     }
 }
 
+export const addToFixturesPlayedForDivision = (fixturesForCompetition, competitionRoundIndex, fixtureType, division, fixturesPlayed) => {
+    if (fixtureType && !fixturesForCompetition[competitionRoundIndex].replaysAllowed) return;       // If replays and replays are not allowed at this stage then return
+    const fixturesForCompetitionRound = getFixturesArray(fixturesForCompetition, competitionRoundIndex, fixtureType);
+    for (let j = 0; j < fixturesForCompetitionRound.length; j++) {
+        if (fixturesForCompetitionRound[j].homeTeamDivision === division || fixturesForCompetitionRound[j].awayTeamDivision === division) {
+                fixturesPlayed.push(fixturesForCompetitionRound[j]);
+        }
+    }
+}
+
 export const isACupUpset = (teamsForCompetition, fixture) => {
     const premierLeagueTeams = teamsForCompetition[0].premierLeague;
     const homeTeamDivisionIndex = DIVISIONS.indexOf(fixture.homeTeamDivision);
@@ -390,7 +420,6 @@ export const getTeamsRemainingInCompetitionByDivision = (teamsForCompetition, fi
     } else {
 
         if (competitionRoundIndex >= 0) {
-            debugger;
             const fixtures = getFixturesArray(fixturesForCompetition, competitionRoundIndex, IS_FIXTURES);
             for (i = 0; i < fixtures.length; i++) {
                 if (fixtures[i].hasFixtureFinished && !isResultADraw(fixtures[i])) {

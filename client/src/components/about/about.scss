@@ -3,7 +3,7 @@
 
 
 .outer-container-about {
-    min-height: 94vh;
+    min-height: $min-height-outer-container;
 
     .container-main-content-about {
         width: 80%;
@@ -26,7 +26,7 @@
                 .container-card {
                     margin-bottom: 3vh;
                     ul li a {
-                        color: blue;
+                        color: $color-link;
 
                         &:hover { text-decoration: underline }
                     }

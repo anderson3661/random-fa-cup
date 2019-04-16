@@ -3,39 +3,40 @@ const router = express.Router();
 
 const MODEL_NAME = 'settingsFactors';
 
-//SettingsFactors Model
 const SettingsFactors = require('../../models/SettingsFactors');
+const { getByUser, findOneAndUpdateByUser, postSave, deleteOneByUser } = require('./api-helpers');
 
 
 // ***************** GET *******************
-// @route GET api/settings-factors
-// @desc  Get all Settings Factors documents  (should only be 1 for each user)
-// @access Public
-router.get('/:userDocumentId', (req, res) => {
-    SettingsFactors.find({ userDocumentId: req.params.userDocumentId })
-        .then(results => res.json(results))
-});
+// GET api/settings-factors                          Get all Settings Factors documents  (should only be 1 for each user)
+router.get('/:userDocumentId', (req, res) => { getByUser(SettingsFactors, req, res); });
 
 
 // ***************** PUT *******************
-// @route PUT (or POST/PATCH) api/settings-factors/:id
-// @desc  Update the Settings Factors document
-// @access Public
-router.put('/:id', (req, res) => {
+// PUT (or POST/PATCH) api/settings-factors/:id      Update the Settings Factors document
+router.put('/:id', (req, res) => { findOneAndUpdateByUser(MODEL_NAME, SettingsFactors, req, res); });
 
-    SettingsFactors.findOneAndUpdate({ _id: req.params.id}, req.body)
-        .then(results => {
-            const response = res.json(results);
-            console.log(`${MODEL_NAME.toUpperCase()} - updated - response - statusCode: ${response.statusCode}, statusMessage: ${response.statusMessage}`);
-        })
-        .catch(err => console.error(err))
+
+// ***************** POST *******************
+// POST api/settings-factors                         Create an Settings Factors document
+router.post('/', (req, res) => {
+    const newSettingsFactors = new SettingsFactors({
+        userDocumentId: req.body.userDocumentId,
+        season: req.body.season,
+        competitionStartDate: req.body.competitionStartDate,
+        goalFactors: req.body.goalFactors
+    });
+    postSave(MODEL_NAME, newSettingsFactors, res);
 });
 
 
-// ***************** PUT (UNUSED) *******************
-// @route PUT (or POST/PATCH) api/settings-factors/:id
-// @desc  Update the Settings Factors document
-// @access Public
+// ************ DELETE BY USER **************
+// DELETE api/settings-factors/:id                    Delete an Settings Factor document
+router.delete('/:userDocumentId', (req, res) => { deleteOneByUser(SettingsFactors, req, res); });
+    
+
+// ************* PUT (UNUSED) **************
+// PUT (or POST/PATCH) api/settings-factors/:id      Update the Settings Factors document
 // router.put('/:id', (req, res) => {
     // console.log('Starting');
     // console.log(req.params.id);
@@ -56,38 +57,5 @@ router.put('/:id', (req, res) => {
         // .catch(err => console.error(err))
 // });
 
-
-// ***************** POST *******************
-// @route POST api/settings-factors
-// @desc  Create an Settings Factors document
-// @access Public
-router.post('/', (req, res) => {
-    const newSettingsFactors = new SettingsFactors({
-        userDocumentId: req.body.userDocumentId,
-        season: req.body.season,
-        competitionStartDate: req.body.competitionStartDate,
-        goalFactors: req.body.goalFactors
-    });
-
-    newSettingsFactors.save()
-        .then(results => {
-            const response = res.json(results);
-            console.log(`${MODEL_NAME.toUpperCase()} - inserted - response - statusCode: ${response.statusCode}, statusMessage: ${response.statusMessage}`);
-        })
-        .catch(err => console.error(err))
-});
-
-
-// ***************** DELETE BY USER *******************
-// @route DELETE api/settings-factors/:id
-// @desc  Delete an Settings Factor document
-// @access Public
-router.delete('/:userDocumentId', (req, res) => {
-    SettingsFactors.findOneAndDelete({ userDocumentId: req.params.userDocumentId })
-        // .then(settingsFactor => settingsFactor.remove().then(() => res.json({success: true})))        
-        .then(() => res.json({success: true}))
-        .catch(err => res.status(404).json({success: false}))
-});
-    
     
 module.exports = router;

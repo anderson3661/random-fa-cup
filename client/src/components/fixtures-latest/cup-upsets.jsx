@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 import FixtureRow from "../common/fixture-row";
 
@@ -29,5 +30,12 @@ const CupUpsets = ({ teamsForCompetition, fixtures, haveLatestFixturesStarted })
         </div>
     </div>
 )
+
+
+CupUpsets.propTypes = {
+    teamsForCompetition: PropTypes.array.isRequired,
+    fixtures: PropTypes.array.isRequired,
+    haveLatestFixturesStarted: PropTypes.bool.isRequired,
+}
 
 export default CupUpsets;

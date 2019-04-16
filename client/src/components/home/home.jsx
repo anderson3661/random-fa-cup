@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 import CompetitionFinishedOrWrongStage from '../common/competition-finished-or-wrong-stage';
 import CompetitionRound from './competition-round';
@@ -14,7 +15,7 @@ import './home.scss';
 const Home = (props) => {
 
     const { authenticated, fixturesForCompetition, hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw,
-            haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays, teamsRemainingInCompetitionByDivision } = props;
+            haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays, teamsRemainingInCompetitionByDivision, settingsFactors } = props;
 
     return (
 
@@ -35,7 +36,7 @@ const Home = (props) => {
                 />
             }
 
-            {COMPETITION_ROUNDS.map((competitionRound, competitionRoundOfFootballIndex) => {
+            {COMPETITION_ROUNDS.map((competitionRound, competitionRoundOfLinkIndex) => {
 
                 let displayPlayReplaysLabel = false, displayPlayFixturesLabel = false, displayPlay = false, displayFixturesAndResultsLabel = false, displayResultsLabel = false, displayFixturesLabel = false, displayFixturesOrResults = false;
 
@@ -47,22 +48,22 @@ const Home = (props) => {
                 const competitionRoundForNextDrawIndex = helpers.getCompetitionRoundIndex(competitionRoundForNextDraw);
                 const competitionRoundForPlayIndex = helpers.getCompetitionRoundIndex(competitionRoundForPlay);
 
-                const displayDrawLabel = (!hasCompetitionFinished && isCompetitionExpectingDraw && competitionRoundOfFootballIndex === competitionRoundForNextDrawIndex);
+                const displayDrawLabel = (!hasCompetitionFinished && isCompetitionExpectingDraw && competitionRoundOfLinkIndex === competitionRoundForNextDrawIndex);
 
                 if (!displayDrawLabel) {
                     
                     if (!isCompetitionExpectingDraw) {
                         // Display 'Play Rx Fixtures' or 'Play Rx Replays'
-                        displayPlayFixturesLabel = isCompetitionExpectingToPlayFixtures && (competitionRoundOfFootballIndex === competitionRoundForPlayIndex);
-                        displayPlayReplaysLabel = isCompetitionExpectingToPlayReplays && (competitionRoundOfFootballIndex === competitionRoundForPlayIndex);
+                        displayPlayFixturesLabel = isCompetitionExpectingToPlayFixtures && (competitionRoundOfLinkIndex === competitionRoundForPlayIndex);
+                        displayPlayReplaysLabel = isCompetitionExpectingToPlayReplays && (competitionRoundOfLinkIndex === competitionRoundForPlayIndex);
                         displayPlay = displayPlayReplaysLabel || displayPlayFixturesLabel;
                     }
                     
                     if (!displayPlay) {
                         // Display 'Fixtures & Results' or 'Fixtures' or 'Results'
-                        displayFixturesAndResultsLabel = isCompetitionExpectingToShowReplays && (competitionRoundOfFootballIndex === competitionRoundForPlayIndex);
-                        displayResultsLabel = hasCompetitionFinished || (!displayFixturesAndResultsLabel && competitionRoundOfFootballIndex < competitionRoundForPlayIndex);
-                        displayFixturesLabel = (!displayFixturesAndResultsLabel && !displayResultsLabel && competitionRoundOfFootballIndex < competitionRoundForNextDrawIndex);
+                        displayFixturesAndResultsLabel = isCompetitionExpectingToShowReplays && (competitionRoundOfLinkIndex === competitionRoundForPlayIndex);
+                        displayResultsLabel = hasCompetitionFinished || (!displayFixturesAndResultsLabel && competitionRoundOfLinkIndex < competitionRoundForPlayIndex);
+                        displayFixturesLabel = (!displayFixturesAndResultsLabel && !displayResultsLabel && competitionRoundOfLinkIndex < competitionRoundForNextDrawIndex);
                         displayFixturesOrResults = displayFixturesAndResultsLabel || displayResultsLabel || displayFixturesLabel;
                     }
                 }
@@ -70,15 +71,15 @@ const Home = (props) => {
                 const isCompetitionRoundActive = displayDrawLabel || displayPlay || displayFixturesOrResults;
                 const linkTo = displayDrawLabel ? '/draw' : (displayPlay ? '/fixtures-latest' : (displayFixturesOrResults ? `/fixtures-and-results/${competitionRound}` : ""));
                 
-                if (competitionRoundOfFootballIndex === 5) {
+                if (competitionRoundOfLinkIndex === 5) {
                     debugger;
                 }
 
                 return(
                     <CompetitionRound
-                        key={competitionRoundOfFootballIndex}
+                        key={competitionRoundOfLinkIndex}
                         linkTo={linkTo}
-                        competitionRoundOfFootball={competitionRound}
+                        competitionRoundOfLink={competitionRound}
                         isCompetitionRoundActive={isCompetitionRoundActive}
                         displayDrawLabel={displayDrawLabel}
                         displayPlayReplaysLabel={displayPlayReplaysLabel}
@@ -95,11 +96,11 @@ const Home = (props) => {
 
             {hasCompetitionFinished &&
                 <div className="container-card display-winners">
-                    <p className="heading">{`${props.settingsFactors[SEASON]} Winners`}</p>
+                    <p className="heading">{`${settingsFactors[SEASON]} Winners`}</p>
                     <p className="winners">{helpers.getWinningTeamInFinal(fixturesForCompetition[fixturesForCompetition.length - 1].finalFixtures)}</p>
                 </div>
             }
-            
+
         </div>
     );
 }
@@ -112,17 +113,28 @@ const mapStateToProps = (state) => {
 
     return {
         authenticated,
-        teamsForCompetition: teamsForCompetition,
-        fixturesForCompetition: fixturesForCompetition,
-        settingsFactors: settingsFactors,
-        hasCompetitionFinished,
-        competitionRoundForNextDraw,
-        competitionRoundForPlay,
-        okToProceedWithDraw,
-        haveFixturesForCompetitionRoundBeenPlayed,
-        haveFixturesProducedReplays,
+        hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw, haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays,
+        teamsForCompetition, fixturesForCompetition, settingsFactors,
         teamsRemainingInCompetitionByDivision: helpers.getTeamsRemainingInCompetitionByDivision(teamsForCompetition, fixturesForCompetition, helpers.getPreviousCompetitionRound(competitionRoundForNextDraw)),
     }
+}
+
+Home.defaultProps = {
+    haveFixturesProducedReplays: false,
+}
+
+Home.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    hasCompetitionFinished: PropTypes.bool.isRequired,
+    competitionRoundForNextDraw: PropTypes.string.isRequired,
+    competitionRoundForPlay: PropTypes.string.isRequired,
+    okToProceedWithDraw: PropTypes.bool.isRequired,
+    haveFixturesForCompetitionRoundBeenPlayed: PropTypes.bool.isRequired,
+    haveFixturesProducedReplays: PropTypes.bool.isRequired,
+    teamsForCompetition: PropTypes.array.isRequired,
+    fixturesForCompetition: PropTypes.array.isRequired,
+    settingsFactors: PropTypes.object.isRequired,
+    teamsRemainingInCompetitionByDivision: PropTypes.array.isRequired,
 }
 
 export default connect(mapStateToProps, null)(Home);

@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { NavLink } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+// import FormControlLabel from '@material-ui/core/FormControlLabel';
+// import Checkbox from '@material-ui/core/Checkbox';
 
 import { userLogin } from '../../redux/actions/userActions';
 
@@ -32,7 +33,7 @@ class Login extends Component {
             },
             submitAttempted: false,
             rememberMe: false,
-            loginInvalidMessage: '',
+            invalidMessageLocal: '',
         }
 
     }
@@ -43,7 +44,7 @@ class Login extends Component {
 
         this.getValidationErrors(e.target);
 
-        this.setState({ loginInvalidMessage: '' });
+        this.setState({ invalidMessageLocal: '' });
         this.setState({ formFields: Object.assign(formFields, {[name]: value })});
         this.setState({ formErrors });
         // this.setState({ formErrors }, () => console.log(this.state));
@@ -70,7 +71,7 @@ class Login extends Component {
 
         const {formFields, formErrors} = this.state;
 
-        this.setState({ submitAttempted: true, loginInvalidMessage: '' });
+        this.setState({ submitAttempted: true, invalidMessageLocal: '' });
 
         // Validate the fields and update state if errors are different
         Object.keys(formFields).forEach(key => {
@@ -81,8 +82,7 @@ class Login extends Component {
 
         if (this.formValid()) {
 
-            // Do something with the details
-            this.props.dispatch(userLogin({ emailAddress: formFields.userEmailAddress, password: formFields.userPassword }));
+            this.props.userLogin(formFields.userEmailAddress, formFields.userPassword);
 
             // console.log(`
             //     -- SUBMITTING --
@@ -95,6 +95,8 @@ class Login extends Component {
         }
     }
 
+
+
     formValid = () => {
         let isValid = true;
         const {formFields, formErrors} = this.state;            
@@ -104,17 +106,17 @@ class Login extends Component {
     }
 
     componentWillReceiveProps(nextProps, prevState) {
-        if ((nextProps.user.authenticated && !this.props.user.authenticated) || (TESTING_MODE && nextProps.user.authenticated && this.props.user.authenticated)) {
+        if ((nextProps.authenticated && !this.props.authenticated) || (TESTING_MODE && nextProps.authenticated && this.props.authenticated)) {
             // Re-route to the Home page
             this.props.history.push(REDIRECT_TO_HOME);
-        } else if (this.state.submitAttempted && nextProps.user.loginInvalidMessage) {
-            this.setState({ loginInvalidMessage: nextProps.user.loginInvalidMessage });
+        } else if (this.state.submitAttempted && nextProps.invalidMessage) {
+            this.setState({ invalidMessageLocal: nextProps.invalidMessage });
         }
     }
 
     render() {
 
-        const {formFields: {userEmailAddress, userPassword}, formErrors, submitAttempted, loginInvalidMessage } = this.state;
+        const {formFields: {userEmailAddress, userPassword}, formErrors, submitAttempted, invalidMessageLocal } = this.state;
 
         return (
             <div className="outer-container-authentication">
@@ -188,13 +190,13 @@ class Login extends Component {
                                     </div>
                                 }
 
-                                { loginInvalidMessage &&
+                                { invalidMessageLocal &&
                                     <div className="invalid-form-message">
-                                        <p>{loginInvalidMessage}</p>
+                                        <p>{invalidMessageLocal}</p>
                                     </div>
                                 }
 
-                                {/* <div className="forgotten-password"><NavLink to={'/password-reset'}>Forgotten your password?</NavLink></div> */}
+                                <div className="forgotten-password"><NavLink to={'/password-reset'}>Forgotten your password?</NavLink></div>
                                 
                             </div>
                         </div>
@@ -206,10 +208,23 @@ class Login extends Component {
 };
 
 const mapStateToProps = (state) => {
-    return { 
-        user: state.default.user,
-        loginInvalidMessage: state.default.user.loginInvalidMessage,
+    const { authenticated, invalidMessage } = state.default.user;
+    return {
+        authenticated,
+        invalidMessage,
     }
 }
 
-export default connect(mapStateToProps, null)(Login);
+const mapDispatchToProps = (dispatch) => {
+    return {
+        userLogin: (emailAddress, password) => dispatch(userLogin({ emailAddress, password })),
+    }
+}
+
+Login.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    invalidMessage: PropTypes.string,
+    userLogin: PropTypes.func.isRequired,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);

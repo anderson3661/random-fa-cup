@@ -7,10 +7,11 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = theme => ({
     progress: {
-        position: 'absolute',
+        position: 'fixed',
         top: 'calc(50% - 125px)',
         left: 'calc(50% - 125px)',
-        // color: 'white',
+        zIndex: 1,
+        /* color: 'white', */
         margin: theme.spacing.unit * 2,
     },
 });
@@ -18,7 +19,7 @@ const styles = theme => ({
 function CircularIndeterminate(props) {
     const { classes } = props;
     return (
-        <div>
+        <div className="loadingIndicator">
             <CircularProgress className={classes.progress} size={250} />
             {/* {/* <CircularProgress className={classes.progress} size={50} /> */}
             {/* <CircularProgress className={classes.progress} color="secondary" /> */}
@@ -26,6 +27,7 @@ function CircularIndeterminate(props) {
         </div>
     );
 }
+
 
 CircularIndeterminate.propTypes = {
     classes: PropTypes.object.isRequired,

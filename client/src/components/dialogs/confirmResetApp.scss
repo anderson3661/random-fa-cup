@@ -13,7 +13,8 @@
 .dialog-buttons {
     @include flex($justify-content: null, $align-items: null);
     flex-direction: column;
-    margin-bottom: 2vh;
+    width: 75%;
+    margin: 0 auto 2vh auto;
 
     > button {
         margin: 1vh 2vw;

@@ -4,6 +4,7 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
+import PropTypes from 'prop-types';
 
 import { FOOTBALL_IMAGE, INCLUDE_FIREBASE_OPTION } from '../../utilities/constants';
 
@@ -72,5 +73,12 @@ class SettingsHeader extends Component {
     }
 }
 
+
+SettingsHeader.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    haveChangesBeenMade: PropTypes.bool.isRequired,
+    onSaveChanges: PropTypes.func.isRequired,
+    onResetApp: PropTypes.func.isRequired,
+}
 
 export default SettingsHeader;

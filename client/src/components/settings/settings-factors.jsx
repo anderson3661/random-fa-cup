@@ -1,10 +1,11 @@
 import React, { Component, Fragment } from "react";
+import PropTypes from 'prop-types';
 
 import { SEASON, FIXTURE_UPDATE_INTERVAL, BASE_FOR_RANDOM_MULTIPLIER, AWAY_TEAM_FACTOR, IS_NOT_A_TOP_TEAM_FACTOR, DIVISION_FACTOR, GOALS_PER_MINUTE_FACTOR, IS_IT_A_GOAL_FACTOR, IS_IT_A_GOAL_PENALTY_FACTOR } from '../../utilities/constants';
 
 import SettingsFieldInput from './settings-field-input';
 import * as helpers from '../../utilities/helper-functions/helpers';
-import { haveSettingsFactorsValuesChanged, haveValidationErrorValuesChanged } from './settings-helpers';
+import { haveSettingsFactorsValuesChanged, haveSettingsFactorsValidationErrorValuesChanged } from './settings-helpers';
 
 
 class SettingsFactors extends Component {
@@ -17,7 +18,7 @@ class SettingsFactors extends Component {
         return helpers.hasObjectValueChanged(this.props, nextProps, 'hasCompetitionStarted') ||
                helpers.hasObjectValueChanged(this.props, nextProps, 'hasCompetitionFinished') ||
                haveSettingsFactorsValuesChanged(this.props.settingsFactors, nextProps.settingsFactors) ||
-               haveValidationErrorValuesChanged(this.props.settingsFactorsValidationErrors, nextProps.settingsFactorsValidationErrors);
+               haveSettingsFactorsValidationErrorValuesChanged(this.props.settingsFactorsValidationErrors, nextProps.settingsFactorsValidationErrors);
     }
 
     render() {
@@ -169,5 +170,13 @@ class SettingsFactors extends Component {
     }
 }
 
+
+SettingsFactors.propTypes = {
+    hasCompetitionStarted: PropTypes.bool.isRequired,
+    hasCompetitionFinished: PropTypes.bool.isRequired,
+    settingsFactors: PropTypes.object.isRequired,
+    settingsFactorsValidationErrors: PropTypes.object.isRequired,
+    onChangeSettingsFactorsFields: PropTypes.func.isRequired,
+}
 
 export default SettingsFactors;

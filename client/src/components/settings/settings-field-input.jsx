@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import _ from 'lodash';
 
 import FieldInput from './settings-crud-field-input';
@@ -43,19 +44,41 @@ class SettingsFieldInput extends Component {
     render() {
         if (TESTING_MODE) console.log('render settings-field-input');
 
+        const { inputFieldValue } = this.state;
+        const { name, disabled, label, fullWidth, multiline, blockType } = this.props;
+
         return(
             <FieldInput
-                name={this.props.name}
-                label={this.props.label}
-                value={this.state.inputFieldValue}
-                disabled={this.props.disabled}
-                fullWidth={this.props.fullWidth}
-                multiline={this.props.multiline}
-                blockType={this.props.blockType}
+                name={name}
+                label={label}
+                value={inputFieldValue}
+                disabled={disabled}
+                fullWidth={fullWidth}
+                multiline={multiline}
+                blockType={blockType}
                 updateField={this.handleChangeInputFieldValue}
             />
         )
     }
+}
+
+
+SettingsFieldInput.defaultProps = {
+    disabled: false,
+    fullWidth: false,
+    multiline: false,
+    blockType: false,
+}
+
+SettingsFieldInput.propTypes = {
+    name: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    disabled: PropTypes.bool.isRequired,
+    label: PropTypes.string.isRequired,
+    fullWidth: PropTypes.bool.isRequired,
+    multiline: PropTypes.bool.isRequired,
+    blockType: PropTypes.bool.isRequired,
+    onChangeInputFieldValue: PropTypes.func.isRequired,
 }
 
 export default SettingsFieldInput;

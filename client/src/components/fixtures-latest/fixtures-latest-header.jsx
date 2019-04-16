@@ -1,4 +1,5 @@
 import React, { Fragment, Component } from "react";
+import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -87,6 +88,24 @@ class FixturesLatestHeader extends Component {
             
         )
     }
+}
+
+
+FixturesLatestHeader.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    hasCompetitionStarted: PropTypes.bool.isRequired,
+    hasCompetitionFinished: PropTypes.bool.isRequired,
+    competitionRound: PropTypes.string.isRequired,
+    displayHeader: PropTypes.string.isRequired,
+    startFixturesButtonText: PropTypes.string.isRequired,
+    startFixturesButtonEnabled: PropTypes.bool.isRequired,
+    fixtureUpdateInterval: PropTypes.number.isRequired,
+    areFixturesInPlay: PropTypes.bool.isRequired,
+    haveFixturesBeenPaused: PropTypes.bool.isRequired,
+    showGoalUpdates: PropTypes.bool.isRequired,
+    onClickStartSetOfFixtures: PropTypes.func.isRequired,
+    onChangeFixtureUpdateInterval: PropTypes.func.isRequired,
+    onChangeShowGoalUpdates: PropTypes.func.isRequired,
 }
 
 export default FixturesLatestHeader;

@@ -3,7 +3,6 @@
 
 
 nav {
-
     position: fixed;
     top: 0;
     height: 8vh;
@@ -13,7 +12,7 @@ nav {
     @include flex($justify-content: null, $align-items: null);
 
     &.displayNavBackground {
-        background-color: rgba(0, 0, 0, 0.9);
+        background-color: $background-color-nav-header;
 
         animation-name: fade-in;
         animation-duration: 0;
@@ -29,11 +28,11 @@ nav {
         flex-basis: 12%;
         max-width: 200px;
         margin-right: 5vw;
-        background-color: rgba(255, 255, 255, 0.3);
+        background-color: $background-color-nav-app-header;
         @include flex($justify-content: null);
 
         &.displayNavBackground {
-            background-color: rgba(0, 0, 0, 0.9);
+            background-color: $background-color-nav-header-on-scroll;
         }
 
         img {
@@ -48,8 +47,8 @@ nav {
             margin-right: 2vw;
 
             span {
-                color: white;
-                font-size: 130%;
+                color: $color-nav-app-header;
+                font-size: $font-size-nav-app-header;
                 font-weight: 700;
             }
         }
@@ -67,14 +66,14 @@ nav {
             width: 8vh;
             margin-right: 1vw;
     
-            &.active-link .football {span { color: blue; } }
+            // &.active-link .nav-link-inner {span { color: $color-nav-header-main-links; } }
 
-            .football {
+            .nav-link-inner {
                 height: 100%;
                 width: 100%;
                 min-height: 64px;
                 min-width: 64px;
-                background-image: url('../../assets/images/white-football-small.png');
+                background-image: $background-image-nav-header-main-links;
                 background-size: contain;
                 background-repeat: no-repeat;
                 background-position: center;
@@ -83,8 +82,10 @@ nav {
                 text-align: center;         // Needed for when label goes over 2 lines (e.g. Fixtures/Results)
         
                 span {
-                    color: blue;
+                    font-size: $font-size-nav-header-main-links;
+                    color: $color-nav-header-main-links;
                     font-weight: 700;
+                    line-height: 1.1;
                 }
 
                 &:hover { transform: scale(1.1); }
@@ -101,7 +102,7 @@ nav {
             li {
                 display: inline-flex;
                 justify-content: center;
-                background-color: #3F51B5;
+                background-color: $background-color-nav-header-authentication-buttons;
                 padding: 0.75vh 1vw;
                 margin: 0 0.5vw;
                 border-radius: 5%;
@@ -109,13 +110,11 @@ nav {
                 width: 100%;
                 
                 &:hover {
-                    background-color: #303F9F;
+                    background-color: $background-color-nav-header-authentication-buttons-hover;
                 }
                 
                 a {
-                    color: white;
-                    font-size: 110%;
-                    letter-spacing: 0.5px;
+                    letter-spacing: $letter-spacing-nav-header-authentication-buttons;
                     font-weight: 700;
                 }
             }

@@ -1,8 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
-
 import Dialog from '@material-ui/core/Dialog';
-// import DialogTitle from '@material-ui/core/DialogTitle';
 
 import { FA_CUP_SMALL_IMAGE } from '../../utilities/constants';
 
@@ -19,7 +18,6 @@ class ConfirmationDialogWinners extends React.Component {
 
         return (
         <Dialog className="dialog-winners" onClose={this.handleClose} aria-labelledby="simple-dialog-title" {...other}>
-            {/* <DialogTitle class="dialog-title">Save</DialogTitle> */}
             <img className="confetti" src={require('../../assets/images/confetti.png')} alt="" />
 
             <header>
@@ -43,5 +41,12 @@ class ConfirmationDialogWinners extends React.Component {
         );
     }
 }
-      
-  export default ConfirmationDialogWinners;
+
+
+ConfirmationDialogWinners.propTypes = {
+    season: PropTypes.string.isRequired,
+    winners: PropTypes.string.isRequired,
+    onClose: PropTypes.func.isRequired,
+}
+
+export default ConfirmationDialogWinners;

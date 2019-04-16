@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
 import Dialog from '@material-ui/core/Dialog';
 
@@ -29,6 +30,12 @@ class ConfirmationResetApp extends React.Component {
             </Dialog>
         );
     }
-  }
-      
-  export default ConfirmationResetApp;
+}
+  
+  
+ConfirmationResetApp.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    message: PropTypes.string.isRequired,
+}
+
+export default ConfirmationResetApp;

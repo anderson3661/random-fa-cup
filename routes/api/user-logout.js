@@ -2,12 +2,11 @@ const express = require('express');
 const router = express.Router();
 
 //User Model
-const User = require('../../models/User');
 const UserSession = require('../../models/UserSession');
 
 
 // ***************** POST *******************
-// @route POST api/user/logout
+// @route POST api/user/logout?token=xxxxxxxxxxxxxxxxxxxxxxxx etc
 // @desc  User Logout
 
 router.post('/', (req, res, next) => {

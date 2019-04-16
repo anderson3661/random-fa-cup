@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 // import Typing from 'react-typing-animation';
 import './goal-updates.scss';
@@ -31,5 +32,10 @@ const GoalUpdates = ({ fixtureUpdates }) => (
     </div>
 
 )
+
+
+GoalUpdates.propTypes = {
+    fixtureUpdates: PropTypes.array.isRequired,
+}
 
 export default GoalUpdates;

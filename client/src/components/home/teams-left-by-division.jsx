@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 import * as helpers from '../../utilities/helper-functions/helpers';
 
@@ -31,3 +32,8 @@ const TeamsLeftByDivision = (props) => {
 }
 
 export default TeamsLeftByDivision;
+
+
+TeamsLeftByDivision.propTypes = {
+    teamsRemainingInCompetitionByDivision: PropTypes.array.isRequired,
+}

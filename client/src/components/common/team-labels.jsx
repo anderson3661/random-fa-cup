@@ -1,8 +1,9 @@
 import React, { Fragment } from "react";
+import PropTypes from 'prop-types';
 
 import * as helpers from '../../utilities/helper-functions/helpers';
 
-const DrawTeamLabels = (props) => {
+const TeamLabels = (props) => {
     let slash;
     let slashIndex;
     let teamsSlashIndex;
@@ -12,9 +13,8 @@ const DrawTeamLabels = (props) => {
     let divisionLast;
     let divisionAbbreviation;
     
-    const { mainDraw, latestTeamToBeDrawnNumber, positionAfter } = props;
+    const { mainDraw, latestTeamToBeDrawn, latestTeamToBeDrawnNumber, positionAfter } = props;
     const { division, teamName } = props.team;
-    const latestTeamToBeDrawn = props.latestTeamToBeDrawn;
 
     if (teamName) {
         slash = "/";
@@ -56,7 +56,7 @@ const DrawTeamLabels = (props) => {
                         <Fragment>
                             {mainDraw && teamName !== undefined && latestTeamToBeDrawn === teamName &&
                                 <div className="teamNumberBlank">
-                                    <span className="teamNumberInDraw">{latestTeamToBeDrawnNumber ? latestTeamToBeDrawnNumber + 1 : ''}</span>
+                                    <span className="teamNumberInDraw">{latestTeamToBeDrawnNumber ? latestTeamToBeDrawnNumber : ''}</span>
                                 </div>
                             }
                             <span className={division}>{teamName}</span>&nbsp;<span className="division">{divisionAbbreviation}</span>
@@ -65,7 +65,7 @@ const DrawTeamLabels = (props) => {
                         <Fragment>
                             {mainDraw && teamName !== undefined && latestTeamToBeDrawn === teamName &&
                                 <div className="teamNumberBlank">
-                                    <span className="teamNumberInDraw">{latestTeamToBeDrawnNumber ? latestTeamToBeDrawnNumber + 1 : ''}</span>
+                                    <span className="teamNumberInDraw">{latestTeamToBeDrawnNumber ? latestTeamToBeDrawnNumber : ''}</span>
                                 </div>
                             }
                             <span className="division">{divisionAbbreviation}</span>&nbsp;<span className={division}>{teamName}</span>
@@ -77,4 +77,17 @@ const DrawTeamLabels = (props) => {
     );
 }
 
-export default DrawTeamLabels;
+
+TeamLabels.defaultProps = {
+    mainDraw: false,
+}
+
+TeamLabels.propTypes = {
+    mainDraw: PropTypes.bool.isRequired,
+    latestTeamToBeDrawn: PropTypes.string,                      // Not required as will be blank before the draw is made
+    latestTeamToBeDrawnNumber: PropTypes.number,                // Not required as will be blank before the draw is made
+    positionAfter: PropTypes.bool.isRequired,
+    team: PropTypes.object.isRequired,
+}
+
+export default TeamLabels;

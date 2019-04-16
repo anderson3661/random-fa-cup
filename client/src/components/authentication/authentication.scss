@@ -3,72 +3,71 @@
 
 
 .outer-container-authentication {
-    min-height: 94vh;
+    min-height: $min-height-outer-container;
 
     .container-main-content-authentication {
         width: 70%;
         margin: 22vh auto 9vh auto;
         @include flex($justify-content: null, $align-items: null);                           // Flex needs to be here, otherwise the Login table shows with no white/gray background
 
-        &.password-reset { margin-top: 25vh }
+        &.reset-password, &.change-password { margin-top: 25vh }
 
         //The main container-card css is in App.scss
         .container-card {
             width: 100%;
-            padding: 1vh 2vw 11vh 2vw;
+            padding: 1vh 2vw 3vh 2vw;
 
             .help-text { text-align: center; }
 
-            .login {
-                @include flex($align-items: null); 
-                align-content: flex-start;
-        
-                .main-form {
-                    width: 65%;
-                    max-height: 40vh;
-                    
-                    .forgotten-password {
-                        text-align: center;
-                        margin-top: 3vh;
-                        font-family: $font-family-main;
-                        a:link, a:visited { color: blue; }
-                    }
+            .login-form {
+                @include flex($align-items: null);
+                flex-direction: column;
+                width: 65%;
+                margin: 1vh auto 0 auto;
 
-                    .login-form {
-                        width: 100%;
-                        margin: 2vh auto;
+                .login-form-full-width {
+                    width: 100%;
+                    padding: 2vh 0 0.5vh 0;
+                }
 
-                        .login-form-full-width {
-                            width: 100%;
-                            padding: 2vh 0 0.5vh 0;
+                .errorMessage {
+                    color: $color-authentication-errors;
+                    margin: 0;
+                    padding: 0;
+                }
+
+                .submit {
+                    text-align: center;
+                    margin: 3vh 0;
+                    @include flex();
+
+                    div {
+                        @include flex($justify-content: null, $align-items: flex-start);
+                        flex-direction: column;
+                        margin-left: 25px;
+
+                        > div {
+                            margin: 0 0 5px 0;
                         }
-
-                        .rememberMe {
-                            color: gray;
-                        }
-
-                        .errorMessage {
-                            color: red;
-                            margin: 0;
-                            padding: 0;
-                        }
-                    }
-
-                    .submit-button {
-                        text-align: center;
-                        margin: 1vh 0;
-                    }
-
-                    .invalid-form-message p {
-                        color: $color-contact-form-invalid-message;
                     }
                 }
-            }
-        }
 
-        mat-form-field {
-            padding: 0;
-            margin: 0;
+                .reset-password, .change-password {
+                    text-align: center;
+                    margin-top: 3vh;
+                    font-family: $font-family-main;
+                    a:link, a:visited { color: $color-authentication-forgotten-password-links; }
+                }
+
+                .invalid-form-message p {
+                    color: $color-contact-form-invalid-message;
+                }
+
+                .rememberMe {
+                    color: $color-authentication-remember-me;
+                }
+
+            }
         }
     }
 }
@@ -76,14 +75,7 @@
 
 @media screen and (max-width: 1280px) {
     .container-main-content-authentication {
-        mat-form-field {
-            font-size: 0.8em;
-            line-height: 0.8em;
-        }
-        
         .header h1, p { margin: 1vh 0 0 0; }
-        
-        .submit-button { margin: 0; }
     }
 }
 

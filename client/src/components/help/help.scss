@@ -3,10 +3,9 @@
 
 
 .outer-container-help {
-    min-height: 94vh;
+    min-height: $min-height-outer-container;
 
     .container-main-content-help {
-        // min-height: 70vh;
         width: 75%;
         margin: 17vh auto 5vh auto;
         @include flex($justify-content: null, $align-items: null);                           // Flex needs to be here, otherwise the table shows with no white/gray background
@@ -34,7 +33,6 @@
                         display: block;
                         margin: 0;
                         padding: 1vh 1vw;
-                        // font-size: 1.2vw;
                         background-color: $background-color-accordian-title;
                         color: $color-accordian-title;
                         border: $border-accordian-title;
@@ -59,12 +57,13 @@
                     .accordion__content {
                         display: block;
                         padding: 0;
-                        height: 0;
+                        // height: 0;
+                        // height: 20vh;
+                        margin-bottom: 2vh;
                         overflow: hidden;
                         transition: height 0.5s ease, padding 0.3s linear;
 
                         p {
-                            // font-size: 1.0vw;
                             text-align: left;
                             padding: 2vh 2vw 0 2vw;
                             margin: 0;
@@ -74,8 +73,12 @@
                             }
                         }
 
-                        &:target {
-                            height: 20vh;
+                        // &:target {
+                            // height: 20vh;
+                        // }
+
+                        &.hidden {
+                            display: none;
                         }
                     }
                 }

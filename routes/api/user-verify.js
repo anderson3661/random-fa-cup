@@ -5,8 +5,8 @@ const router = express.Router();
 const UserSession = require('../../models/UserSession');
 
 
-// ***************** POST *******************
-// @route POST api/user/verify
+// ***************** GET *******************
+// @route GET api/user/verify
 // @desc  Verify User Session
 
 router.get('/', (req, res, next) => {
@@ -32,7 +32,7 @@ router.get('/', (req, res, next) => {
             } else if (userSessions.length > 1) {
                 return res.send({ success: false, message: 'Error: Invalid ... there are more than one active user sessions' });
             } else {
-                return res.send({ success: true, message: 'User Session Valid' });
+                return res.send({ success: true, message: 'User Session Valid', userId: userSessions[0].userId });
             }
         }
     );

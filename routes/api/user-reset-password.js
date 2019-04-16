@@ -4,12 +4,11 @@ const router = express.Router();
 const User = require('../../models/User');
 const UserSession = require('../../models/UserSession');
 const { isValidUser, isValidReqBody } = require('./api-helpers');
-const IS_SIGNUP = true;
 
 
 // ***************** POST *******************
-// @route POST api/user/sign-up
-// @desc  User Sign-up
+// @route POST api/user/reset-password
+// @desc  User Reset Password
 
 router.post('/', (req, res, next) => {
     let { emailAddress } = req.body;
@@ -24,17 +23,16 @@ router.post('/', (req, res, next) => {
             emailAddress: emailAddress
         },
         (err, usersWithThisEmailAddress) => {
-            if (!isValidUser(res, err, usersWithThisEmailAddress, IS_SIGNUP)) return;
-                    
-            const newUser = new User();
-            newUser.emailAddress = emailAddress;
-            newUser.password = newUser.generateHash(password);
+            if (!isValidUser(res, err, usersWithThisEmailAddress)) return;
+           
+            const user = usersWithThisEmailAddress[0];
+            user.password = user.generateHash(password);
             
-            newUser.save((err, user) => {
+            user.save((err, userDoc) => {
                 if (err) return res.send({ success: false, message: 'Error: Server error' });
 
                 const userSession = new UserSession();
-                userSession.createUserSession(userSession, res, user, 'User Signed Up');
+                userSession.createUserSession(userSession, res, userDoc, 'User Password Reset');
             });
         }
     );

@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
+// import FormControlLabel from '@material-ui/core/FormControlLabel';
+// import Checkbox from '@material-ui/core/Checkbox';
 
-import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, USER_DEFAULT_REQUIRED, USER_EMAIL_ADDRESS_REQUIRED, USER_EMAIL_ADDRESS_INVALID, EMAIL_REGEX } from '../../utilities/constants';
+import { userResetPassword } from '../../redux/actions/userActions';
+
+import { MAIN_BACKGROUND_IMAGE, FOOTBALL_IMAGE, REDIRECT_TO_SETTINGS, USER_EMAIL_ADDRESS_INVALID, USER_PASSWORD_INVALID, USER_CONFIRM_PASSWORD_INVALID, EMAIL_REGEX, PASSWORD_REGEX} from '../../utilities/constants';
 
 import "./authentication.scss";
 
@@ -15,32 +21,51 @@ class PasswordReset extends Component {
 
         this.state = {
             formFields: {
-                userEmailAddress: ''
+                userEmailAddress: '',
+                userPassword: '',
+                userConfirmPassword: '',
             },
             formErrors: {
-                userEmailAddress: ''
+                userEmailAddress: '',
+                userPassword: '',
+                userConfirmPassword: '',
             },
             submitAttempted: false,
+            rememberMe: false,
+            invalidMessageLocal: '',
         }
 
-        console.log(this.state);
     }
 
     handleChange = e => {
-        const {name, value} = e.target;
-        const {formFields, formErrors} = this.state;
+        const { name, value } = e.target;
+        const { formFields, formErrors } = this.state;
+
+        this.getValidationErrors(e.target);
+
+        this.setState({ invalidMessageLocal: '' });
+        this.setState({ formFields: Object.assign(formFields, {[name]: value })});
+        this.setState({ formErrors });
+        // this.setState({ formErrors }, () => console.log(this.state));
+    }
+
+    getValidationErrors = ({ name, value }) => {
+        const { formFields, formErrors } = this.state;
 
         switch (name) {
             case "userEmailAddress":
-                formErrors.userEmailAddress = value.length < 1 ? USER_EMAIL_ADDRESS_REQUIRED : "";
-                formErrors.userEmailAddress = value.length > 0 && !EMAIL_REGEX.test(value) ? USER_EMAIL_ADDRESS_INVALID : formErrors.userEmailAddress
+                formErrors.userEmailAddress = !EMAIL_REGEX.test(value) ? USER_EMAIL_ADDRESS_INVALID : "";
+                break;
+            case "userPassword":
+                formErrors.userPassword = !PASSWORD_REGEX.test(value) ? USER_PASSWORD_INVALID : "";
+                formErrors.userConfirmPassword = (!formFields.userConfirmPassword || formFields.userConfirmPassword !== value) ? USER_CONFIRM_PASSWORD_INVALID : "";
+                break;
+            case "userConfirmPassword":
+                formErrors.userConfirmPassword = (!value || value !== formFields.userPassword) ? USER_CONFIRM_PASSWORD_INVALID : "";
                 break;
             default:
                 break;
         }
-
-        this.setState({ formFields: Object.assign(formFields, {[name]: value })});
-        this.setState({ formErrors }, () => console.log(this.state));
     }
 
     handleSubmit = (e) => {
@@ -49,53 +74,62 @@ class PasswordReset extends Component {
 
         const {formFields, formErrors} = this.state;
 
-        this.setState({ submitAttempted: true });
+        this.setState({ submitAttempted: true, invalidMessageLocal: '' });
 
+        // Validate the fields and update state if errors are different
         Object.keys(formFields).forEach(key => {
-            if (formFields[key].trim() === '') {
-                this.setState({ formErrors: Object.assign(formErrors, {[key]: USER_DEFAULT_REQUIRED})})
-            }
+            const previousValidationError = formErrors[key];
+            this.getValidationErrors({ name: key, value: formFields[key] });
+            if (previousValidationError !== formErrors[key]) this.setState({ formErrors: Object.assign(formErrors) });
         });
 
         if (this.formValid()) {
 
-            // Do something with the details
+            this.props.userResetPassword(formFields.userEmailAddress, formFields.userPassword);
 
-            // Clear the form
-            this.setState({ formFields: Object.assign(formFields, {userEmailAddress: ''})});
-            this.setState({ formErrors: Object.assign(formErrors, {userEmailAddress: ''})});
-            this.setState({ submitAttempted: false });
+            // console.log(`
+            //     -- SUBMITTING --
+            //     Email Address: ${formFields.userEmailAddress}
+            //     // Password: ${formFields.userPassword}
+            //     // Confirm Password: ${formFields.userConfirmPassword}
+            // `);
 
-            console.log(`
-                -- SUBMITTING --
-                Email Address: ${formFields.userEmailAddress}
-            `);
-        } else {
-            console.log("FORM INVALID");
+        // } else {
+        //     console.log("FORM INVALID");
         }
     }
 
     formValid = () => {
-            let isValid = true;
-            const {formFields, formErrors} = this.state;            
-            Object.values(formErrors).forEach(val => { val.length > 0 && (isValid = false) });          // Validate form errors being empty            
-            Object.values(formFields).forEach(val => { val.trim() === '' && (isValid = false) });       // Validate the form fields contained values
+        let isValid = true;
+        const {formFields, formErrors} = this.state;            
+        Object.values(formErrors).forEach(val => { val.length > 0 && (isValid = false) });          // Validate form errors being empty            
+        Object.values(formFields).forEach(val => { val.trim() === '' && (isValid = false) });       // Validate the form fields contained values
         return isValid;
+    }
+
+    componentWillReceiveProps(nextProps, prevState) {
+        debugger;
+        if (nextProps.authenticated && !this.props.authenticated) {
+            // Re-route to the Settings page
+            this.props.history.push(REDIRECT_TO_SETTINGS);
+        } else if (this.state.submitAttempted && nextProps.invalidMessage) {
+            this.setState({ invalidMessageLocal: nextProps.invalidMessage });
+        }
     }
 
     render() {
 
-        const {formFields: {userEmailAddress}, formErrors, submitAttempted} = this.state;
+        const { formFields: { userEmailAddress, userPassword, userConfirmPassword }, formErrors, submitAttempted, invalidMessageLocal } = this.state;
 
         return (
             <div className="outer-container-authentication">
-                <div className="container-main-content-authentication password-reset">
+                <div className="container-main-content-authentication">
                     <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
                     <div className="container-card">
                         <header>
                             <img src={FOOTBALL_IMAGE} alt="" />
-                            <h1>Password Reset</h1>
-                            <img src={FOOTBALL_IMAGE} alt="" />                        
+                            <h1>Reset Password</h1>
+                            <img src={FOOTBALL_IMAGE} alt="" />
                         </header>
 
                         <div className="login">
@@ -117,10 +151,54 @@ class PasswordReset extends Component {
                                     </div>
                                     {submitAttempted && formErrors.userEmailAddress.length > 0 ? <div className="errorMessage">{formErrors.userEmailAddress}</div> : <div>&nbsp;</div>}
 
+                                    <div className="login-form-full-width">
+                                        <TextField
+                                            type="password"
+                                            id="userPassword"
+                                            name="userPassword"
+                                            label="Your password"
+                                            className="form-control"
+                                            required={true}
+                                            fullWidth={true}
+                                            value={userPassword}
+                                            onChange={this.handleChange}
+                                        />        
+                                    </div>
+                                    {submitAttempted && formErrors.userPassword.length > 0 ? <div className="errorMessage">{formErrors.userPassword}</div> : <div>&nbsp;</div>}
+
+                                    <div className="login-form-full-width">
+                                        <TextField
+                                            type="password"
+                                            id="userConfirmPassword"
+                                            name="userConfirmPassword"
+                                            label="Confirm password"
+                                            className="form-control"
+                                            required={true}
+                                            fullWidth={true}
+                                            value={userConfirmPassword}
+                                            onChange={this.handleChange}
+                                        />        
+                                    </div>
+                                    {submitAttempted && formErrors.userConfirmPassword.length > 0 ? <div className="errorMessage">{formErrors.userConfirmPassword}</div> : <div>&nbsp;</div>}
+
+                                    {/* <div className="remember-me">
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    className="rememberMe"
+                                                    checked={this.state.rememberMe}
+                                                    onChange={(e) => this.setState({rememberMe: e.target.checked})}
+                                                    value={this.state.rememberMe.toString()}
+                                                />
+                                            }
+                                            label="Remember me"
+                                        />                        
+                                    </div> */}
+
                                 </form>
 
                                 <div className="submit-button">
-                                    <Button variant="contained" color="primary" id="submit" onClick={this.handleSubmit}>Reset</Button>
+                                    <Button variant="contained" color="primary" id="submit" onClick={this.handleSubmit}>Sign up</Button>
                                 </div>
 
 
@@ -129,7 +207,13 @@ class PasswordReset extends Component {
                                         <p>Invalid ... please check the details highlighted in red above</p>
                                     </div>
                                 }
-                                
+
+                                { invalidMessageLocal &&
+                                    <div className="invalid-form-message">
+                                        <p>{invalidMessageLocal}</p>
+                                    </div>
+                                }
+
                             </div>
                         </div>
                     </div>
@@ -139,4 +223,26 @@ class PasswordReset extends Component {
     };
 };
 
-export default PasswordReset;
+
+const mapStateToProps = (state) => {
+    const { authenticated, invalidMessage } = state.default.user;
+    debugger;
+    return {
+        authenticated,
+        invalidMessage,
+    }
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        userResetPassword: (emailAddress, password) => dispatch(userResetPassword({ emailAddress, password })),
+    }
+}
+
+PasswordReset.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    invalidMessage: PropTypes.string,
+    userResetPassword: PropTypes.func.isRequired,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PasswordReset);

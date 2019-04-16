@@ -1,9 +1,25 @@
-import { TEAMS_DEFAULT, FIXTURES_DEFAULT, COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES, API_ENDPOINT_USERS, API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_SETTINGS_FACTORS, API_ENDPOINT_TEAMS, API_ENDPOINT_MY_WATCHLIST_TEAMS, API_ENDPOINT_FIXTURES, API_ENDPOINTS_TO_DELETE_ALL_DATA, API_ENDPOINTS_TO_DELETE_KEEP_CURRENT_SETTINGS, HAVE_SEASONS_FIXTURES_BEEN_CREATED, DIVISIONS, NUMBER_OF_TEAMS } from './constants';
+import { APP_STORAGE_KEY, TEAMS_DEFAULT, FIXTURES_DEFAULT, COMPETITION_ROUNDS, COMPETITION_ROUNDS_FIXTURES, API_ENDPOINT_USERS, API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_SETTINGS_FACTORS, API_ENDPOINT_TEAMS, API_ENDPOINT_MY_WATCHLIST_TEAMS, API_ENDPOINT_FIXTURES, API_ENDPOINTS_TO_DELETE_ALL_DATA, API_ENDPOINTS_TO_DELETE_KEEP_CURRENT_SETTINGS, HAVE_SEASONS_FIXTURES_BEEN_CREATED, DIVISIONS, NUMBER_OF_TEAMS, API_ENDPOINT_USER_VERIFY } from './constants';
+import { getFromStorage, removeFromStorage } from './storage';
 
-// const APP_DATA_LOCAL_STORAGE = "football_AppInfo";
 
+export const userValidateAndReturnUserDocId = async () => {
+    try {
+        const userSessionToken = await getFromStorage(APP_STORAGE_KEY);
+        if (userSessionToken) {
+            const resultsFromUserSession = await fetchDataFromUserSessionDb(userSessionToken);
+            if (resultsFromUserSession && resultsFromUserSession.userId) {
+                return resultsFromUserSession.userId;
+            }
+        }
+        await removeFromStorage(APP_STORAGE_KEY);
+        return null;
+    } catch(error) {
+        await removeFromStorage(APP_STORAGE_KEY);
+        return null;
+    }
+}
 
-export async function isUserAuthenticated(userDetails) {
+export const isUserAuthenticated = async (userDetails) => {
     try {
         const res = await fetch(API_ENDPOINT_USERS + '/' + userDetails.emailAddress);
         if (!res.ok) throw Error(res.statusText);
@@ -19,7 +35,7 @@ export async function isUserAuthenticated(userDetails) {
     }
 }
 
-export async function userSignUpDoesUserAlreadyExist(userDetails) {
+export const userSignUpDoesUserAlreadyExist = async (userDetails) => {
     try {
         const res = await fetch(API_ENDPOINT_USERS + '/' + userDetails.emailAddress);
         if (!res.ok) throw Error(res.statusText);
@@ -31,7 +47,25 @@ export async function userSignUpDoesUserAlreadyExist(userDetails) {
     }
 }
 
-export async function fetchDataFromAllDbs(documentIdInUsersDb) {
+export const fetchDataFromUserSessionDb = async (userSessionToken) => {
+    // This is called to get data from the user session.  One of the object keys it returns is userId which is subsequently used to load the releveant data from databases
+    let res;
+    let dataFromUserSessionsDb;
+
+    try {
+        // Get the data from all of the databases
+        res = await fetch(API_ENDPOINT_USER_VERIFY + "?token=" + userSessionToken);
+        if (!res.ok) throw Error(res.statusText);
+        dataFromUserSessionsDb = await res.json();
+        console.log('dataFromUserSessionsDb', dataFromUserSessionsDb);
+        return dataFromUserSessionsDb;
+    } catch(err) {
+        console.log(err);
+        throw new Error('Error from fetchDataFromUserSessionDb');
+    }
+}
+
+export const fetchDataFromAllDbs = async (documentIdInUsersDb) => {
     // This is called by the starting function getAppDataFromDb, to load the data from the databases into arrays (and update the Redux store)
     let res;
     let dataFromMiscellaneousDb;
@@ -111,7 +145,7 @@ export const doesFixturesDbContainCorrectNumberOfDocuments = (dataFromMiscellane
 }
 
 const formatTeams = (resultsTeams) => {
-    // This is called when teams are loaded from the database.  Each team is stored in an individual document on the db, and this function groups them into sets of divisions
+    // This is called when teams are loaded from the database.  Each team is stored in an individual document on the db, and this groups them into sets of divisions
     let teamsByDivision;
     let filteredTeams;
     let i;
@@ -129,7 +163,7 @@ const formatTeams = (resultsTeams) => {
 }
 
 const formatFixtures = (resultsFixtures) => {
-    // This is called when fixtures are loaded from the database.  Each fixtures is stored in an individual document on the db, and this function groups them into sets of fixtures
+    // This is called when fixtures are loaded from the database.  Each fixtures is stored in an individual document on the db, and this groups them into sets of fixtures
     let setsOfFixtures;
     let filteredFixtures;
 
@@ -159,13 +193,13 @@ export const deleteAllDocumentsInDbs = (documentIdInUsersDb) => {
                    .then(response => response.json())
         });
 
-        // Resolve all the promises - return the Promise to the calling function
-        return Promise.all(requests)
+        // Resolve all the promises
+        Promise.all(requests)
             // .then(results => console.log(JSON.stringify(results, null, 2)))
             .catch(error => {
                 throw Error("There is an error attempting to delete all of the documents in all of the databases ..." + error);       // Throw an error so that the promise returns rejected
         });
-       
+      
     } catch(error) {
         console.log(error);
         throw new Error('Error in deleteAllDocumentsInAllDbs');
@@ -182,8 +216,8 @@ export const deleteAllDocumentsInDbsKeepCurrentSettings = (documentIdInUsersDb) 
                    .then(response => response.json())
         });
 
-        // Resolve all the promises - return the Promise to the calling function
-        return Promise.all(requests)
+        // Resolve all the promises
+        Promise.all(requests)
             // .then(results => console.log(JSON.stringify(results, null, 2)))
             .catch(error => {
                 throw Error("There is an error attempting to delete all of the documents in some of the databases (Keep Current Settings) ..." + error);       // Throw an error so that the promise returns rejected
@@ -195,20 +229,20 @@ export const deleteAllDocumentsInDbsKeepCurrentSettings = (documentIdInUsersDb) 
     }
 }
 
-export const createDocumentInASingleDocumentDb = (obj, apiEndpoint, dbDescription, documentIdInUsersDb) => {
-    // This function is called when the app is reset, or the app is loaded for the first time after the user has registered.
+export const createOrUpdateDocumentInASingleDocumentDb = (obj, apiEndpoint, dbDescription, documentIdInUsersDb, userSessionToken) => {
+    // This is called when the app is reset, or the app is loaded for the first time after the user has registered.
     // The Miscellaneous document in the database is a single document which stores various values required by the app.
     // The SettingsFactors document in the database is a single document which stores the values entered (excluding teams) on the Settings screen.
     try {
         if (documentIdInUsersDb) obj.userDocumentId = documentIdInUsersDb;
-        return sendDataToAPIEndpoint(apiEndpoint, dbDescription, 'POST', obj);
+        return sendDataToAPIEndpoint(apiEndpoint, dbDescription, 'POST', obj, userSessionToken);
     } catch(error) {
         throw new Error(`Error creating ${dbDescription} document in db`, error);
     }
 }
 
 export const createTeamsDocumentsInDb = (documentIdInUsersDb) => {
-    // This function is called when the app is reset, or the app is loaded for the first time after the user has registered.
+    // This is called when the app is reset, or the app is loaded for the first time after the user has registered.
     // The Team documents in the database just store a document for each team with the team's name and whether the team is 'a top team'.
     const numberOfDivisions = TEAMS_DEFAULT.length;
     let division;
@@ -235,7 +269,7 @@ export const createTeamsDocumentsInDb = (documentIdInUsersDb) => {
 }
 
 export const createMyWatchlistTeamsDocumentsInDb = (myWatchlistTeams, documentIdInUsersDb) => {
-    // This function is called when the app is reset, or the app is loaded for the first time after the user has registered.
+    // This is called when the app is reset, or the app is loaded for the first time after the user has registered.
     // The My Watchlist Team documents in the database just store a document for each team with the team's name.
     let bulkData = [];
     let i;
@@ -299,7 +333,7 @@ export const mergeDocumentsIdsFromFixturesDatabaseToObjectsInArray = (originalVa
 }
 
 export const updateTeamsDocumentsInDb = (updatedValues) => {
-    // This function is called when changes to the teams on the Settings screen are then saved
+    // This is called when changes to the teams on the Settings screen are then saved
     let bulkData = [];
 
         updatedValues.forEach(updatedValue => {
@@ -315,7 +349,7 @@ export const updateTeamsDocumentsInDb = (updatedValues) => {
 }
 
 export const updateMyWatchlistTeamsDocumentsInDb = (updatedValues) => {
-    // This function is called when changes to the My Watchlist Teams on the Settings screen are then saved
+    // This is called when changes to the My Watchlist Teams on the Settings screen are then saved
     let bulkData = [];
 
         updatedValues.forEach(updatedValue => {
@@ -331,7 +365,7 @@ export const updateMyWatchlistTeamsDocumentsInDb = (updatedValues) => {
 }
 
 export const deleteMyWatchlistTeamsDocumentsInDb = (deletedValues) => {
-    // This function is called when changes to the My Watchlist Teams on the Settings screen are then saved
+    // This is called when changes to the My Watchlist Teams on the Settings screen are then saved
     let bulkData = [];
 
     deletedValues.forEach(updatedValue => {
@@ -345,8 +379,8 @@ export const deleteMyWatchlistTeamsDocumentsInDb = (deletedValues) => {
     sendDataToAPIEndpoint(API_ENDPOINT_MY_WATCHLIST_TEAMS, 'MyWatchlistTeam', 'DELETE', bulkData);
 }
 
-export async function updateDocumentsInDbAfterLatestResults(sourceArray, apiEndpoint, dbDescription) {
-    // After the results of the latest fixtures, this function updates documents in the appropriate database.
+export const updateDocumentsInDbAfterLatestResults = async (sourceArray, apiEndpoint, dbDescription) => {
+    // After the results of the latest fixtures, this updates documents in the appropriate database.
     // Each 'fixture' or 'team for league table' is stored as a separate document in the database, so the API uses bulkWrite to batch all of the results into one http request.
     let bulkData = [];
     let i;
@@ -371,13 +405,14 @@ export const updateSettingsFactorsDocumentInDb = (settingsFactorsDocumentIdInDb,
     return sendDataToAPIEndpoint(API_ENDPOINT_SETTINGS_FACTORS + "/" + settingsFactorsDocumentIdInDb, 'Settings Factors', 'PUT', changes);
 }
 
-async function sendDataToAPIEndpoint(apiEndpoint, dataName, method, dataToSend) {
-    // This function sends data to the appropriate API endpoint
+export const sendDataToAPIEndpoint = async (apiEndpoint, dataName, method, dataToSend, userSessionToken) => {
+    // This sends data to the appropriate API endpoint
     let res;
     let results;
 
     try {
-        res = await fetch(apiEndpoint, { method: method, body: JSON.stringify(dataToSend), headers: { 'Content-Type': 'application/json'} });
+        res = await fetch(apiEndpoint + (userSessionToken ? '?token=' + userSessionToken : ''),
+                    { method: method, body: JSON.stringify(dataToSend), headers: { 'Content-Type': 'application/json'} });
 
         if (res.ok) {
             results = await res.json();

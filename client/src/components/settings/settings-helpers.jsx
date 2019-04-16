@@ -12,13 +12,13 @@ export const getSettingsFactors = (values, isGoalFactorsANestedArray, returnGoal
     goalsPerMinuteFactor = helpers.getGoalsPerMinuteFactors(goalFactorValues[GOALS_PER_MINUTE_FACTOR], returnTypeForGoalsPerMinuteFactor);
 
     let goalFactors = {
-        [FIXTURE_UPDATE_INTERVAL]: parseFloat(goalFactorValues[FIXTURE_UPDATE_INTERVAL].toString().trim()),
-        [BASE_FOR_RANDOM_MULTIPLIER]: parseFloat(goalFactorValues[BASE_FOR_RANDOM_MULTIPLIER].toString().trim()),
-        [AWAY_TEAM_FACTOR]: parseFloat(goalFactorValues[AWAY_TEAM_FACTOR].toString().trim()),
-        [IS_NOT_A_TOP_TEAM_FACTOR]: parseFloat(goalFactorValues[IS_NOT_A_TOP_TEAM_FACTOR].toString().trim()),
-        [DIVISION_FACTOR]: parseFloat(goalFactorValues[DIVISION_FACTOR].toString().trim()),
-        [IS_IT_A_GOAL_FACTOR]: parseFloat(goalFactorValues[IS_IT_A_GOAL_FACTOR].toString().trim()),
-        [IS_IT_A_GOAL_PENALTY_FACTOR]: parseFloat(goalFactorValues[IS_IT_A_GOAL_PENALTY_FACTOR].toString().trim()),
+        [FIXTURE_UPDATE_INTERVAL]: getSettingsValue(goalFactorValues[FIXTURE_UPDATE_INTERVAL]),
+        [BASE_FOR_RANDOM_MULTIPLIER]: (goalFactorValues[BASE_FOR_RANDOM_MULTIPLIER]),
+        [AWAY_TEAM_FACTOR]: getSettingsValue(goalFactorValues[AWAY_TEAM_FACTOR]),
+        [IS_NOT_A_TOP_TEAM_FACTOR]: getSettingsValue(goalFactorValues[IS_NOT_A_TOP_TEAM_FACTOR]),
+        [DIVISION_FACTOR]: getSettingsValue(goalFactorValues[DIVISION_FACTOR]),
+        [IS_IT_A_GOAL_FACTOR]: getSettingsValue(goalFactorValues[IS_IT_A_GOAL_FACTOR]),
+        [IS_IT_A_GOAL_PENALTY_FACTOR]: getSettingsValue(goalFactorValues[IS_IT_A_GOAL_PENALTY_FACTOR]),
         [GOALS_PER_MINUTE_FACTOR]: goalsPerMinuteFactor,
     };
 
@@ -34,6 +34,11 @@ export const getSettingsFactors = (values, isGoalFactorsANestedArray, returnGoal
     }
 
     return settingsFactors;
+}
+
+const getSettingsValue = (fieldValue) => {
+    fieldValue = fieldValue.toString().trim();
+    return isNaN(parseFloat(fieldValue)) ? fieldValue : parseFloat(fieldValue);
 }
 
 export const validateSettingsFactors = (state) => {
@@ -141,6 +146,14 @@ export const haveTeamValuesChanged = (originalValues, updatedValues) => {
 }
 
 export const haveSettingsFactorsValuesChanged = (originalValues, updatedValues) => {
+    let anyChanges = false;
+    Object.entries(originalValues).forEach(([key, val]) => {
+        if (val !== updatedValues[key]) anyChanges = true;
+    });
+    return anyChanges;
+};
+
+export const haveSettingsFactorsValidationErrorValuesChanged = (originalValues, updatedValues) => {
     let anyChanges = false;
     Object.entries(originalValues).forEach(([key, val]) => {
         if (val !== updatedValues[key]) anyChanges = true;

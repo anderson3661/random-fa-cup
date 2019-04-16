@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 import FixtureRow from "../common/fixture-row";
 
@@ -6,8 +7,6 @@ import FixtureRow from "../common/fixture-row";
 const FixturesLatestFixtures = ({ fixtures, haveLatestFixturesStarted }) => (
 
     <div className="container-card fixtures">
-
-        {/* <div className="fixtures-date">{this.formattedDateOfFixtures}</div> */}
 
         <div className="fixtures in-play">
 
@@ -19,7 +18,6 @@ const FixturesLatestFixtures = ({ fixtures, haveLatestFixturesStarted }) => (
                         showForLatestFixtures={true}
                         haveLatestFixturesStarted={haveLatestFixturesStarted}
                         showGoals={false}
-                        // top3TeamsBeforeFixtures={this.top3TeamsBeforeFixtures}
                     />
                 )
             })}
@@ -28,5 +26,11 @@ const FixturesLatestFixtures = ({ fixtures, haveLatestFixturesStarted }) => (
 
     </div>
 )
+
+
+FixturesLatestFixtures.propTypes = {
+    fixtures: PropTypes.array.isRequired,
+    haveLatestFixturesStarted: PropTypes.bool.isRequired,
+}
 
 export default FixturesLatestFixtures;

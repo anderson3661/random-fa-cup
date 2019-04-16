@@ -23,10 +23,10 @@
                 }
             
                 .goal-update {
-                    color: black; 
-                    font-family: "Courier";
+                    color: $color-goal-updates;
+                    font-family: $font-family-goal-updates;
                     line-height: 1.2;
-                    font-size: 75%;
+                    font-size: $font-size-goal-updates;
                     margin: 0.75vh 0 0 0;
                     white-space: nowrap;
                     overflow: initial;
@@ -36,7 +36,7 @@
                     .minsBlank {
                         display: inline-block;
                         width: 3.5vw;
-                        background-color: $background-color-half-time-score;
+                        background-color: $background-color-goal-updates-minutes;
                         margin-right: 0.5vw;
                         text-align: center;
                     }
@@ -47,7 +47,7 @@
 
                     span { font-weight: normal; }
                     span.team.home { margin-right: 1vw; }
-                    span.team.goal { font-weight: 700; color: blue; }
+                    span.team.goal { font-weight: 700; color: $color-goal-updates-scoring-team; }
 
                   }
                   

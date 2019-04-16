@@ -1,8 +1,9 @@
 import React, { Component, Fragment } from 'react';
 import { connect } from 'react-redux';
 import { Prompt } from 'react-router';
+import PropTypes from 'prop-types';
 
-import { updateDbsAndStoreAfterCompetitionHasFinished, refreshAfterEachPenalty } from '../../redux/actions/fixturesActions';
+import { updateDbsAndStoreAfterLatestResults, refreshAfterEachPenalty, updateDbsAndStoreAfterCompetitionHasFinished } from '../../redux/actions/fixturesActions';
 
 import { Fixture } from '../../utilities/classes/fixture';
 import FixturesLatestHeader from './fixtures-latest-header';
@@ -27,7 +28,6 @@ import ConfirmationDialogWinners from '../dialogs/confirmationDialogWinners';
 
 import Loading from '../loading/loading';
 
-import '../../utilities/css/fixtures.scss';
 import './fixtures-latest.scss';
 
 
@@ -199,7 +199,7 @@ class FixturesLatest extends Component {
         let maxMinutesPlayedForFixture = 0;
 
         const { counterMinutes } = this.state;
-        const { dispatch, fixturesForCompetition, goalFactors } = this.props;
+        const { fixturesForCompetition, goalFactors, updateDbsAndStoreAfterLatestResults, refreshAfterEachPenalty } = this.props;
 
         if (this.haveAllFixturesInThisSetFinished) return;      //Break out of the loop if fixtures have gone to penalties and the games have finished
         
@@ -232,7 +232,7 @@ class FixturesLatest extends Component {
 
         this.setState(prevState => ({ counterMinutes: prevState.counterMinutes + 1 }));
 
-        if (this.havePenaltiesStarted) dispatch(refreshAfterEachPenalty());
+        if (this.havePenaltiesStarted) refreshAfterEachPenalty();
 
         if (this.maxMinutesForPeriod === counterMinutes || this.havePenaltiesStarted) {
 
@@ -242,7 +242,8 @@ class FixturesLatest extends Component {
     
             if (this.haveAllFixturesInThisSetFinished) {
                 this.setState({ startFixturesButtonText: FIXTURES_FINISHED, startFixturesButtonEnabled: false });
-                helperFixtureUpdates.createUpdatesAfterFixturesHaveFinished(dispatch, fixturesForCompetition, this.fixtures, this.competitionRound, this.props.competitionRoundForPlay);
+                const data = helperFixtureUpdates.createUpdatesAfterFixturesHaveFinished(fixturesForCompetition, this.fixtures, this.competitionRound, this.props.competitionRoundForPlay);
+                updateDbsAndStoreAfterLatestResults(data.fixtures, data.replays, data.replayUpdatesInFixturesDb, data.nextSetOfFixtures, data.finalFixture, data.miscellaneousUpdates, data.replaysJustFinished, data.semiFinalsJustFinished);
                 this.setState({ areFixturesInPlay: false });
             } else {
                 if (!this.havePenaltiesStarted) {
@@ -289,21 +290,21 @@ class FixturesLatest extends Component {
 
     componentWillReceiveProps(nextProps, prevState) {
         // The following is required in order to display the correct dialog message (i.e. it has either worked, or there has been a backend error)
-        const { dispatch, fixturesForCompetition } = this.props;
+        const { fixturesForCompetition, updateDbsAndStoreAfterCompetitionHasFinished } = this.props;
+        debugger;
 
         if (nextProps.loadingRefreshLatestFixtures) {
-            debugger;
             this.loadComponent(true);
         }
 
-        if (!nextProps.miscellaneous.loadingLatestFixtures && this.props.miscellaneous.loadingLatestFixtures) {
-            if (nextProps.miscellaneous.loadingBackendError) {
+        if (!nextProps.loading && this.props.loading) {
+            if (nextProps.loadingBackendError) {
                 this.setState({ dialogLoadingBackendErrorConfirmIsOpen: true });     // If an error was encountered on the backend, then open the backend error dialog
             } else {
                 // If the season has finished display the congratulations to winners dialog, otherwise display the latest fixtures have finished dialog
                 if (helpers.isThisCompetitionRoundTheFinal(this.competitionRound) && helpers.haveAllFixturesInSetFinished(helpers.getFixturesArray(fixturesForCompetition, helpers.getCompetitionRoundIndex(this.competitionRound), IS_FIXTURES))) {
                     this.setState({ displayWinnersAtEndOfCompetition: true });
-                    dispatch(updateDbsAndStoreAfterCompetitionHasFinished());
+                    updateDbsAndStoreAfterCompetitionHasFinished();
                 } else {
                     this.setState({ dialogLatestFixturesFinishedIsOpen: true });
                 }                
@@ -342,8 +343,7 @@ class FixturesLatest extends Component {
     render() {
 
         const { startFixturesButtonText, startFixturesButtonEnabled, areFixturesInPlay, haveFixturesBeenPaused, showGoalUpdates, haveLatestFixturesStarted } = this.state;
-        const { authenticated, fixturesForCompetition, hasCompetitionFinished, myWatchlistTeams, latestFixturesHaveStarted } = this.props;
-        const { season } = this.props.settingsFactors;
+        const { authenticated, fixturesForCompetition, hasCompetitionFinished, myWatchlistTeams, loading, season } = this.props;
         
         return (
 
@@ -353,7 +353,7 @@ class FixturesLatest extends Component {
 
                 <img className="full-screen-background-image" src={MAIN_BACKGROUND_IMAGE} alt=""></img>
 
-                { latestFixturesHaveStarted ? <Loading /> : null }
+                { loading ? <Loading /> : null }
 
                 <Prompt when={this.state.areFixturesInPlay} message="Are you sure you want to abandon these fixtures ?"/>
 
@@ -457,27 +457,55 @@ class FixturesLatest extends Component {
 
 const mapStateToProps = (state) => {
     const { authenticated } = state.default.user;
-    const { hasCompetitionStarted, hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw, haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays, loadingRefreshLatestFixtures } = state.default.miscellaneous;
+    const { hasCompetitionStarted, hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw,
+            haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays, loading, loadingBackendError, loadingRefreshLatestFixtures } = state.default.miscellaneous;
+    const { season, goalFactors } = state.default.settingsFactors;
+    debugger;
 
     return {
         authenticated,
-        miscellaneous: state.default.miscellaneous,
+        hasCompetitionStarted, hasCompetitionFinished, competitionRoundForNextDraw, competitionRoundForPlay, okToProceedWithDraw,
+        haveFixturesForCompetitionRoundBeenPlayed, haveFixturesProducedReplays, loading, loadingBackendError, loadingRefreshLatestFixtures,
+        season, goalFactors,
         fixturesForCompetition: state.default.fixturesForCompetition,
         teamsForCompetition: state.default.teamsForCompetition,
         myWatchlistTeams: state.default.myWatchlistTeams,
-        settingsFactors: state.default.settingsFactors,
-        goalFactors: state.default.settingsFactors.goalFactors,
-        hasCompetitionStarted,
-        hasCompetitionFinished,
-        competitionRoundForNextDraw,
-        competitionRoundForPlay,
-        okToProceedWithDraw,
-        haveFixturesForCompetitionRoundBeenPlayed,
-        haveFixturesProducedReplays,
-        loadingRefreshLatestFixtures,
     }
 }
 
-FixturesLatest = connect(mapStateToProps, null)(FixturesLatest)
+const mapDispatchToProps = (dispatch) => {
+    return {
+        updateDbsAndStoreAfterLatestResults: (fixtures, replays, replayUpdatesInFixturesDb, nextSetOfFixtures, finalFixture, miscellaneousUpdates, replaysJustFinished, semiFinalsJustFinished) => dispatch(updateDbsAndStoreAfterLatestResults(fixtures, replays, replayUpdatesInFixturesDb, nextSetOfFixtures, finalFixture, miscellaneousUpdates, replaysJustFinished, semiFinalsJustFinished)),
+        refreshAfterEachPenalty: () => dispatch(refreshAfterEachPenalty()),
+        updateDbsAndStoreAfterCompetitionHasFinished: () => dispatch(updateDbsAndStoreAfterCompetitionHasFinished()),
+    }
+}
 
-export default FixturesLatest;
+
+FixturesLatest.defaultProps = {
+    haveFixturesProducedReplays: false,
+}
+
+FixturesLatest.propTypes = {
+    authenticated: PropTypes.bool.isRequired,
+    hasCompetitionStarted: PropTypes.bool.isRequired,
+    hasCompetitionFinished: PropTypes.bool.isRequired,
+    competitionRoundForNextDraw: PropTypes.string.isRequired,
+    competitionRoundForPlay: PropTypes.string.isRequired,
+    okToProceedWithDraw: PropTypes.bool.isRequired,
+    haveFixturesForCompetitionRoundBeenPlayed: PropTypes.bool.isRequired,
+    haveFixturesProducedReplays: PropTypes.bool.isRequired,
+    loading: PropTypes.bool.isRequired,
+    loadingBackendError: PropTypes.bool.isRequired,
+    loadingRefreshLatestFixtures: PropTypes.bool.isRequired,
+    season: PropTypes.string.isRequired,
+    goalFactors: PropTypes.object.isRequired,
+    fixturesForCompetition: PropTypes.array.isRequired,
+    teamsForCompetition: PropTypes.array.isRequired,
+    myWatchlistTeams: PropTypes.array.isRequired,
+    updateDbsAndStoreAfterLatestResults: PropTypes.func.isRequired,
+    refreshAfterEachPenalty: PropTypes.func.isRequired,
+    updateDbsAndStoreAfterCompetitionHasFinished: PropTypes.func.isRequired,
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(FixturesLatest);

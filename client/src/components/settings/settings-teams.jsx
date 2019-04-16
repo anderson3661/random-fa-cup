@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from 'prop-types';
 // import Checkbox from '@material-ui/core/Checkbox';
 
 import { DIVISIONS_HEADINGS } from '../../utilities/constants';
@@ -10,7 +11,6 @@ import { haveTeamValuesChanged, haveValidationErrorValuesChanged } from './setti
 class SettingsTeams extends Component {
 
     handleTeamsInputChange = (divisionIndex, teamIndex, updatedValue) => {
-        debugger;
         // If using native HTML inputs then updatedValue will return an event object; if using Material UI then updatedValue returns a string
         this.props.onTeamsInputChange(divisionIndex, teamIndex, updatedValue.target ? updatedValue.target.value : updatedValue);
     }
@@ -115,5 +115,14 @@ class SettingsTeams extends Component {
     }
 }
 
+
+SettingsTeams.propTypes = {
+    hasCompetitionStarted: PropTypes.bool.isRequired,
+    divisionIndex: PropTypes.number.isRequired,
+    teams: PropTypes.array.isRequired,
+    teamsValidationErrors: PropTypes.array.isRequired,
+    onTeamsInputChange: PropTypes.func.isRequired,
+    onTopTeamsInputChange: PropTypes.func.isRequired,
+}
 
 export default SettingsTeams;

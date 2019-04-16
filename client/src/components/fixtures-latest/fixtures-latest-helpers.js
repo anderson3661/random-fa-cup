@@ -1,6 +1,6 @@
 import { COMPETITION_ROUNDS, IS_FIXTURES } from '../../utilities/constants';
 import * as helpers from '../../utilities/helper-functions/helpers';
-import { updateDbsAndStoreAfterLatestResults } from '../../redux/actions/fixturesActions';
+
 
 export const getMaximumMinutes = (fixture, maxMinutesForPeriod) => {
     if (fixture.isPenalties) return 100;        //If penalties set the update to 100 minutes
@@ -15,10 +15,11 @@ export const getEmptySetOfFixtures = () => {
     return { fixtures: [] };
 }
 
-export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForCompetition, fixtures, competitionRound, competitionRoundForPlay) => {
+export const createUpdatesAfterFixturesHaveFinished = (fixturesForCompetition, fixtures, competitionRound, competitionRoundForPlay) => {
     // If haveFixturesForCompetitionRoundBeenPlayed is true then replays are due to be played (if any)
     let i;
     let replaysJustFinished = false;
+    let semiFinalsJustFinished = false;
     let nextSetOfFixtures = [];
     let miscellaneousUpdates = {};
 
@@ -50,13 +51,23 @@ export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForComp
             }
             if (replays.length > 0) {
                 helpers.sortFixturesByHomeTeam(replays);
-                miscellaneousUpdates = { okToProceedWithDraw: true, haveFixturesForCompetitionRoundBeenPlayed: true, haveFixturesProducedReplays: true };
+                miscellaneousUpdates = { okToProceedWithDraw: true,
+                                         haveFixturesForCompetitionRoundBeenPlayed: true,
+                                         haveFixturesProducedReplays: true
+                                        };
             } else {
                 miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay,
-                                         okToProceedWithDraw: true, haveFixturesForCompetitionRoundBeenPlayed: false, haveFixturesProducedReplays: false };
+                                         okToProceedWithDraw: true,
+                                         haveFixturesForCompetitionRoundBeenPlayed: false,
+                                         haveFixturesProducedReplays: false
+                                        };
             }
         } else {
-            miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay, okToProceedWithDraw: true, haveFixturesForCompetitionRoundBeenPlayed: false, haveFixturesProducedReplays: false };
+            miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay,
+                                     okToProceedWithDraw: true,
+                                     haveFixturesForCompetitionRoundBeenPlayed: false,
+                                     haveFixturesProducedReplays: false
+                                    };
         }
     } else {
         // These are replays so need to update the fixtures database with the scores and also clarify the draw for the next round
@@ -72,8 +83,11 @@ export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForComp
             updateTeamsAfterReplay(nextSetOfFixtures, fixtures, i, 'awayTeam', slashAway, updatesToNextRound);
             if (helpers.doesObjectHaveAnyProperties(updatesToNextRound)) replayUpdatesInFixturesDb.push(updatesToNextRound);
         }
-        miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay, okToProceedWithDraw: false,
-                                 haveFixturesForCompetitionRoundBeenPlayed: false, haveFixturesProducedReplays: false };
+        miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay,
+                                 okToProceedWithDraw: false,
+                                 haveFixturesForCompetitionRoundBeenPlayed: false,
+                                 haveFixturesProducedReplays: false
+                                };
                
         replaysJustFinished = true;
     }
@@ -95,11 +109,15 @@ export const createUpdatesAfterFixturesHaveFinished = (dispatch, fixturesForComp
             hasFixtureFinished: false,
             isReplay: false,
         });
-        miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay, okToProceedWithDraw: false, haveFixturesForCompetitionRoundBeenPlayed: false, haveFixturesProducedReplays: false };
+        miscellaneousUpdates = { competitionRoundForPlay: nextCompetitionRoundForPlay,
+                                 okToProceedWithDraw: false,
+                                 haveFixturesForCompetitionRoundBeenPlayed: false,
+                                 haveFixturesProducedReplays: false
+                                };
+        semiFinalsJustFinished = true;
     }
     
-    dispatch(updateDbsAndStoreAfterLatestResults(fixtures, replays, replayUpdatesInFixturesDb, nextSetOfFixtures, finalFixture, miscellaneousUpdates, replaysJustFinished));
-
+    return { fixtures, replays, replayUpdatesInFixturesDb, nextSetOfFixtures, finalFixture, miscellaneousUpdates, replaysJustFinished, semiFinalsJustFinished };
 }
 
 const updateTeamsAfterReplay = (fixturesForNextRound, replays, fixtureCounter, whichTeam, slashIndex, updatesToNextRound, ) => {

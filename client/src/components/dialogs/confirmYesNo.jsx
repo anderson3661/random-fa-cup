@@ -1,8 +1,7 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import Button from "@material-ui/core/Button";
-
 import Dialog from '@material-ui/core/Dialog';
-// import DialogTitle from '@material-ui/core/DialogTitle';
 
 import './confirmYesNo.scss';
 
@@ -13,11 +12,10 @@ class ConfirmationYesNo extends React.Component {
     };
        
     render() {
-        const { onClose, message="Are you sure ?", dialogYesNoSelectedIsYes, ...other } = this.props;
+        const { onClose, message="Are you sure ?", ...other } = this.props;
     
         return (
             <Dialog onClose={() => this.handleClose(false)} aria-labelledby="simple-dialog-title" {...other}>
-                {/* <DialogTitle class="dialog-title">Save</DialogTitle> */}
                 <div>
                     <p className="dialog-para">{message}</p>
                 </div>
@@ -29,6 +27,12 @@ class ConfirmationYesNo extends React.Component {
             </Dialog>
         );
     }
-  }
-      
-  export default ConfirmationYesNo;
+}
+
+
+ConfirmationYesNo.propTypes = {
+    onClose: PropTypes.func.isRequired,
+    message: PropTypes.string.isRequired,
+}
+
+export default ConfirmationYesNo;

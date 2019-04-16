@@ -1,23 +1,14 @@
-import React, { Component, Fragment } from "react";
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
+import React, { Component } from "react";
+import PropTypes from 'prop-types';
 
 import FixtureRow from "../common/fixture-row";
-import * as helpers from '../../utilities/helper-functions/helpers';
-import { FOOTBALL_IMAGE } from '../../utilities/constants';
-
-import "../../utilities/css/fixtures.scss";
 
 
 class FixturesAndResultsFixtureSet extends Component {
 
-    state = { showGoals: false }
-
-    handleChangeShowGoals(e) { this.setState({showGoals: e.target.checked}) }
-
     render() {
 
-        const { fixtures, teamsForCompetition, hasCompetitionStarted, competitionRound, displayResults, displayHeader } = this.props;
+        const { fixtures, hasCompetitionStarted, competitionRound, displayResults, title, showGoals } = this.props;
 
         return (
 
@@ -25,27 +16,7 @@ class FixturesAndResultsFixtureSet extends Component {
 
                 <div className={`main-header ${displayResults ? "displayResults" : ""} ${hasCompetitionStarted ? "" : "seasonsFixturesHaveNotBeenCreated"}`}>
                 
-                    <div className="image-left"><img src={FOOTBALL_IMAGE} alt="" /></div>
-
-                    <h1>{displayHeader}</h1>
-
-                    {(!(displayResults && hasCompetitionStarted) || fixtures.length === 0) && <div className="image-right"><img src={FOOTBALL_IMAGE} alt="" /></div>}
-
-                    {displayResults && hasCompetitionStarted && fixtures.length > 0 && (
-                        <div className="showGoals">
-                            <FormControlLabel
-                                control={
-                                    <Checkbox
-                                        className="showGoalsText"
-                                        checked={this.state.showGoals}
-                                        onChange={this.handleChangeShowGoals.bind(this)}
-                                        value={this.state.showGoals.toString()}
-                                    />
-                                }
-                                label="Show Goals"
-                            />                        
-                        </div>
-                    )}
+                    <h1>{title}</h1>
 
                 </div>
 
@@ -54,28 +25,32 @@ class FixturesAndResultsFixtureSet extends Component {
                 }
 
                 {hasCompetitionStarted && fixtures.length > 0 &&
-                    <Fragment>
-                        {/* <div className="fixtures-date">{fixtures.dateOfFixtures}</div> */}
-
-                        <div className={`fixtures ${displayResults ? "results" : ""}`}>                                
-                            {fixtures.map((fixture, i) => {
-                                return (
-                                    <FixtureRow
-                                        key={i}
-                                        fixture={fixture}
-                                        showForFixturesAndResults = {true}
-                                        showGoals={this.state.showGoals}
-                                        homeTeamDivision={helpers.getDivisionTheTeamPlaysIn(teamsForCompetition, fixture.homeTeam)}
-                                    />
-                                );
-                            })}
-                        </div>
-                    </Fragment>
+                    <div className={`fixtures ${displayResults ? "results" : ""}`}>                                
+                        {fixtures.map((fixture, i) => {
+                            return (
+                                <FixtureRow
+                                    key={i}
+                                    fixture={fixture}
+                                    showForFixturesAndResults = {true}
+                                    showGoals={showGoals}
+                                />
+                            );
+                        })}
+                    </div>
                 }
             </div>
         );
     }
 }
 
+
+FixturesAndResultsFixtureSet.propTypes = {
+    fixtures: PropTypes.array.isRequired,
+    hasCompetitionStarted: PropTypes.bool.isRequired,
+    competitionRound: PropTypes.string.isRequired,
+    displayResults: PropTypes.bool.isRequired,
+    title: PropTypes.string.isRequired,
+    showGoals: PropTypes.bool.isRequired,
+}
 
 export default FixturesAndResultsFixtureSet;

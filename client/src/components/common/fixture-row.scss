@@ -6,7 +6,7 @@
     @include flex($justify-content: null);
     font-weight: bold;
 
-    border-bottom: 1px solid $color-fixture-row-goal-times-bottom-border;
+    border-bottom: $border-bottom-fixture-row-goal-times;
 
     %teamName {
         flex-basis: $width-fixture-row-team-name;
@@ -23,7 +23,7 @@
             font-weight: 700;
         
             &.division { color: $color-division-abbreviation; font-size: $font-size-division-abbreviation;}
-            &.premierLeague { color: $color-premier-league-teams; }
+            &.premierLeague { color: $color-premier-league-team; }
         }
     }
 
@@ -63,9 +63,11 @@
         .halfTimeScore { @include score($color-half-time-score, $background-color-half-time-score); }
     }
 
-    &.route-to-this-stage .competitionRound { color: darkgray }
+    &.route-to-this-stage .competitionRound { color: $color-route-to-this-stage-competition-round }
 
     .competitionRound { width: 1.5vw; }
+
+    &.fixtures-and-results:first-child { border-top: $border-top-fixture-row-goal-times; }
 
 }
 
@@ -74,7 +76,7 @@
     
     font-size: $font-size-fixture-row-goal-times;
     color: $color-fixture-row-goal-times;
-    border-bottom: 1px solid $color-fixture-row-goal-times-bottom-border;
+    border-bottom: $border-bottom-fixture-row-goal-times;
     
     .teamsGoalTimes {
         flex-basis: $width-fixture-row-goal-times;
@@ -105,9 +107,4 @@
     &.is-extra-time.in-play, &.is-penalties.in-play { padding-bottom: 0.5vh; }
 
     .competitionRound { width: 1.5vw; }
-}
-
-.icon-position {
-    color: #a67c00;
-    padding-left: 0.5vw; padding-right: 1vw;
 }

@@ -19,7 +19,7 @@
     color: $color-penalties;
 
     &:not(.is-penalties), &.is-penalties:not(.show-goals), &.is-penalties.route-to-this-stage.show-goals {
-        border-bottom: 1px solid $color-fixture-row-goal-times-bottom-border;
+        border-bottom: $border-bottom-fixture-row-goal-times;
     }
 
     &.is-penalties.in-play, &.is-penalties.fixtures-and-results.show-goals {
@@ -29,7 +29,7 @@
     
     .extraTimeOrPenaltiesSummary {
         width: 100%;
-        font-size: 115%;
+        font-size: $font-size-extra-time-or-penalties-summary;
         text-align: center;
         margin-bottom: 0.5vh;
     }
@@ -40,7 +40,7 @@
 
     &:last-child {
         // border-bottom: 1px solid $color-fixture-border-bottom;
-        border-bottom: 1px solid lightgray;
+        border-bottom: $border-bottom-penalties;
     }
 }
 
@@ -63,7 +63,7 @@
     color: $color-penalties-team-score;
 }
 
-.teamScorePenalties.homeTeam span, .teamScorePenalties.awayTeam span { color: darkgray; font-size: 80%; }
+.teamScorePenalties.homeTeam span, .teamScorePenalties.awayTeam span { color: $color-team-score-penalties; font-size: $font-size-team-score-penalties; }
 .teamScorePenalties.homeTeam span { margin-right: 1.5vw; }
 .teamScorePenalties.awayTeam span { margin-left: 1.5vw; }
 

@@ -1,20 +1,24 @@
 import { LOAD_FROM_MISCELLANEOUS_DB, LOAD_FROM_SETTINGS_FACTORS_DB, LOAD_FROM_TEAMS_DB, LOAD_FROM_MY_WATCHLIST_TEAMS_DB, LOAD_FROM_FIXTURES_DB, LOAD_FROM_ALL_DBS_FINISHED, MERGE_DOCUMENT_IDS_FROM_TEAMS_DB, LOADING_BACKEND_UPDATE } from './types';
 import { getSettingsFactors } from '../../components/settings/settings-helpers';
-import { fetchDataFromAllDbs, errorWithNumbersOfDocumentsInDatabases, doesFixturesDbContainCorrectNumberOfDocuments, createDocumentInASingleDocumentDb, createTeamsDocumentsInDb, mergeDocumentsIdsFromDatabaseToObjectsInArray } from '../../utilities/data-backend';
+import { userValidateAndReturnUserDocId, fetchDataFromAllDbs, errorWithNumbersOfDocumentsInDatabases, doesFixturesDbContainCorrectNumberOfDocuments, createOrUpdateDocumentInASingleDocumentDb, createTeamsDocumentsInDb, mergeDocumentsIdsFromDatabaseToObjectsInArray } from '../../utilities/data-backend';
 import { API_ENDPOINT_MISCELLANEOUS, API_ENDPOINT_SETTINGS_FACTORS, NUMBER_OF_TEAMS } from '../../utilities/constants';
+
 
 // ACTION CREATORS
 
-export const loadFromAllDbsStarted = () => async (dispatch, getState) => {
+export const loadFromAllDbsStarted = () => async (dispatch) => {
     try {
-        let results = await fetchDataFromAllDbs(getState().default.user._id);
-        let { dataFromMiscellaneousDb, dataFromSettingsFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures } = results;
+        const userId = await userValidateAndReturnUserDocId();
+        const results = await fetchDataFromAllDbs(userId);
+        const { dataFromMiscellaneousDb, dataFromSettingsFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures } = results;
         if (dataFromMiscellaneousDb.length === 0 && dataFromSettingsFactorsDb.length === 0 && dataFromTeamsDb.length === 0 && dataFromFixturesDb.length === 0) {
-            console.log('No documents exist in any of the databases ... create documents in the database from the app defaults');
-            dispatch(createDocumentsInDbsFromAppDefaults(getState().default.user._id));
-            dispatch({ type: LOAD_FROM_ALL_DBS_FINISHED, data: { loading: false }});
+            if (userId) {
+                console.log('No documents exist in any of the databases ... create documents in the database from the app defaults');
+                if (userId) dispatch(createDocumentsInDbsFromAppDefaults(userId));
+            }
+            dispatch({ type: LOAD_FROM_ALL_DBS_FINISHED, data: { loadingApp: false }});
         } else if (dataFromMiscellaneousDb.length === 1 && dataFromSettingsFactorsDb.length === 1 && dataFromTeamsDb.length === NUMBER_OF_TEAMS &&
-                  (dataFromFixturesDb.length === 0 || doesFixturesDbContainCorrectNumberOfDocuments(dataFromMiscellaneousDb, dataFromSettingsFactorsDb, dataFromFixturesDb, setsOfFixtures))) {
+                (dataFromFixturesDb.length === 0 || doesFixturesDbContainCorrectNumberOfDocuments(dataFromMiscellaneousDb, dataFromSettingsFactorsDb, dataFromFixturesDb, setsOfFixtures))) {
             // console.log(`Data has been loaded from the databases ... the user has not yet created fixtures`);
             console.log(`Data has been loaded from the databases`);
             dispatch({ type: LOAD_FROM_MISCELLANEOUS_DB, data: dataFromMiscellaneousDb[0] });        // As the api call result returns an array just need to send the [0] element
@@ -22,7 +26,7 @@ export const loadFromAllDbsStarted = () => async (dispatch, getState) => {
             dispatch({ type: LOAD_FROM_TEAMS_DB, data: teamsByDivision });
             dispatch({ type: LOAD_FROM_MY_WATCHLIST_TEAMS_DB, data: dataFromMyWatchlistTeamsDb });
             dispatch({ type: LOAD_FROM_FIXTURES_DB, data: (dataFromFixturesDb === 0 ? dataFromFixturesDb : setsOfFixtures) });
-            dispatch({ type: LOAD_FROM_ALL_DBS_FINISHED, data: { loading: false }});
+            dispatch({ type: LOAD_FROM_ALL_DBS_FINISHED, data: { loadingApp: false }});
         } else {
             errorWithNumbersOfDocumentsInDatabases(dataFromMiscellaneousDb, dataFromSettingsFactorsDb, dataFromTeamsDb, teamsByDivision, dataFromMyWatchlistTeamsDb, dataFromFixturesDb, setsOfFixtures);
         }
@@ -40,11 +44,11 @@ export const createDocumentsInDbsFromAppDefaults = (documentIdInUsersDb) => asyn
     let updatedData;
 
     try {
-        results = await createDocumentInASingleDocumentDb(getState().default.miscellaneous, API_ENDPOINT_MISCELLANEOUS, 'Miscellaneous', documentIdInUsersDb);
+        results = await createOrUpdateDocumentInASingleDocumentDb(getState().default.miscellaneous, API_ENDPOINT_MISCELLANEOUS, 'Miscellaneous', documentIdInUsersDb);
         dispatch({ type: LOAD_FROM_MISCELLANEOUS_DB, data: results });            // The API call returns an object so update the store
         
         // FIELD_GOALS_PER_MINUTE_FACTOR is stored as a string so need to convert it to an array so that it gets saved in the database as an array
-        results = await createDocumentInASingleDocumentDb(getSettingsFactors(getState().default.settingsFactors, true, true, 'array'), API_ENDPOINT_SETTINGS_FACTORS, 'SettingsFactors', documentIdInUsersDb);
+        results = await createOrUpdateDocumentInASingleDocumentDb(getSettingsFactors(getState().default.settingsFactors, true, true, 'array'), API_ENDPOINT_SETTINGS_FACTORS, 'SettingsFactors', documentIdInUsersDb);
         dispatch({ type: LOAD_FROM_SETTINGS_FACTORS_DB, data: results });            // The API call returns an object so update the store
         
         results = await createTeamsDocumentsInDb(documentIdInUsersDb);

@@ -6,7 +6,7 @@
     @include flex($justify-content: null);
     font-weight: bold;
 
-    border-bottom: 1px solid $color-fixture-row-goal-times-bottom-border;
+    border-bottom: $border-bottom-fixture-row-goal-times;
 
     %teamName {
         flex-basis: $width-fixture-row-team-name;
@@ -15,17 +15,20 @@
     .homeTeamsName { @extend %teamName; text-align: right; padding-right: 0.75vw; justify-content: flex-end; flex-wrap: wrap; }
     .awayTeamsName { @extend %teamName; text-align: left;  padding-left: 0.75vw; justify-content: flex-start; flex-wrap: wrap; }
 
-    .homeTeamsName span.divisionAbbreviation, .awayTeamsName span.divisionAbbreviation { color: lightgray; font-size: 80%; }
-
-    .homeTeamsName span.teamName.premierLeague, .awayTeamsName span.teamName.premierLeague { color: blue; }
-
     .homeTeamsName, .awayTeamsName {
         span {
             font-weight: normal;
         
-            &.division { color: gray; font-size: 80%;}
-            &.premierLeague { color: blue; }
+            &.division { color: $color-division-abbreviation; font-size: $font-size-division-abbreviation;}
+            &.premierLeague { color: $color-premier-league-team; }
         }
+    }
+
+    .versus {
+        @include flex($align-items: null);
+        text-align: center;
+        padding-top: 0.7vh;
+        padding-bottom: 0.7vh;
     }
 
     // .homeTeamsName span {
@@ -40,23 +43,5 @@
     // @keyframes blink-caret {                      /* The typewriter cursor effect */
     //     from, to { border-color: transparent }
     //     50% { border-color: orange; }
-    // }
-
-    .versus {
-        @include flex($align-items: null);
-        text-align: center;
-        padding-top: 0.7vh;
-        padding-bottom: 0.7vh;
-    }
-       
+    // }       
 }
-
-.icon-position {
-    color: #a67c00;
-    padding-left: 0.5vw; padding-right: 1vw;
-}
-
-.iconTop3 { top: 0; left: 0; }
-.iconTop3BeforeText, .iconTop3AfterText { position: relative; }
-.iconTop3BeforeText:before, .iconTop3AfterText:after { color: #a67c00; padding-left: 0.5vw; padding-right: 1vw; }
-.iconTop3Home2nd:before, .iconTop3Away2nd:after { content: "looks_two"; }

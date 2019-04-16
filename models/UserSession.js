@@ -9,4 +9,16 @@ const UserSessionSchema = new Schema({
     isDeleted: { type: Boolean, default: false },
 });
 
+UserSessionSchema.methods.createUserSession = (userSession, res, user, message) => {
+    userSession.userId = user._id;
+
+    userSession.save((err, userSessionDoc) => {
+        if (err) return res.send({ success: false, message: 'Error: Server error' });
+
+        return res.send({ success: true, message: message, userId: user._id, token: userSessionDoc._id });
+    });
+};
+
+
+
 module.exports = UserSession = mongoose.model('user-session', UserSessionSchema);

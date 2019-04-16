@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 import FixtureRow from "../common/fixture-row";
 
@@ -30,5 +31,12 @@ const MyWatchlist = ({ myWatchlistTeams, fixtures, haveLatestFixturesStarted }) 
         </div>
     </div>
 )
+
+
+MyWatchlist.propTypes = {
+    myWatchlistTeams: PropTypes.array.isRequired,
+    fixtures: PropTypes.array.isRequired,
+    haveLatestFixturesStarted: PropTypes.bool.isRequired,
+}
 
 export default MyWatchlist;

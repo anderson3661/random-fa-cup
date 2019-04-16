@@ -1,6 +1,7 @@
 import React, { Component } from "react";
+import PropTypes from 'prop-types';
 
-import DrawTeamLabels from "./draw-team-labels";
+import TeamLabels from "../common/team-labels";
 
 import "./draw-team.scss";
 
@@ -24,7 +25,7 @@ class DrawTeam extends Component {
             <div className="draw-row">
 
                 <div className="homeTeamsName">
-                    <DrawTeamLabels
+                    <TeamLabels
                         mainDraw={mainDraw}
                         team={{teamName: homeTeam, division: homeTeamDivision }}
                         latestTeamToBeDrawnNumber={latestTeamToBeDrawnNumber}
@@ -36,7 +37,7 @@ class DrawTeam extends Component {
                 <div className="versus">v</div>
 
                 <div className="awayTeamsName">
-                    <DrawTeamLabels
+                    <TeamLabels
                         mainDraw={mainDraw}
                         team={{teamName: awayTeam, division: awayTeamDivision }}
                         latestTeamToBeDrawnNumber={latestTeamToBeDrawnNumber}
@@ -49,6 +50,18 @@ class DrawTeam extends Component {
 
         );
     }
+}
+
+
+DrawTeam.defaultProps = {
+    mainDraw: false,
+}
+
+DrawTeam.propTypes = {
+    fixture: PropTypes.object.isRequired,
+    mainDraw: PropTypes.bool.isRequired,
+    latestTeamToBeDrawnNumber: PropTypes.number,                // Not required as will be blank before the draw is made
+    latestTeamToBeDrawn: PropTypes.string,                      // Not required as will be blank before the draw is made
 }
 
 export default DrawTeam;

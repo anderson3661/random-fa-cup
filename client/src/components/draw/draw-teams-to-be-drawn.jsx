@@ -1,6 +1,7 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
-import DrawTeamLabels from "./draw-team-labels";
+import TeamLabels from "../common/team-labels";
 
 
 const DrawTeamsToBeDrawn = ({ teamsToBeDrawn }) => (
@@ -16,9 +17,9 @@ const DrawTeamsToBeDrawn = ({ teamsToBeDrawn }) => (
                 return (
                     <div key={team.teamNumberInDraw} className="team">
                         <div className="teamNumberBlank">
-                            <span className="teamNumberInDraw">{team.teamNumberInDraw + 1}</span>
+                            <span className="teamNumberInDraw">{team.teamNumberInDraw}</span>
                         </div>
-                        <div className="teamAndDivision"><DrawTeamLabels team={team} positionAfter={true} /></div>
+                        <div className="teamAndDivision"><TeamLabels team={team} positionAfter={true} /></div>
                     </div>
                 );
             })}
@@ -26,5 +27,10 @@ const DrawTeamsToBeDrawn = ({ teamsToBeDrawn }) => (
 
     </div>
 )
+
+
+DrawTeamsToBeDrawn.propTypes = {
+    teamsToBeDrawn: PropTypes.array.isRequired,
+}
 
 export default DrawTeamsToBeDrawn;

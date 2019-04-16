@@ -3,7 +3,6 @@
 
 @import './utilities/css/links.scss';
 
-
 $min_width: 320px;
 $max_width: 1200px;
 $min_font: 16px;
@@ -23,16 +22,14 @@ h1 {
 }
 
 body {
-    // background-color: $background-color-main-body;
-    background-color: black;
-    font-family: Aerial;
+    background-color: $background-color-main-body;
+    font-family: $font-family-main;
     margin: 0;
     line-height: $line-height-main-body;
 }
 
 .container-main-content {
     width: 90%;
-    // max-width: $width-main-content;
     margin: 14vh auto 10vh auto;
 }
 
@@ -47,13 +44,11 @@ body {
 }
 
 .container-card {
-    font-family: $font-family-main;
-    // font-size: 0.9rem;
-    color: black;
+    color: $color-container-card;
     text-align: left;
-    // background: radial-gradient(ellipse at center, rgb(255, 255, 255) 0%, rgba(210, 210, 210, 0.95) 100%);
-    background: rgba(255, 255, 255, 0.95);
-    box-shadow: 0 0 2vw rgba(0, 0, 0, 0.5);
+    // background: $background-color-container-card;
+    background: $background-color-container-card;
+    box-shadow: 0 0 2vw $box-shadow-color-container-card;
     border-radius: 10px;
     margin: 0 auto;
     padding: 1vh 2vw;
@@ -87,8 +82,8 @@ body {
     }
 
     &.not-at-this-stage {
-        background-color: rgba(253, 229, 92, 0.9);
-        
+        background-color: $background-color-container-card-not-at-this-stage;
+         
         &.home-nav {
             position: absolute;
             width: 25%;
@@ -104,7 +99,7 @@ body {
     .main-header {
         @include flex($justify-content: space-between);
 
-        .image-left, .image-right { flex-basis: 20%; }
+        // .image-left, .image-right { flex-basis: 20%; }
         .image-left { text-align: left; }
         .image-right { text-align: right; }
         img { width: 3vw; }
