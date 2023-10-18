@@ -29,4 +29,4 @@ You can specify:
 * the **periods** during a match which are more likely to produce goals
 * the advantage that teams from a **higher division** have over teams from lower divisions
 * whether you want high-scoring or low-scoring matches
-* the **speed** at which the fixtures are updated
+* the **speed** at which the fixtures are updated.
